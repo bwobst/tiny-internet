@@ -141,6 +141,18 @@ const decodeDnsMessage = (buffer: Buffer): DnsMessageResponse => {
         buffer,
       ),
     ],
+    authority: [
+      decodeResourceRecord(
+        buffer.subarray(HEADER_LENGTH + questions.totalLength),
+        buffer,
+      ),
+    ],
+    additional: [
+      decodeResourceRecord(
+        buffer.subarray(HEADER_LENGTH + questions.totalLength),
+        buffer,
+      ),
+    ],
   }
 }
 
