@@ -5,9 +5,6 @@ import type { DnsMessageResponse } from '@dns/interfaces.js'
  * Query: 00-query → 192.5.6.30 (a.gtld-servers.net glue from hop 1)
  * Captured: dig @192.5.6.30 google.com A +norecurse
  * Sections: ancount=0, nscount=4, arcount=8
- *
- * TODO: Once the decoder exposes authority and additional sections, move the
- * NS and glue records out of `answers` — they belong in those sections on the wire.
  */
 export const decoded: DnsMessageResponse = {
   header: {
@@ -32,17 +29,120 @@ export const decoded: DnsMessageResponse = {
     type: 1,
     totalLength: 16,
   },
-  answers: {
-    name: 'google.com',
-    type: 2,
-    class: 1,
-    ttl: 172800,
-    rdlength: 6,
-    rdata: Buffer.from([0x03, 0x6e, 0x73, 0x32, 0xc0, 0x0c]),
-  },
+  authority: [
+    {
+      name: 'google.com',
+      type: 2,
+      class: 1,
+      ttl: 172800,
+      rdlength: 6,
+      rdata: Buffer.from([0x03, 0x6e, 0x73, 0x32, 0xc0, 0x0c]),
+    },
+    {
+      name: 'google.com',
+      type: 2,
+      class: 1,
+      ttl: 172800,
+      rdlength: 6,
+      rdata: Buffer.from([0x03, 0x6e, 0x73, 0x31, 0xc0, 0x0c]),
+    },
+    {
+      name: 'google.com',
+      type: 2,
+      class: 1,
+      ttl: 172800,
+      rdlength: 6,
+      rdata: Buffer.from([0x03, 0x6e, 0x73, 0x33, 0xc0, 0x0c]),
+    },
+    {
+      name: 'google.com',
+      type: 2,
+      class: 1,
+      ttl: 172800,
+      rdlength: 6,
+      rdata: Buffer.from([0x03, 0x6e, 0x73, 0x34, 0xc0, 0x0c]),
+    },
+  ],
+  additional: [
+    {
+      name: 'ns2.google.com',
+      type: 28,
+      class: 1,
+      ttl: 172800,
+      rdlength: 16,
+      rdata: Buffer.from([
+        0x20, 0x01, 0x48, 0x60, 0x48, 0x02, 0x00, 0x34, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x0a,
+      ]),
+    },
+    {
+      name: 'ns2.google.com',
+      type: 1,
+      class: 1,
+      ttl: 172800,
+      rdlength: 4,
+      rdata: Buffer.from([0xd8, 0xef, 0x22, 0x0a]),
+    },
+    {
+      name: 'ns1.google.com',
+      type: 28,
+      class: 1,
+      ttl: 172800,
+      rdlength: 16,
+      rdata: Buffer.from([
+        0x20, 0x01, 0x48, 0x60, 0x48, 0x02, 0x00, 0x32, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x0a,
+      ]),
+    },
+    {
+      name: 'ns1.google.com',
+      type: 1,
+      class: 1,
+      ttl: 172800,
+      rdlength: 4,
+      rdata: Buffer.from([0xd8, 0xef, 0x20, 0x0a]),
+    },
+    {
+      name: 'ns3.google.com',
+      type: 28,
+      class: 1,
+      ttl: 172800,
+      rdlength: 16,
+      rdata: Buffer.from([
+        0x20, 0x01, 0x48, 0x60, 0x48, 0x02, 0x00, 0x36, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x0a,
+      ]),
+    },
+    {
+      name: 'ns3.google.com',
+      type: 1,
+      class: 1,
+      ttl: 172800,
+      rdlength: 4,
+      rdata: Buffer.from([0xd8, 0xef, 0x24, 0x0a]),
+    },
+    {
+      name: 'ns4.google.com',
+      type: 28,
+      class: 1,
+      ttl: 172800,
+      rdlength: 16,
+      rdata: Buffer.from([
+        0x20, 0x01, 0x48, 0x60, 0x48, 0x02, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x0a,
+      ]),
+    },
+    {
+      name: 'ns4.google.com',
+      type: 1,
+      class: 1,
+      ttl: 172800,
+      rdlength: 4,
+      rdata: Buffer.from([0xd8, 0xef, 0x26, 0x0a]),
+    },
+  ],
 }
 
-/** Full response packet (276 bytes). Bytes 0–27 match queryWire in 00-query. */
 export const wire = Buffer.from([
   0xaa, 0xaa, 0x80, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x08, 0x06,
   0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01,

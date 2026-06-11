@@ -29,17 +29,18 @@ export const decoded: DnsMessageResponse = {
     type: 1,
     totalLength: 16,
   },
-  answers: {
-    name: 'google.com',
-    type: 1,
-    class: 1,
-    ttl: 300,
-    rdlength: 4,
-    rdata: Buffer.from([142, 251, 215, 174]),
-  },
+  answers: [
+    {
+      name: 'google.com',
+      type: 1,
+      class: 1,
+      ttl: 300,
+      rdlength: 4,
+      rdata: Buffer.from([0x8e, 0xfb, 0xd7, 0xae]),
+    },
+  ],
 }
 
-/** Full response packet (44 bytes). Bytes 0–27 match queryWire in 00-query. */
 export const wire = Buffer.from([
   0xaa, 0xaa, 0x84, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x06,
   0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01,

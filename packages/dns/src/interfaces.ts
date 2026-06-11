@@ -32,7 +32,9 @@ export interface DnsMessageRequest {
 export interface DnsMessageResponse {
   header: DnsMessageHeader
   questions?: DnsMessageQuestions
-  answers?: ResourceRecord
+  answers?: ResourceRecord[]
+  authority?: ResourceRecord[]
+  additional?: ResourceRecord[]
 }
 
 export interface ResourceRecord {

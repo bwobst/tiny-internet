@@ -28,14 +28,16 @@ export const decoded: DnsMessageResponse = {
     type: 1,
     totalLength: 16,
   },
-  answers: {
-    name: 'google.com',
-    type: 1,
-    class: 1,
-    ttl: 261,
-    rdlength: 4,
-    rdata: Buffer.from([142, 251, 41, 14]),
-  },
+  answers: [
+    {
+      name: 'google.com',
+      type: 1,
+      class: 1,
+      ttl: 261,
+      rdlength: 4,
+      rdata: Buffer.from([142, 251, 41, 14]),
+    },
+  ],
 }
 
 /** Full response packet (45 bytes). Bytes 0–27 match queryWire in 00-query. */

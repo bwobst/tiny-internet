@@ -135,10 +135,12 @@ const decodeDnsMessage = (buffer: Buffer): DnsMessageResponse => {
   return {
     header: decodeHeader(buffer),
     questions,
-    answers: decodeResourceRecord(
-      buffer.subarray(HEADER_LENGTH + questions.totalLength),
-      buffer,
-    ),
+    answers: [
+      decodeResourceRecord(
+        buffer.subarray(HEADER_LENGTH + questions.totalLength),
+        buffer,
+      ),
+    ],
   }
 }
 
