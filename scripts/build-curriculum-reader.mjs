@@ -13,7 +13,7 @@ const pages = [
     id: 'curriculum',
     title: 'Overview',
     subtitle: 'Tiny Internet',
-    layer: 0,
+    layer: 'overview',
     file: 'CURRICULUM.md',
   },
   {
@@ -52,85 +52,65 @@ const pages = [
     file: '2-traffic-routing/4-front-door.md',
   },
   {
-    id: 'api-gateway',
-    title: 'API Gateway',
-    subtitle: 'Stage 6',
-    layer: 2,
-    file: '2-traffic-routing/6-api-gateway.md',
-  },
-  {
     id: 'http-cache-layer',
-    title: 'HTTP Cache Layer',
-    subtitle: 'Stage 7',
+    title: 'HTTP cache',
+    subtitle: 'Stage 5',
     layer: 3,
     file: '3-caching-content-delivery/8-http-cache-layer.md',
   },
   {
-    id: 'cdn',
-    title: 'Content Delivery',
-    subtitle: 'Stage 8',
-    layer: 3,
-    file: '3-caching-content-delivery/7-cdn.md',
-  },
-  {
     id: 'key-value-store',
-    title: 'Key-Value Store',
-    subtitle: 'Stage 9',
+    title: 'Key-value store',
+    subtitle: 'Stage 6',
     layer: 3,
     file: '3-caching-content-delivery/9-key-value-store.md',
   },
   {
     id: 'metrics-collector',
-    title: 'Metrics Collector',
-    subtitle: 'Stage 10',
+    title: 'Metrics',
+    subtitle: 'Stage 7',
     layer: 4,
     file: '4-reliability-observability/11-metrics-collector.md',
   },
   {
     id: 'distributed-tracing',
-    title: 'Distributed Tracing',
-    subtitle: 'Stage 11',
+    title: 'Tracing',
+    subtitle: 'Stage 8',
     layer: 4,
     file: '4-reliability-observability/12-distributed-tracing.md',
   },
   {
-    id: 'circuit-breaker',
-    title: 'Circuit Breaker',
-    subtitle: 'Stage 12',
-    layer: 4,
-    file: '4-reliability-observability/10-circuit-breaker.md',
-  },
-  {
     id: 'write-ahead-log',
-    title: 'Write-Ahead Log',
-    subtitle: 'Stage 13',
+    title: 'Write-ahead log',
+    subtitle: 'Stage 9',
     layer: 5,
     file: '5-data-storage/13-write-ahead-log.md',
   },
   {
     id: 'message-queue',
-    title: 'Message Queue',
-    subtitle: 'Stage 14',
+    title: 'Message queue',
+    subtitle: 'Stage 10',
     layer: 5,
     file: '5-data-storage/14-message-queue.md',
   },
   {
     id: 'object-storage',
-    title: 'Object Storage',
-    subtitle: 'Stage 15',
+    title: 'Object storage',
+    subtitle: 'Stage 11',
     layer: 5,
     file: '5-data-storage/15-object-storage.md',
   },
 ]
 
-const layerLabels = {
-  0: 'Start',
-  1: 'Layer 1 · Networking fundamentals',
-  2: 'Layer 2 · Traffic',
-  3: 'Layer 3 · Caching and shared state',
-  4: 'Layer 4 · Observability',
-  5: 'Layer 5 · Data and storage',
-}
+const layerOrder = [
+  ['overview', 'Overview'],
+  [0, 'Network - outside the layers'],
+  [1, 'Layer 1 · Networking fundamentals'],
+  [2, 'Layer 2 · Traffic'],
+  [3, 'Layer 3 · Caching and shared state'],
+  [4, 'Layer 4 · Observability'],
+  [5, 'Layer 5 · Data and storage'],
+]
 
 function escapeHtml(text) {
   return text
@@ -348,9 +328,9 @@ const renderedPages = pages.map((page) => {
   return { ...page, body, toc }
 })
 
-const navSections = Object.entries(layerLabels)
+const navSections = layerOrder
   .map(([layer, label]) => {
-    const items = renderedPages.filter((p) => p.layer === Number(layer))
+    const items = renderedPages.filter((p) => p.layer === layer)
     if (items.length === 0) return ''
     return `<section class="nav-section" data-layer="${layer}">
       <h2 class="nav-heading">${label}</h2>

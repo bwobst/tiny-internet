@@ -506,11 +506,16 @@
       <div class="sidebar-tools">
         <button class="tool-btn" id="theme-toggle" type="button">Toggle theme</button>
       </div>
-      <nav aria-label="Build path"><section class="nav-section" data-layer="0">
-      <h2 class="nav-heading">Start</h2>
+      <nav aria-label="Build path"><section class="nav-section" data-layer="overview">
+      <h2 class="nav-heading">Overview</h2>
       <ul>
         <li><a href="#curriculum" data-page="curriculum"><span class="nav-subtitle">Tiny Internet</span><span class="nav-title">Overview</span></a></li>
-<li><a href="#network" data-page="network"><span class="nav-subtitle">Stage 0</span><span class="nav-title">Network</span></a></li>
+      </ul>
+    </section>
+<section class="nav-section" data-layer="0">
+      <h2 class="nav-heading">Network - outside the layers</h2>
+      <ul>
+        <li><a href="#network" data-page="network"><span class="nav-subtitle">Stage 0</span><span class="nav-title">Network</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="1">
@@ -525,31 +530,28 @@
       <h2 class="nav-heading">Layer 2 · Traffic</h2>
       <ul>
         <li><a href="#front-door" data-page="front-door"><span class="nav-subtitle">Stage 4</span><span class="nav-title">Front door</span></a></li>
-<li><a href="#api-gateway" data-page="api-gateway"><span class="nav-subtitle">Stage 6</span><span class="nav-title">API Gateway</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="3">
       <h2 class="nav-heading">Layer 3 · Caching and shared state</h2>
       <ul>
-        <li><a href="#http-cache-layer" data-page="http-cache-layer"><span class="nav-subtitle">Stage 7</span><span class="nav-title">HTTP Cache Layer</span></a></li>
-<li><a href="#cdn" data-page="cdn"><span class="nav-subtitle">Stage 8</span><span class="nav-title">Content Delivery</span></a></li>
-<li><a href="#key-value-store" data-page="key-value-store"><span class="nav-subtitle">Stage 9</span><span class="nav-title">Key-Value Store</span></a></li>
+        <li><a href="#http-cache-layer" data-page="http-cache-layer"><span class="nav-subtitle">Stage 5</span><span class="nav-title">HTTP cache</span></a></li>
+<li><a href="#key-value-store" data-page="key-value-store"><span class="nav-subtitle">Stage 6</span><span class="nav-title">Key-value store</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="4">
       <h2 class="nav-heading">Layer 4 · Observability</h2>
       <ul>
-        <li><a href="#metrics-collector" data-page="metrics-collector"><span class="nav-subtitle">Stage 10</span><span class="nav-title">Metrics Collector</span></a></li>
-<li><a href="#distributed-tracing" data-page="distributed-tracing"><span class="nav-subtitle">Stage 11</span><span class="nav-title">Distributed Tracing</span></a></li>
-<li><a href="#circuit-breaker" data-page="circuit-breaker"><span class="nav-subtitle">Stage 12</span><span class="nav-title">Circuit Breaker</span></a></li>
+        <li><a href="#metrics-collector" data-page="metrics-collector"><span class="nav-subtitle">Stage 7</span><span class="nav-title">Metrics</span></a></li>
+<li><a href="#distributed-tracing" data-page="distributed-tracing"><span class="nav-subtitle">Stage 8</span><span class="nav-title">Tracing</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="5">
       <h2 class="nav-heading">Layer 5 · Data and storage</h2>
       <ul>
-        <li><a href="#write-ahead-log" data-page="write-ahead-log"><span class="nav-subtitle">Stage 13</span><span class="nav-title">Write-Ahead Log</span></a></li>
-<li><a href="#message-queue" data-page="message-queue"><span class="nav-subtitle">Stage 14</span><span class="nav-title">Message Queue</span></a></li>
-<li><a href="#object-storage" data-page="object-storage"><span class="nav-subtitle">Stage 15</span><span class="nav-title">Object Storage</span></a></li>
+        <li><a href="#write-ahead-log" data-page="write-ahead-log"><span class="nav-subtitle">Stage 9</span><span class="nav-title">Write-ahead log</span></a></li>
+<li><a href="#message-queue" data-page="message-queue"><span class="nav-subtitle">Stage 10</span><span class="nav-title">Message queue</span></a></li>
+<li><a href="#object-storage" data-page="object-storage"><span class="nav-subtitle">Stage 11</span><span class="nav-title">Object storage</span></a></li>
       </ul>
     </section></nav>
     </aside>
@@ -1626,111 +1628,10 @@ Connection: close
 <p><strong>Next:</strong> ALPHA survives a dead backend, but every request still recomputes the same response from scratch. <a href="#http-cache-layer">Stage 5 · HTTP cache</a>.</p></div>
       </div>
     </article>
-<article class="page" id="page-api-gateway" data-page="api-gateway" hidden>
-      <header class="page-header">
-        <p class="page-eyebrow">Stage 6</p>
-        <h1>API Gateway</h1>
-      </header>
-      <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#api-gateway/api-gateway-stage-6-api-gateway">Stage 6 · API gateway</a></li><li class="depth-4"><a href="#api-gateway/api-gateway-step-1---request-routing-to-microservices">Step 1 - Request routing to microservices</a></li><li class="depth-4"><a href="#api-gateway/api-gateway-step-2---token-based-authentication-middleware">Step 2 - Token-based authentication middleware</a></li><li class="depth-4"><a href="#api-gateway/api-gateway-step-3---rate-limiting-per-client">Step 3 - Rate limiting per client</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="api-gateway-stage-6-api-gateway">Stage 6 · API gateway</h3>
-<blockquote><p>Give the front door policy.</p></blockquote>
-<p><strong>In the platform:</strong> The site's <code>/api/*</code> routes need to behave differently from its static pages - different rate limits, different auth, different backends. The gateway is where that policy lives instead of being scattered through each backend.</p>
-<p><strong>Scope:</strong> the routing and policy rules your own site needs. Build it when the site has API routes worth protecting.</p>
-<p>*Formerly: API Gateway.*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="api-gateway-step-1---request-routing-to-microservices">Step 1 - Request routing to microservices</h4>
-<p><strong>Goal:</strong> Match incoming request paths to backend services using a configurable routing table.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: incoming request + routing config like <code>[{ prefix: &quot;/users&quot;, upstream: &quot;http://localhost:3001&quot; }, ...]</code>
-</li>
-<li>Output: request forwarded to the matching upstream; path prefix stripped or preserved per config
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>Should prefix matching be first-match or longest-match wins? Why does it matter?
-</li>
-<li>Do you strip the matched prefix before forwarding (e.g. <code>/users/123</code> → <code>/123</code>) or pass it through?
-</li>
-<li>What happens when no route matches?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li><code>GET /users/42</code> reaches the users service at <code>/42</code> (if stripping) or <code>/users/42</code> (if not)
-</li>
-<li><code>GET /orders/7</code> reaches the orders service
-</li>
-<li><code>GET /unknown</code> returns <code>404</code> from the gateway, not from any upstream
-</li>
-</ul>
-<p><strong>Watch out:</strong> A prefix <code>/api</code> will also match <code>/api-docs</code>. Match on <code>/api/</code> or check for exact segment boundaries to avoid this.</p>
-<hr />
-<h4 id="api-gateway-step-2---token-based-authentication-middleware">Step 2 - Token-based authentication middleware</h4>
-<p><strong>Goal:</strong> Validate a bearer token on every request before forwarding, and reject unauthorized requests.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: <code>Authorization: Bearer &lt;token&gt;</code> header
-</li>
-<li>Output: validated identity object attached to the request context (forwarded as a header to the upstream); <code>401</code> on missing/invalid token
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>Are you validating a JWT (verify signature + claims) or doing a lookup against a token store?
-</li>
-<li>What information should you forward to the upstream so it doesn't need to re-authenticate?
-</li>
-<li>What is the difference between 401 (unauthenticated) and 403 (unauthorized)?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>A request with a valid token reaches the upstream and includes an <code>X-User-Id</code> (or similar) header
-</li>
-<li>A request with no token or an expired token returns <code>401</code> and never reaches the upstream
-</li>
-<li>Rotating the signing secret immediately invalidates all existing tokens
-</li>
-</ul>
-<p><strong>Watch out:</strong> If using JWTs, validate the <code>exp</code> claim - an expired but well-signed token must be rejected. Checking only the signature is not enough.</p>
-<hr />
-<h4 id="api-gateway-step-3---rate-limiting-per-client">Step 3 - Rate limiting per client</h4>
-<p><strong>Goal:</strong> Limit each client to N requests per time window using a sliding window or token bucket algorithm.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: incoming request + client identifier (IP, API key, or user ID)
-</li>
-<li>Output: request forwarded if within limit; <code>429 Too Many Requests</code> with <code>Retry-After</code> header if exceeded
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What is your rate limit key? Per-IP, per-token, or per-user-ID?
-</li>
-<li>Fixed window vs. sliding window vs. token bucket - what are the trade-offs?
-</li>
-<li>Where do you store the counters? In-memory is fine for a single instance; what breaks at scale?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Sending 11 requests/second with a limit of 10/s causes the 11th to return <code>429</code>
-</li>
-<li>The <code>Retry-After</code> header reflects the correct number of seconds until the window resets
-</li>
-<li>After the window resets, the client can make requests again without restarting the server
-</li>
-</ul>
-<p><strong>Watch out:</strong> Fixed windows have a burst problem at window boundaries - a client can fire 10 requests just before midnight and 10 more just after, effectively getting 20 in 2 seconds. Know this trade-off before defending your design.</p></div>
-      </div>
-    </article>
 <article class="page" id="page-http-cache-layer" data-page="http-cache-layer" hidden>
       <header class="page-header">
-        <p class="page-eyebrow">Stage 7</p>
-        <h1>HTTP Cache Layer</h1>
+        <p class="page-eyebrow">Stage 5</p>
+        <h1>HTTP cache</h1>
       </header>
       <div class="page-layout">
         <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-cache-layer/http-cache-layer-stage-5-http-cache">Stage 5 · HTTP cache</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-1---serve-a-miss-and-store-it">Step 1 - Serve a MISS and store it</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-2---serve-a-hit-with-age-then-expire-it">Step 2 - Serve a HIT with age, then expire it</a></li></ul></nav>
@@ -1856,107 +1757,10 @@ Connection: close
 <p><strong>Next:</strong> the cache makes one path fast on one node, but BRAVO and CHARLIE still don't agree on anything. <a href="#key-value-store">Stage 6 · Key-value store</a>.</p></div>
       </div>
     </article>
-<article class="page" id="page-cdn" data-page="cdn" hidden>
-      <header class="page-header">
-        <p class="page-eyebrow">Stage 8</p>
-        <h1>Content Delivery</h1>
-      </header>
-      <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#cdn/cdn-stage-8-content-delivery">Stage 8 · Content delivery</a></li><li class="depth-4"><a href="#cdn/cdn-step-1---cache-responses-from-the-origin">Step 1 - Cache responses from the origin</a></li><li class="depth-4"><a href="#cdn/cdn-step-2---respect-cache-control-directives">Step 2 - Respect Cache-Control directives</a></li><li class="depth-4"><a href="#cdn/cdn-step-3---ttl-expiry-and-origin-fallback">Step 3 - TTL expiry and origin fallback</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="cdn-stage-8-content-delivery">Stage 8 · Content delivery</h3>
-<blockquote><p>Treat the three nodes as content locations and decide where content lives.</p></blockquote>
-<p><strong>In the platform:</strong> With three machines holding content, you have to answer where a given object should live, who serves it, and what happens when it changes. <code>/architecture</code> can show the answer moving in real time.</p>
-<p><strong>Scope:</strong> placement, origin fallback, and invalidation across three nodes in one house. Not a global edge network.</p>
-<p>*Formerly: CDN (Content Delivery Simulation).*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="cdn-step-1---cache-responses-from-the-origin">Step 1 - Cache responses from the origin</h4>
-<p><strong>Goal:</strong> Forward a request to the origin server and store the response; serve subsequent requests from cache.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: HTTP request for a cacheable resource
-</li>
-<li>Output: on miss, fetch from origin and store; on hit, return stored response with <code>X-Cache: HIT</code>
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What makes a response cacheable? Which HTTP methods and status codes qualify?
-</li>
-<li>What is your cache key? Just the path, or path + query string + <code>Vary</code> headers?
-</li>
-<li>Where do you store the cached response - in memory, on disk, or both?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>First request logs <code>[MISS]</code> and takes ≥50ms (simulate origin latency); second request logs <code>[HIT]</code> and takes &lt;5ms
-</li>
-<li><code>X-Cache: HIT</code> and <code>X-Cache: MISS</code> headers are set correctly on all responses
-</li>
-</ul>
-<p><strong>Watch out:</strong> The <code>Vary</code> header from the origin tells you which request headers affect the response (e.g. <code>Vary: Accept-Encoding</code>). Ignoring it means serving a gzipped response to a client that didn't ask for compression.</p>
-<hr />
-<h4 id="cdn-step-2---respect-cache-control-directives">Step 2 - Respect Cache-Control directives</h4>
-<p><strong>Goal:</strong> Honor <code>Cache-Control</code> headers from both the origin (response) and the client (request).</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: responses with <code>Cache-Control: max-age=N</code>, <code>no-store</code>, <code>private</code>, <code>no-cache</code>; requests with <code>Cache-Control: no-cache</code>
-</li>
-<li>Output: correct caching behavior for each directive
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What is the difference between <code>no-cache</code> and <code>no-store</code>?
-</li>
-<li>What does <code>private</code> mean for a shared cache like a CDN?
-</li>
-<li>When a client sends <code>Cache-Control: no-cache</code>, what should your edge node do?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>A response with <code>Cache-Control: no-store</code> is never stored
-</li>
-<li>A response with <code>Cache-Control: private</code> is served to the original client but not cached for others
-</li>
-<li>A client <code>no-cache</code> request causes revalidation with the origin even if a fresh cached copy exists
-</li>
-</ul>
-<p><strong>Watch out:</strong> <code>no-cache</code> does <strong>not</strong> mean &quot;don't cache&quot; - it means &quot;revalidate before serving from cache.&quot; Only <code>no-store</code> means don't cache at all. Swapping these is the most common CDN misconfiguration.</p>
-<hr />
-<h4 id="cdn-step-3---ttl-expiry-and-origin-fallback">Step 3 - TTL expiry and origin fallback</h4>
-<p><strong>Goal:</strong> Expire stale cache entries using <code>max-age</code> and re-fetch from origin; serve stale content if origin is unreachable.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: a cached entry whose <code>max-age</code> has elapsed; optionally an unavailable origin
-</li>
-<li>Output: on expiry with reachable origin, fetch fresh copy; on expiry with unreachable origin, serve stale with <code>Warning: 110</code> header
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>How do you calculate when a cached entry expires? (Creation time + <code>max-age</code>)
-</li>
-<li>What is <code>stale-while-revalidate</code>, and how would you implement it?
-</li>
-<li>What is the correct HTTP warning code for &quot;response is stale&quot;?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Waiting for <code>max-age</code> to expire causes the next request to fetch from origin (<code>[MISS]</code>)
-</li>
-<li>Stopping the origin server causes stale content to be served with the correct <code>Warning</code> header, rather than a <code>502</code>
-</li>
-</ul>
-<p><strong>Watch out:</strong> Clock skew between your server and the client can cause entries to expire too early or too late. Use the origin's <code>Date</code> response header as the reference point for age calculations, not your local clock at store time.</p></div>
-      </div>
-    </article>
 <article class="page" id="page-key-value-store" data-page="key-value-store" hidden>
       <header class="page-header">
-        <p class="page-eyebrow">Stage 9</p>
-        <h1>Key-Value Store</h1>
+        <p class="page-eyebrow">Stage 6</p>
+        <h1>Key-value store</h1>
       </header>
       <div class="page-layout">
         <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#key-value-store/key-value-store-stage-6-key-value-store">Stage 6 · Key-value store</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-1---store-and-retrieve-a-value-on-one-node">Step 1 - Store and retrieve a value on one Node</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-2---agree-on-a-value-across-both-nodes">Step 2 - Agree on a value across both Nodes</a></li></ul></nav>
@@ -2081,8 +1885,8 @@ green
     </article>
 <article class="page" id="page-metrics-collector" data-page="metrics-collector" hidden>
       <header class="page-header">
-        <p class="page-eyebrow">Stage 10</p>
-        <h1>Metrics Collector</h1>
+        <p class="page-eyebrow">Stage 7</p>
+        <h1>Metrics</h1>
       </header>
       <div class="page-layout">
         <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#metrics-collector/metrics-collector-stage-7-metrics">Stage 7 · Metrics</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-1---count-every-request-show-it-at-status">Step 1 - Count every request, show it at /status</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-2---time-every-request-show-it-at-status-and-metrics">Step 2 - Time every request, show it at /status and /metrics</a></li></ul></nav>
@@ -2183,8 +1987,8 @@ curl -s http://127.0.0.1:8080/status
     </article>
 <article class="page" id="page-distributed-tracing" data-page="distributed-tracing" hidden>
       <header class="page-header">
-        <p class="page-eyebrow">Stage 11</p>
-        <h1>Distributed Tracing</h1>
+        <p class="page-eyebrow">Stage 8</p>
+        <h1>Tracing</h1>
       </header>
       <div class="page-layout">
         <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#distributed-tracing/distributed-tracing-stage-8-tracing">Stage 8 · Tracing</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-1---show-the-path-of-one-request">Step 1 - Show the path of one request</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-2---add-a-duration-to-each-hop">Step 2 - Add a duration to each hop</a></li></ul></nav>
@@ -2264,109 +2068,10 @@ bravo	36
 <p><strong>Next:</strong> the platform can see its own request path, but a node killed mid-write still loses data. <a href="#write-ahead-log">Stage 9 · Write-ahead log</a>.</p></div>
       </div>
     </article>
-<article class="page" id="page-circuit-breaker" data-page="circuit-breaker" hidden>
-      <header class="page-header">
-        <p class="page-eyebrow">Stage 12</p>
-        <h1>Circuit Breaker</h1>
-      </header>
-      <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#circuit-breaker/circuit-breaker-stage-12-circuit-breaker">Stage 12 · Circuit breaker</a></li><li class="depth-4"><a href="#circuit-breaker/circuit-breaker-step-1---closed-and-open-states">Step 1 - Closed and open states</a></li><li class="depth-4"><a href="#circuit-breaker/circuit-breaker-step-2---half-open-state-and-recovery">Step 2 - Half-open state and recovery</a></li><li class="depth-4"><a href="#circuit-breaker/circuit-breaker-step-3---metrics-and-observability">Step 3 - Metrics and observability</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="circuit-breaker-stage-12-circuit-breaker">Stage 12 · Circuit breaker</h3>
-<blockquote><p>Stop sending traffic to a backend that is hurting.</p></blockquote>
-<p><strong>In the platform:</strong> A slow backend is worse than a dead one - it ties up connections everywhere upstream. The breaker is what lets the platform degrade instead of cascading, and it is what makes <code>/lab</code> survivable when you start injecting failure on purpose.</p>
-<p><strong>Scope:</strong> protecting your own calls between your own nodes.</p>
-<p>*Formerly: Circuit Breaker.*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="circuit-breaker-step-1---closed-and-open-states">Step 1 - Closed and open states</h4>
-<p><strong>Goal:</strong> Track failures against a threshold; trip to OPEN state and reject calls immediately when exceeded.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: wrapped function calls; some succeed, some throw errors
-</li>
-<li>Output: calls pass through in CLOSED state; <code>CircuitOpenError</code> thrown immediately in OPEN state without calling the wrapped function
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What counts as a failure? Any thrown error? Specific error types? Timeouts?
-</li>
-<li>What is your failure threshold - count, or percentage of recent calls?
-</li>
-<li>When the breaker trips OPEN, how long should it stay open before attempting recovery?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>After 5 consecutive failures, all subsequent calls throw <code>CircuitOpenError</code> without hitting the wrapped function
-</li>
-<li>A manual call count confirms zero calls to the wrapped function while OPEN
-</li>
-</ul>
-<p><strong>Watch out:</strong> Count *consecutive* failures, not total failures, unless you're implementing a sliding-window approach. A single success resetting a 4-failure count is typically the right behavior.</p>
-<hr />
-<h4 id="circuit-breaker-step-2---half-open-state-and-recovery">Step 2 - Half-open state and recovery</h4>
-<p><strong>Goal:</strong> After a timeout, allow a single test call through; recover to CLOSED on success, re-trip on failure.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: OPEN circuit after timeout elapses
-</li>
-<li>Output: exactly one call passes through in HALF-OPEN; success → CLOSED (counters reset); failure → back to OPEN
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>How do you prevent multiple concurrent callers from all passing through in HALF-OPEN?
-</li>
-<li>What is the correct sequence of state transitions: CLOSED → OPEN → HALF-OPEN → CLOSED?
-</li>
-<li>Should you reset the failure counter on transition to HALF-OPEN, or only on transition to CLOSED?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>After the open timeout, exactly one call reaches the wrapped function
-</li>
-<li>A second concurrent call during HALF-OPEN receives <code>CircuitOpenError</code>
-</li>
-<li>A successful probe transitions to CLOSED and subsequent calls all pass through
-</li>
-</ul>
-<p><strong>Watch out:</strong> Without a guard, 20 concurrent requests arriving during HALF-OPEN will all be let through at once, defeating the purpose. Use a flag (e.g. <code>probeSent</code>) to allow only the first.</p>
-<hr />
-<h4 id="circuit-breaker-step-3---metrics-and-observability">Step 3 - Metrics and observability</h4>
-<p><strong>Goal:</strong> Track state transitions and call outcomes; expose them for external monitoring.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: any call passing through the breaker
-</li>
-<li>Output: <code>{ state, totalCalls, successCount, failureCount, rejectedCount, lastStateChange }</code> from a <code>stats()</code> method
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>Should stats be per-instance or global?
-</li>
-<li>How do you emit state change events so external systems can react (e.g. alert on trip)?
-</li>
-<li>What is a rolling window for counting failures, and why is it more useful than a total count?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li><code>stats()</code> returns accurate counts after 100 mixed success/failure calls
-</li>
-<li>An <code>EventEmitter</code>-style <code>on('stateChange', handler)</code> fires on every CLOSED↔OPEN transition
-</li>
-<li>Stats reset correctly when the circuit recovers to CLOSED
-</li>
-</ul>
-<p><strong>Watch out:</strong> <code>rejectedCount</code> (calls blocked by an OPEN circuit) is a separate metric from <code>failureCount</code> (calls that reached the wrapped function and threw). Mixing them makes dashboards misleading.</p></div>
-      </div>
-    </article>
 <article class="page" id="page-write-ahead-log" data-page="write-ahead-log" hidden>
       <header class="page-header">
-        <p class="page-eyebrow">Stage 13</p>
-        <h1>Write-Ahead Log</h1>
+        <p class="page-eyebrow">Stage 9</p>
+        <h1>Write-ahead log</h1>
       </header>
       <div class="page-layout">
         <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#write-ahead-log/write-ahead-log-stage-9-write-ahead-log">Stage 9 · Write-ahead log</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-1---log-a-write-before-acknowledging-it">Step 1 - Log a write before acknowledging it</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-2---kill-the-node-mid-write-restart-it-and-find-the-data-intact">Step 2 - Kill the Node mid-write, restart it, and find the data intact</a></li></ul></nav>
@@ -2478,8 +2183,8 @@ green
     </article>
 <article class="page" id="page-message-queue" data-page="message-queue" hidden>
       <header class="page-header">
-        <p class="page-eyebrow">Stage 14</p>
-        <h1>Message Queue</h1>
+        <p class="page-eyebrow">Stage 10</p>
+        <h1>Message queue</h1>
       </header>
       <div class="page-layout">
         <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#message-queue/message-queue-stage-10-message-queue">Stage 10 · Message queue</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-1---publish-without-waiting-for-the-consumer">Step 1 - Publish without waiting for the consumer</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-2---consumer-drains-in-order-and-the-record-shows-up-later">Step 2 - Consumer drains in order and the record shows up later</a></li></ul></nav>
@@ -2560,8 +2265,8 @@ click
     </article>
 <article class="page" id="page-object-storage" data-page="object-storage" hidden>
       <header class="page-header">
-        <p class="page-eyebrow">Stage 15</p>
-        <h1>Object Storage</h1>
+        <p class="page-eyebrow">Stage 11</p>
+        <h1>Object storage</h1>
       </header>
       <div class="page-layout">
         <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#object-storage/object-storage-stage-11-object-storage">Stage 11 · Object storage</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-1---put-and-get-an-object">Step 1 - Put and Get an object</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-2---the-blob-survives-the-nodes-reboot">Step 2 - The blob survives the Node's reboot</a></li></ul></nav>
@@ -2661,7 +2366,7 @@ tiny internet
   </div>
   <button class="mobile-toggle" id="menu-toggle" type="button" aria-label="Open navigation">Menu</button>
   <script>
-    const pages = ["curriculum","network","dns-resolver","tcp-server","http-server","front-door","api-gateway","http-cache-layer","cdn","key-value-store","metrics-collector","distributed-tracing","circuit-breaker","write-ahead-log","message-queue","object-storage"];
+    const pages = ["curriculum","network","dns-resolver","tcp-server","http-server","front-door","http-cache-layer","key-value-store","metrics-collector","distributed-tracing","write-ahead-log","message-queue","object-storage"];
     const sidebar = document.getElementById("sidebar");
     const menuToggle = document.getElementById("menu-toggle");
     const themeToggle = document.getElementById("theme-toggle");
