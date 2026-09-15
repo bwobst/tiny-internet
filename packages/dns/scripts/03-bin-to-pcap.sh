@@ -17,8 +17,8 @@ Options:
 
 Example:
   03-bin-to-pcap.sh \
-    -i src/fixtures/iterative/google-com-a/01-root-referral.bin \
-    -o src/fixtures/iterative/google-com-a/01-root-referral.pcap \
+    -i src/fixtures/google-com-a/iterative/01-root-referral.bin \
+    -o src/fixtures/google-com-a/iterative/01-root-referral.pcap \
     -4 10.0.0.1,170.247.170.2
 EOF
 }

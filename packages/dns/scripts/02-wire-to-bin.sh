@@ -9,8 +9,8 @@ Usage:
   02-wire-to-bin.sh FIXTURE.ts OUTPUT.bin
 
 Example:
-  02-wire-to-bin.sh src/fixtures/iterative/google-com-a/02-com-referral.ts \
-    src/fixtures/iterative/google-com-a/02-com-referral.bin
+  02-wire-to-bin.sh src/fixtures/google-com-a/iterative/02-com-referral.ts \
+    src/fixtures/google-com-a/iterative/02-com-referral.bin
 EOF
 }
 

@@ -1,12 +1,13 @@
 import type { DnsMessageResponse } from '@dns/interfaces.js'
 
 /**
- * Hop 1 response: root → TLD referral.
- * Query: 00-query → 170.247.170.2 (b.root-servers.net)
+ * Hop 1: root → TLD referral (hard multi-RR case).
+ * Query: query({ rd: 0 }) → 170.247.170.2 (b.root-servers.net)
  * Captured: dig @170.247.170.2 google.com A +norecurse
  * Sections: ancount=0, nscount=13, arcount=12
+ * Packet shape: many authority NS + glue in additional. Same logic as hop 2, more records.
  */
-export const decoded: DnsMessageResponse = {
+export const expected: DnsMessageResponse = {
   header: {
     transactionId: '0xaaaa',
     flags: {

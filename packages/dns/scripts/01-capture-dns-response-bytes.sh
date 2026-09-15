@@ -12,20 +12,20 @@ Options:
   -o, --output PATH   Output .bin file path (required)
   -s, --server IP     Nameserver to query (default: 8.8.8.8)
   --rd                Set RD=1 in query (default)
-  --no-rd             Set RD=0 in query (iterative walk; matches 00-query.ts)
+  --no-rd             Set RD=0 in query (iterative walk; matches query({ rd: 0 }))
   --query-hex HEX     Full query packet as hex (overrides --rd/--no-rd)
   -h, --help          Show this help
 
 Examples:
   # Recursive resolver answer
   01-capture-dns-response-bytes.sh \
-    -o src/fixtures/recursive/google-com-a/01-answer.bin
+    -o src/fixtures/google-com-a/recursive/01-answer.bin
 
-  # Iterative hop 1 — root referral
+  # Iterative hop 1 - root referral
   01-capture-dns-response-bytes.sh \
     -s 170.247.170.2 \
     --no-rd \
-    -o src/fixtures/iterative/google-com-a/01-root-referral.bin
+    -o src/fixtures/google-com-a/iterative/01-root-referral.bin
 EOF
 }
 
@@ -54,10 +54,10 @@ fi
 
 if [[ -z "$QUERY_HEX" ]]; then
   if [[ $RD -eq 1 ]]; then
-    # google.com A, ID=0xAAAA, RD=1
+    # google.com A, ID=0xAAAA, RD=1 - matches wire({ rd: 1 }) in query.ts
     QUERY_HEX="aaaa0100000100000000000006676f6f676c6503636f6d0000010001"
   else
-    # google.com A, ID=0xAAAA, RD=0 — matches queryWire in 00-query.ts
+    # google.com A, ID=0xAAAA, RD=0 - matches wire({ rd: 0 }) in query.ts
     QUERY_HEX="aaaa0000000100000000000006676f6f676c6503636f6d0000010001"
   fi
 fi

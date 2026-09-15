@@ -132,7 +132,7 @@ pnpm test:watch       # re-run tests on change
 ### @dns scripts
 
 ```bash
-pnpm exec tsx packages/dns/src/wire-format-parser/index.ts
+pnpm exec tsx packages/dns/src/query.ts
 ```
 
 Requires **Node 26** (see `engines` in root `package.json`). Use [fnm](https://github.com/Schniz/fnm) or similar: `fnm use 26`.

@@ -1,12 +1,13 @@
 import type { DnsMessageResponse } from '@dns/interfaces.js'
 
 /**
- * Hop 3 response: authoritative answer.
- * Query: 00-query → 216.239.32.10 (ns1.google.com glue from hop 2)
+ * Hop 3: authoritative final answer.
+ * Query: query({ rd: 0 }) → 216.239.32.10 (ns1.google.com glue from hop 2)
  * Captured: dig @216.239.32.10 google.com A +norecurse
  * Sections: ancount=1, nscount=0, arcount=0
+ * Packet shape: same as recursive/01-answer (one A), AA=1.
  */
-export const decoded: DnsMessageResponse = {
+export const expected: DnsMessageResponse = {
   header: {
     transactionId: '0xaaaa',
     flags: {

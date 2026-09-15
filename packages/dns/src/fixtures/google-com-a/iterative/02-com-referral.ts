@@ -1,12 +1,13 @@
 import type { DnsMessageResponse } from '@dns/interfaces.js'
 
 /**
- * Hop 2 response: TLD → authoritative referral.
- * Query: 00-query → 192.5.6.30 (a.gtld-servers.net glue from hop 1)
+ * Hop 2: TLD → authoritative referral (first multi-RR target).
+ * Query: query({ rd: 0 }) → 192.5.6.30 (a.gtld-servers.net glue from hop 1)
  * Captured: dig @192.5.6.30 google.com A +norecurse
  * Sections: ancount=0, nscount=4, arcount=8
+ * Packet shape: authority + additional, no answers. Unskip this before hop 1.
  */
-export const decoded: DnsMessageResponse = {
+export const expected: DnsMessageResponse = {
   header: {
     transactionId: '0xaaaa',
     flags: {
