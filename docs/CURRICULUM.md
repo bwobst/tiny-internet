@@ -132,11 +132,7 @@ Do not add these as Steps unless a new Enables fact appears: least-connections, 
 
 ---
 
-## Stage 0 · Network
-
-On disk this stage will live at [`docs/0-network/0-network.md`](./0-network/0-network.md).
-The file is not written yet.
-Samples for this stage wait with stages 2-11.
+## [Stage 0 · Network](./0-network/0-network.md)
 
 Three machines that can reach each other, with fixed addresses, SSH access, and a way to run a process on each one.
 

@@ -510,6 +510,7 @@
       <h2 class="nav-heading">Start</h2>
       <ul>
         <li><a href="#curriculum" data-page="curriculum"><span class="nav-subtitle">Tiny Internet</span><span class="nav-title">Overview</span></a></li>
+<li><a href="#network" data-page="network"><span class="nav-subtitle">Stage 0</span><span class="nav-title">Network</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="1">
@@ -559,15 +560,18 @@
         <h1>Overview</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#curriculum/curriculum-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-4-reverse-proxy">Stage 4 · Reverse proxy</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-5-load-balancing">Stage 5 · Load balancing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-6-api-gateway">Stage 6 · API gateway</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-7-http-cache-layer">Stage 7 · HTTP cache layer</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-8-content-delivery">Stage 8 · Content delivery</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-9-key-value-store">Stage 9 · Key-value store</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-10-metrics-collector">Stage 10 · Metrics collector</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-11-distributed-tracing">Stage 11 · Distributed tracing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-12-circuit-breaker">Stage 12 · Circuit breaker</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-13-write-ahead-log">Stage 13 · Write-ahead log</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-14-message-queue">Stage 14 · Message queue</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-15-object-storage">Stage 15 · Object storage</a></li></ul></nav>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#curriculum/curriculum-stage-headings">Stage headings</a></li><li class="depth-3"><a href="#curriculum/curriculum-step-headings">Step headings</a></li><li class="depth-3"><a href="#curriculum/curriculum-samples-and-checks">Samples and Checks</a></li><li class="depth-3"><a href="#curriculum/curriculum-done-and-skip">Done and Skip</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-4-front-door">Stage 4 · Front door</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-5-http-cache">Stage 5 · HTTP cache</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-6-key-value-store">Stage 6 · Key-value store</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-7-metrics">Stage 7 · Metrics</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-8-tracing">Stage 8 · Tracing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-9-write-ahead-log">Stage 9 · Write-ahead log</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-10-message-queue">Stage 10 · Message queue</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-11-object-storage">Stage 11 · Object storage</a></li></ul></nav>
         <div class="page-content prose"><h1 id="curriculum-tiny-internet---build-path">Tiny Internet - Build Path</h1>
 <p>You are going to build a tiny web platform from scratch and run it across three physical computers.</p>
 <p>There is no framework, no cloud platform, no managed database, no CDN, and no observability service hiding underneath it.</p>
 <p>You implement the infrastructure yourself, one layer at a time.</p>
 <p>At first the system can barely communicate.</p>
-<p>By the end it serves a website, distributes traffic across machines, survives node failures, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.</p>
+<p>By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.</p>
 <p>Each layer exists because the system needs it.</p>
 <p><strong>Start here:</strong> <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/dns/"><code>packages/dns/</code></a>.</p>
+<p>Stage files for 2-11 still use old names on disk.</p>
+<p>A later session rewrites them to this contract.</p>
+<p>Do not treat those files as the locked step lists.</p>
 <hr />
 <h2 id="curriculum-the-machines">The machines</h2>
 <div class="table-wrap"><table>
@@ -577,15 +581,15 @@
 </tr></thead><tbody>
 <tr>
 <td>ALPHA</td>
-<td>Names and front door: DNS, then proxy and load balancer</td>
+<td>Names and Front door</td>
 </tr>
 <tr>
 <td>BRAVO</td>
-<td>Web backend: HTTP server, then cache</td>
+<td>Web backend</td>
 </tr>
 <tr>
 <td>CHARLIE</td>
-<td>Web backend: HTTP server, then cache</td>
+<td>Web backend</td>
 </tr>
 </tbody></table></div>
 <p>Roles are a starting point.</p>
@@ -597,7 +601,8 @@
 <p>The platform serves <code>pi.world</code>, a site about the platform itself.</p>
 <p>The site grows with the infrastructure.</p>
 <p>Do not build the site up front.</p>
-<p>Each stage below unlocks the next thing the site can honestly show.</p>
+<p>Product pages prove an Enables line.</p>
+<p>They do not order the path.</p>
 <div class="table-wrap"><table>
 <thead><tr>
 <th>Page</th>
@@ -605,19 +610,19 @@
 </tr></thead><tbody>
 <tr>
 <td><code>/</code></td>
-<td>HTTP server</td>
+<td>HTTP</td>
 </tr>
 <tr>
 <td><code>/status</code></td>
-<td>Metrics, health checks</td>
+<td>Metrics</td>
 </tr>
 <tr>
 <td><code>/requests</code></td>
-<td>Load balancer, request logging</td>
+<td>Front door</td>
 </tr>
 <tr>
 <td><code>/metrics</code></td>
-<td>Metrics collector</td>
+<td>Metrics</td>
 </tr>
 <tr>
 <td><code>/events</code></td>
@@ -629,110 +634,383 @@
 </tr>
 <tr>
 <td><code>/lab</code></td>
-<td>Everything, plus nerve</td>
+<td>The cluster under stress</td>
 </tr>
 </tbody></table></div>
 <hr />
 <h2 id="curriculum-methodology---guided-spec">Methodology - Guided Spec</h2>
-<p>For each stage, you receive a <strong>guided spec</strong> rather than implementation code: enough detail to know what to build and how to verify it, but the design and implementation decisions belong to you.</p>
-<p>Each build step includes:</p>
-<ul>
-<li><strong>Goal</strong> - what this step accomplishes in one sentence
-</li>
-<li><strong>Inputs &amp; outputs</strong> - data shapes, not code
-</li>
-<li><strong>Key questions</strong> - things to answer before writing a line
-</li>
-<li><strong>Done when</strong> - a checklist verifiable with a real tool or console output
-</li>
-<li><strong>Watch out</strong> - the one thing that most commonly trips people up
-</li>
-</ul>
-<p>Each stage also answers one question: <strong>what does this component enable in the platform?</strong></p>
-<p>If a component does not enable anything, it does not belong in the build path yet.</p>
-<p>When you get stuck on a specific bug, concept, or decision between approaches, bring it to Claude and work through it together.</p>
-<p>Implementation code is not volunteered unprompted.</p>
+<p>For each stage you receive a <strong>guided spec</strong>, not implementation code: enough to know what to build, why, and how to know it is done.</p>
+<p>Design and implementation stay yours.</p>
+<p><a href="#dns-resolver">Stage 1 · Naming</a> is the exemplar.</p>
+<p>Copy its headings.</p>
+<p>Do not invent a new format.</p>
+<h3 id="curriculum-stage-headings">Stage headings</h3>
+<p>1. <code>### Stage N · Name</code></p>
+<p>2. Blockquote: one-sentence stage Goal</p>
+<p>3. <code><strong>Enables:</strong></code> one skip-testable platform fact, present tense, observable on the real machines</p>
+<p>4. <code><strong>Scope:</strong></code> one or two sentences of bound</p>
+<p>5. <code>*Formerly: …*</code> only when the name changed</p>
+<p>6. Steps</p>
+<p>7. <code><strong>Next:</strong></code> one sentence plus a link</p>
+<p>Do not add prereqs, time estimates, or stretch sections.</p>
+<h3 id="curriculum-step-headings">Step headings</h3>
+<p>1. <code>#### Step N - Title</code></p>
+<p>2. <code><strong>Goal:</strong></code></p>
+<p>3. <code><strong>Shape:</strong></code> field list with types only. No example values.</p>
+<p>4. <code><strong>Key questions:</strong></code> may name an RFC. Must not implement it for you.</p>
+<p>5. <code><strong>Watch out:</strong></code></p>
+<p>6. <code><strong>Samples:</strong></code></p>
+<p>7. <code><strong>Done when:</strong></code> the Check list. Keep this string so the reader does not move.</p>
+<p>Sitting-sized work is a Step.</p>
+<p>Use <code>##### Substep - &lt;name&gt;</code> only when one Step must stay one Check list but is too big to read as a single block.</p>
+<p>A Substep gets a Goal only.</p>
+<h3 id="curriculum-samples-and-checks">Samples and Checks</h3>
+<p>Each Sample is <code>##### Sample &lt;n&gt; - &lt;short name&gt;</code>.</p>
+<p>One Check per Sample.</p>
+<p>The Check bullet uses the Sample's short name.</p>
+<p>Behavior Sample: one command fenced, then one exact transcript fenced.</p>
+<p>Wire or object Sample: one relative link to a fixture (<code>.bin</code> or <code>.ts</code>) plus one sentence that names that file as the oracle.</p>
+<p>A step may mix kinds.</p>
+<p>Never both for the same Check.</p>
+<p>A Sample may contain expected bytes, a decoded object, one command, or one transcript.</p>
+<p>A Sample must not contain algorithms, control flow, code, a walkthrough of how to produce the transcript, or an RFC section used as a recipe.</p>
+<h3 id="curriculum-done-and-skip">Done and Skip</h3>
+<p>A <strong>Step</strong> is done when its Samples reproduce on Compose.</p>
+<p>A <strong>Stage</strong> is done when its Enables line is true on the real machines.</p>
+<p><strong>Skip:</strong> if a stage's Enables line is already true on the real machines, skip that stage.</p>
 <hr />
 <h2 id="curriculum-rules">Rules</h2>
 <p><strong>Write the code by hand.</strong> That is the point of the project.</p>
 <p><strong>Do not use a library to solve the thing this stage is meant to teach.</strong></p>
 <p>OS primitives are fine: sockets, filesystem, processes, threads, timers.</p>
-<p>Express is not an HTTP server you built. Redis is not a key-value store you built.</p>
+<p>Express is not an HTTP server you built.</p>
+<p>Redis is not a key-value store you built.</p>
 <p><strong>Keep scope bounded.</strong> You are not recreating production systems.</p>
 <p>You are understanding one deeply enough to build a small working version and watch it behave in a real environment.</p>
 <p><strong>Let failure be real.</strong> Physical failure is part of the project, not something to mock away.</p>
+<p><strong>Pedagogy that does not Enable <code>pi.world</code> is off the path.</strong></p>
+<p>Do not add these as Steps unless a new Enables fact appears: least-connections, presigned URLs, OTLP export, multipart upload, virtual hosts, TLS termination.</p>
 <hr />
-<h2 id="curriculum-stage-0---network">Stage 0 - Network</h2>
+<h2 id="curriculum-stage-0-network"><a href="#network">Stage 0 · Network</a></h2>
 <p>Three machines that can reach each other, with fixed addresses, SSH access, and a way to run a process on each one.</p>
-<p><strong>Enables:</strong> everything.</p>
-<p><strong>Done when:</strong> you can <code>ssh bravo</code> from ALPHA, and a process on ALPHA can open a socket to a process on CHARLIE.</p>
+<p><strong>Enables:</strong> From ALPHA you can <code>ssh bravo</code>, and a process on ALPHA can open a socket to a process on CHARLIE.</p>
 <hr />
-<h2 id="curriculum-layer-1---networking-fundamentals">Layer 1 - Networking Fundamentals</h2>
+<h2 id="curriculum-layer-1-networking-fundamentals">Layer 1 · Networking fundamentals</h2>
 <p>Turn three addressable machines into something that can serve a page.</p>
 <h3 id="curriculum-stage-1-naming"><a href="#dns-resolver">Stage 1 · Naming</a></h3>
-<p>Build the naming system for your tiny internet.</p>
-<p><strong>Enables:</strong> <code>pi.world</code>, <code>alpha.pi.world</code>, <code>bravo.pi.world</code>, <code>charlie.pi.world</code>. Nothing later has to hardcode an IP address.</p>
+<p><strong>Enables:</strong> <code>dig pi.world</code> against ALPHA returns the cluster addresses. Later stages do not hardcode IPs.</p>
 <h3 id="curriculum-stage-2-transport"><a href="#tcp-server">Stage 2 · Transport</a></h3>
-<p>Build the transport mechanism that lets the machines communicate.</p>
-<p><strong>Enables:</strong> every service above this line. Connections, backpressure, and the failure modes you will spend the rest of the project handling.</p>
+<p><strong>Enables:</strong> ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.</p>
 <h3 id="curriculum-stage-3-http"><a href="#http-server">Stage 3 · HTTP</a></h3>
-<p>Build the first thing a person can see.</p>
-<p><strong>Enables:</strong> <code>pi.world/</code> serves a static page from BRAVO. The project becomes visible to someone who is not you.</p>
+<p><strong>Enables:</strong> <code>pi.world/</code> serves a static page from BRAVO.</p>
 <hr />
-<h2 id="curriculum-layer-2---traffic-routing">Layer 2 - Traffic &amp; Routing</h2>
+<h2 id="curriculum-layer-2-traffic">Layer 2 · Traffic</h2>
 <p>Make the website a property of the cluster instead of a property of one machine.</p>
-<h3 id="curriculum-stage-4-reverse-proxy"><a href="#reverse-proxy">Stage 4 · Reverse proxy</a></h3>
-<p>Put something in front of the backends.</p>
-<p><strong>Enables:</strong> one public entry point on ALPHA. Backends stop being directly addressable.</p>
-<h3 id="curriculum-stage-5-load-balancing"><a href="#load-balancer">Stage 5 · Load balancing</a></h3>
-<p>Spread traffic across BRAVO and CHARLIE, and notice when one stops answering.</p>
-<p><strong>Enables:</strong> the defining moment. The page says <code>Served by BRAVO</code>. You shut BRAVO down. The page says <code>Served by CHARLIE</code>.</p>
-<h3 id="curriculum-stage-6-api-gateway"><a href="#api-gateway">Stage 6 · API gateway</a></h3>
-<p>Give the front door policy: routing rules, rate limits, auth boundaries.</p>
-<p><strong>Enables:</strong> <code>/api/*</code> on the site can be treated differently from static pages.</p>
+<h3 id="curriculum-stage-4-front-door">Stage 4 · Front door</h3>
+<p><strong>Enables:</strong> <code>pi.world</code> has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.</p>
+<p>No stage file yet.</p>
+<p>Old reverse-proxy and load-balancer docs stay on disk until a later rewrite.</p>
 <hr />
-<h2 id="curriculum-layer-3---caching-content-delivery">Layer 3 - Caching &amp; Content Delivery</h2>
-<p>Make the system fast, and make its speed observable.</p>
-<h3 id="curriculum-stage-7-http-cache-layer"><a href="#http-cache-layer">Stage 7 · HTTP cache layer</a></h3>
-<p>Cache expensive responses at the edge.</p>
-<p><strong>Enables:</strong> the site reports its own cache behavior - <code>MISS origin: bravo 42ms</code>, then <code>HIT age: 1.2s 0.7ms</code>.</p>
-<h3 id="curriculum-stage-8-content-delivery"><a href="#cdn">Stage 8 · Content delivery</a></h3>
-<p>Treat the three nodes as content locations and decide where content lives.</p>
-<p><strong>Enables:</strong> experiments with placement, invalidation, and what &quot;close to the user&quot; means when the user is in the next room.</p>
-<h3 id="curriculum-stage-9-key-value-store"><a href="#key-value-store">Stage 9 · Key-value store</a></h3>
-<p>Build the storage engine the cache and the app both need.</p>
-<p><strong>Enables:</strong> shared state across nodes instead of per-node memory.</p>
+<h2 id="curriculum-layer-3-caching-and-shared-state">Layer 3 · Caching and shared state</h2>
+<p>Make the system fast, and give it shared state.</p>
+<h3 id="curriculum-stage-5-http-cache"><a href="#http-cache-layer">Stage 5 · HTTP cache</a></h3>
+<p><strong>Enables:</strong> The site reports a MISS from origin, then a HIT with age and a shorter time.</p>
+<h3 id="curriculum-stage-6-key-value-store"><a href="#key-value-store">Stage 6 · Key-value store</a></h3>
+<p><strong>Enables:</strong> BRAVO and CHARLIE agree on one value after a write from either.</p>
 <hr />
-<h2 id="curriculum-layer-4---reliability-observability">Layer 4 - Reliability &amp; Observability</h2>
-<p>Find out what your tiny internet is actually doing, then make it survive.</p>
-<h3 id="curriculum-stage-10-metrics-collector"><a href="#metrics-collector">Stage 10 · Metrics collector</a></h3>
-<p>Count and time everything.</p>
-<p><strong>Enables:</strong> <code>/metrics</code> and <code>/status</code>. <code>http_requests_total</code>, <code>http_request_duration_ms</code>, <code>cache_hits_total</code>, <code>active_connections</code>.</p>
-<h3 id="curriculum-stage-11-distributed-tracing"><a href="#distributed-tracing">Stage 11 · Distributed tracing</a></h3>
-<p>Follow one request across every machine it touched.</p>
-<p><strong>Enables:</strong> <code>/architecture</code> shows a live request path - DNS, proxy, cache, backend, storage, with a duration on each hop.</p>
-<h3 id="curriculum-stage-12-circuit-breaker"><a href="#circuit-breaker">Stage 12 · Circuit breaker</a></h3>
-<p>Stop sending traffic to a backend that is hurting.</p>
-<p><strong>Enables:</strong> degraded-but-alive behavior instead of cascading failure. Makes <code>/lab</code> survivable.</p>
+<h2 id="curriculum-layer-4-observability">Layer 4 · Observability</h2>
+<p>Find out what the cluster is doing.</p>
+<h3 id="curriculum-stage-7-metrics"><a href="#metrics-collector">Stage 7 · Metrics</a></h3>
+<p><strong>Enables:</strong> <code>/metrics</code> and <code>/status</code> show request counts and timings.</p>
+<h3 id="curriculum-stage-8-tracing"><a href="#distributed-tracing">Stage 8 · Tracing</a></h3>
+<p><strong>Enables:</strong> <code>/architecture</code> shows a live request path with a duration on each hop.</p>
 <hr />
-<h2 id="curriculum-layer-5---data-storage">Layer 5 - Data &amp; Storage</h2>
+<h2 id="curriculum-layer-5-data-and-storage">Layer 5 · Data and storage</h2>
 <p>Give the system memory.</p>
-<h3 id="curriculum-stage-13-write-ahead-log"><a href="#write-ahead-log">Stage 13 · Write-ahead log</a></h3>
-<p>Make writes survive a process that dies mid-write.</p>
-<p><strong>Enables:</strong> kill a node during a write, restart it, verify the data is intact.</p>
-<h3 id="curriculum-stage-14-message-queue"><a href="#message-queue">Stage 14 · Message queue</a></h3>
-<p>Decouple request handling from request processing.</p>
-<p><strong>Enables:</strong> <code>/events</code>. HTTP request goes to a queue, an analytics consumer drains it, the database records it, and none of that slows down the page.</p>
-<h3 id="curriculum-stage-15-object-storage"><a href="#object-storage">Stage 15 · Object storage</a></h3>
-<p>Store the blobs the site serves.</p>
-<p><strong>Enables:</strong> static assets and uploads that live in the cluster rather than on one node's disk.</p>
+<h3 id="curriculum-stage-9-write-ahead-log"><a href="#write-ahead-log">Stage 9 · Write-ahead log</a></h3>
+<p><strong>Enables:</strong> You kill a node during a write, restart it, and the data is intact.</p>
+<h3 id="curriculum-stage-10-message-queue"><a href="#message-queue">Stage 10 · Message queue</a></h3>
+<p><strong>Enables:</strong> <code>/events</code> updates without the page waiting for the consumer.</p>
+<h3 id="curriculum-stage-11-object-storage"><a href="#object-storage">Stage 11 · Object storage</a></h3>
+<p><strong>Enables:</strong> A blob is still served after the node that first stored it reboots.</p>
+<hr />
+<h2 id="curriculum-not-on-this-path">Not on this path</h2>
+<p>These are not stages on the locked path.</p>
+<p>Their files stay until a later rewrite deletes or recuts them.</p>
+<ul>
+<li>API gateway: no product page that needs policy yet
+</li>
+<li>Content delivery: three nodes in one room do not Enable a CDN
+</li>
+<li>Circuit breaker: dead-BRAVO failover is the Front door Enables line
+</li>
+</ul>
 <hr />
 <h2 id="curriculum-do-not-design-the-whole-thing-first">Do not design the whole thing first</h2>
 <p>The stage list above is a direction, not an architecture.</p>
 <p>Build the smallest thing that works, then let the next problem force the next piece of infrastructure.</p>
-<p>Discovering *why* a system is built the way it is - by hitting the problem it solves - is the point.</p>
-<p>If you reach a stage and the system does not yet need it, skip it.</p>
-<p>If the system needs something not on this list, build that instead.</p></div>
+<p>Discovering why a system is built the way it is - by hitting the problem it solves - is the point.</p>
+<p>If you reach a stage and its Enables line is already true, skip it.</p>
+<p>If the system needs something not on this list, that is a new Enables fact, not a silent extra Step.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-network" data-page="network" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 0</p>
+        <h1>Network</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#network/network-stage-0-network">Stage 0 · Network</a></li><li class="depth-4"><a href="#network/network-step-1---give-each-node-a-fixed-address">Step 1 - Give each Node a fixed address</a></li><li class="depth-4"><a href="#network/network-step-2---reach-the-other-nodes">Step 2 - Reach the other Nodes</a></li><li class="depth-4"><a href="#network/network-step-3---get-a-shell-on-another-node">Step 3 - Get a shell on another Node</a></li><li class="depth-4"><a href="#network/network-step-4---open-a-socket-between-nodes">Step 4 - Open a socket between Nodes</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="network-stage-0-network">Stage 0 · Network</h3>
+<blockquote><p>Make the three Nodes reach each other, so the later stages have a cluster to run on.</p></blockquote>
+<p><strong>Enables:</strong> From ALPHA you can <code>ssh bravo</code>, and a process on ALPHA can open a socket to a process on CHARLIE.</p>
+<p><strong>Scope:</strong> Fixed addresses, names that resolve on each Node, SSH between Nodes, and one TCP connection between two Nodes. No DNS server, no HTTP, no service you wrote.</p>
+<h4 id="network-step-1---give-each-node-a-fixed-address">Step 1 - Give each Node a fixed address</h4>
+<p><strong>Goal:</strong> Give ALPHA, BRAVO, and CHARLIE addresses that survive a reboot.</p>
+<p><strong>Shape:</strong></p>
+<ul>
+<li>Input: a Node
+</li>
+<li>Output:
+<ul>
+<li>name: string
+</li>
+<li>address: IPv4 address
+</li>
+<li>prefix: integer (bits)
+</li>
+<li>gateway: IPv4 address
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Which addresses in your subnet does the router hand out by DHCP, and which are yours to assign?
+</li>
+<li>A static lease on the router and a static address on the Node both survive a reboot. Which one do you have to redo when a Node is reinstalled?
+</li>
+<li>What is the gateway for, when every Sample here stays inside one subnet?
+</li>
+</ul>
+<p><strong>Watch out:</strong> An address that came from DHCP looks right until the lease expires or the router restarts. Reboot the Node and check the address again before you call this done.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="network-sample-1---alpha-address">Sample 1 - alpha address</h5>
+<pre><code>docker compose exec alpha ip -4 addr show eth0
+</code></pre>
+<pre><code>2: eth0@if211: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default  link-netnsid 0
+    inet 10.53.0.10/24 brd 10.53.0.255 scope global eth0
+       valid_lft forever preferred_lft forever
+</code></pre>
+<h5 id="network-sample-2---alpha-route">Sample 2 - alpha route</h5>
+<pre><code>docker compose exec alpha ip route
+</code></pre>
+<pre><code>default via 10.53.0.1 dev eth0 
+10.53.0.0/24 dev eth0 proto kernel scope link src 10.53.0.10 
+</code></pre>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>alpha address
+</li>
+<li>alpha route
+</li>
+</ul>
+<hr />
+<h4 id="network-step-2---reach-the-other-nodes">Step 2 - Reach the other Nodes</h4>
+<p><strong>Goal:</strong> Reach BRAVO and CHARLIE from ALPHA, by address and by name.</p>
+<p><strong>Shape:</strong></p>
+<ul>
+<li>Input:
+<ul>
+<li>target: name or IPv4 address
+</li>
+<li>count: integer (packets)
+</li>
+</ul>
+</li>
+<li>Output:
+<ul>
+<li>transmitted: integer
+</li>
+<li>received: integer
+</li>
+<li>loss: percent
+</li>
+<li>rtt: milliseconds
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Where does the name <code>bravo</code> resolve on this Node, before you have written a DNS server?
+</li>
+<li>Which failure tells you the name did not resolve, and which tells you the address did not answer?
+</li>
+<li>Stage 1 removes this name source. What does the Enables line for Naming say ALPHA has to do instead?
+</li>
+</ul>
+<p><strong>Watch out:</strong> Names work here because something local already maps them. That mapping is a starting point, not the finished cluster: Naming replaces it, and a leftover <code>/etc/hosts</code> entry will hide a broken zone. Times and sequence numbers change every run - match the resolved address, the loss count, and the error text.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="network-sample-1---ping-bravo-by-name">Sample 1 - ping bravo by name</h5>
+<pre><code>docker compose exec alpha ping -c 3 bravo
+</code></pre>
+<pre><code>PING bravo (10.53.0.11) 56(84) bytes of data.
+64 bytes from bravo.tiny-internet_tiny-internet (10.53.0.11): icmp_seq=1 ttl=64 time=0.196 ms
+64 bytes from bravo.tiny-internet_tiny-internet (10.53.0.11): icmp_seq=2 ttl=64 time=0.326 ms
+64 bytes from bravo.tiny-internet_tiny-internet (10.53.0.11): icmp_seq=3 ttl=64 time=0.130 ms
+
+--- bravo ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2027ms
+rtt min/avg/max/mdev = 0.130/0.217/0.326/0.081 ms
+</code></pre>
+<h5 id="network-sample-2---ping-charlie-by-address">Sample 2 - ping charlie by address</h5>
+<pre><code>docker compose exec alpha ping -c 3 10.53.0.12
+</code></pre>
+<pre><code>PING 10.53.0.12 (10.53.0.12) 56(84) bytes of data.
+64 bytes from 10.53.0.12: icmp_seq=1 ttl=64 time=0.211 ms
+64 bytes from 10.53.0.12: icmp_seq=2 ttl=64 time=0.329 ms
+64 bytes from 10.53.0.12: icmp_seq=3 ttl=64 time=0.244 ms
+
+--- 10.53.0.12 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2067ms
+rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
+</code></pre>
+<h5 id="network-sample-3---ping-an-unknown-name">Sample 3 - ping an unknown name</h5>
+<pre><code>docker compose exec alpha ping -c 1 delta
+</code></pre>
+<pre><code>ping: delta: Name or service not known
+</code></pre>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>ping bravo by name
+</li>
+<li>ping charlie by address
+</li>
+<li>ping an unknown name
+</li>
+</ul>
+<hr />
+<h4 id="network-step-3---get-a-shell-on-another-node">Step 3 - Get a shell on another Node</h4>
+<p><strong>Goal:</strong> Run a command on BRAVO and on CHARLIE from ALPHA, over SSH, without typing a password.</p>
+<p><strong>Shape:</strong></p>
+<ul>
+<li>Input:
+<ul>
+<li>target: Node name
+</li>
+<li>command: string
+</li>
+</ul>
+</li>
+<li>Output:
+<ul>
+<li>stdout: string
+</li>
+<li>exitCode: integer
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Which key does ALPHA present, and which file on BRAVO decides to accept it?
+</li>
+<li>A host key identifies the Node to you. What happens on the first connection, and what should happen if that key ever changes?
+</li>
+<li><code>ssh bravo</code> with no user works only if something supplies one. Where does the user name come from?
+</li>
+</ul>
+<p><strong>Watch out:</strong> The first connection to a Node prints a host key warning and then succeeds. That line is not in the transcript below because the key is already known. Connect once to accept it, then take the transcript.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="network-sample-1---ssh-bravo">Sample 1 - ssh bravo</h5>
+<pre><code>docker compose exec alpha ssh bravo hostname
+</code></pre>
+<pre><code>bravo
+</code></pre>
+<h5 id="network-sample-2---ssh-charlie">Sample 2 - ssh charlie</h5>
+<pre><code>docker compose exec alpha ssh charlie 'hostname; ip -4 addr show eth0 | grep inet'
+</code></pre>
+<pre><code>charlie
+    inet 10.53.0.12/24 brd 10.53.0.255 scope global eth0
+</code></pre>
+<h5 id="network-sample-3---ssh-charlie-to-bravo">Sample 3 - ssh charlie to bravo</h5>
+<pre><code>docker compose exec charlie ssh bravo hostname
+</code></pre>
+<pre><code>bravo
+</code></pre>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>ssh bravo
+</li>
+<li>ssh charlie
+</li>
+<li>ssh charlie to bravo
+</li>
+</ul>
+<hr />
+<h4 id="network-step-4---open-a-socket-between-nodes">Step 4 - Open a socket between Nodes</h4>
+<p><strong>Goal:</strong> Open a TCP connection from a process on ALPHA to a process on CHARLIE and carry one line of bytes.</p>
+<p><strong>Shape:</strong></p>
+<ul>
+<li>Listener:
+<ul>
+<li>port: integer
+</li>
+<li>received: bytes
+</li>
+</ul>
+</li>
+<li>Connector:
+<ul>
+<li>target: Node name
+</li>
+<li>port: integer
+</li>
+<li>sent: bytes
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Which side has to be running first, and what does the other side see if it is not?
+</li>
+<li>The listener binds a port. Which addresses does it accept on, and does that matter on a Node with one interface?
+</li>
+<li>Ports under 1024 need a capability or root. Which range are you using here, and why does Naming not get that choice?
+</li>
+</ul>
+<p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process. Refused means the Node answered and nothing was listening. The source port in the listener transcript changes every run - match the Node name and the bytes.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="network-sample-1---listener-on-charlie">Sample 1 - listener on charlie</h5>
+<pre><code>docker compose exec charlie nc -lv -p 9000
+</code></pre>
+<pre><code>Listening on 0.0.0.0 9000
+Connection received on alpha.tiny-internet_tiny-internet 34354
+hello from alpha
+</code></pre>
+<h5 id="network-sample-2---connect-from-alpha">Sample 2 - connect from alpha</h5>
+<pre><code>echo &quot;hello from alpha&quot; | docker compose exec -T alpha nc -v -w 2 charlie 9000
+</code></pre>
+<pre><code>Connection to charlie (10.53.0.12) 9000 port [tcp/*] succeeded!
+</code></pre>
+<h5 id="network-sample-3---connect-to-a-closed-port">Sample 3 - connect to a closed port</h5>
+<pre><code>docker compose exec alpha nc -v -w 2 charlie 9001
+</code></pre>
+<pre><code>nc: connect to charlie (10.53.0.12) port 9001 (tcp) failed: Connection refused
+</code></pre>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>listener on charlie
+</li>
+<li>connect from alpha
+</li>
+<li>connect to a closed port
+</li>
+</ul>
+<hr />
+<p><strong>Next:</strong> the Nodes reach each other, but only because something local already knows their names. <a href="#dns-resolver">Stage 1 · Naming</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-dns-resolver" data-page="dns-resolver" hidden>
@@ -2371,7 +2649,7 @@ bravo.pi.world.		300	IN	A	10.53.0.11
   </div>
   <button class="mobile-toggle" id="menu-toggle" type="button" aria-label="Open navigation">Menu</button>
   <script>
-    const pages = ["curriculum","dns-resolver","tcp-server","http-server","reverse-proxy","load-balancer","api-gateway","http-cache-layer","cdn","key-value-store","metrics-collector","distributed-tracing","circuit-breaker","write-ahead-log","message-queue","object-storage"];
+    const pages = ["curriculum","network","dns-resolver","tcp-server","http-server","reverse-proxy","load-balancer","api-gateway","http-cache-layer","cdn","key-value-store","metrics-collector","distributed-tracing","circuit-breaker","write-ahead-log","message-queue","object-storage"];
     const sidebar = document.getElementById("sidebar");
     const menuToggle = document.getElementById("menu-toggle");
     const themeToggle = document.getElementById("theme-toggle");

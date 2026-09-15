@@ -17,6 +17,13 @@ const pages = [
     file: 'CURRICULUM.md',
   },
   {
+    id: 'network',
+    title: 'Network',
+    subtitle: 'Stage 0',
+    layer: 0,
+    file: '0-network/0-network.md',
+  },
+  {
     id: 'dns-resolver',
     title: 'Naming',
     subtitle: 'Stage 1',
@@ -274,9 +281,7 @@ function markdownToHtml(markdown, pageId, fromFile = '') {
         i++
       }
       if (i < lines.length) i++
-      html.push(
-        `<pre><code>${escapeHtml(body.join('\n'))}\n</code></pre>`,
-      )
+      html.push(`<pre><code>${escapeHtml(body.join('\n'))}\n</code></pre>`)
       continue
     }
 
