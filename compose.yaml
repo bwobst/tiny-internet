@@ -1,0 +1,105 @@
+# Tiny Internet - local development topology.
+#
+# Three containers stand in for the three machines during development.
+# They share one bridge network with fixed addresses, so the zone data in your
+# DNS server can hold real A records and no service has to hardcode anything
+# that is not also true on the Pis.
+#
+# This is a convenience for building. It is not a substitute for the hardware
+# test. `docker compose stop bravo` is a stand-in for pulling a power cable,
+# not the real thing - a container stop is clean and instant, where a dead Pi
+# is slow, partial, and sometimes still half-answering.
+
+name: tiny-internet
+
+x-node: &node
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+  image: tiny-internet-node
+  init: true
+  working_dir: /workspace
+  volumes:
+    # The repo is live in every node. Edit on the laptop, run in the container.
+    - .:/workspace
+    # Keep container-built node_modules out of the host tree: the host installs
+    # darwin/arm64 binaries, the containers need linux ones.
+    - node_modules:/workspace/node_modules
+    - dns_node_modules:/workspace/packages/dns/node_modules
+    # pnpm keeps its content-addressable store on the same filesystem as the
+    # project so it can hardlink. Give that path a volume, otherwise the store
+    # lands in the bind-mounted working copy as an untracked .pnpm-store.
+    - pnpm_store:/workspace/.pnpm-store
+  environment:
+    # Every node knows the whole topology by name and by address, so a service
+    # can be told where its peers are without discovering them yet.
+    ALPHA_ADDRESS: 10.53.0.10
+    BRAVO_ADDRESS: 10.53.0.11
+    CHARLIE_ADDRESS: 10.53.0.12
+    ZONE: pi.world
+  # No cap_add here on purpose. The image grants the capabilities on the
+  # binaries themselves with setcap, so node can bind port 53 and tcpdump can
+  # read the interface, both as the unprivileged user. Adding any cap_add to a
+  # service breaks UDP port forwarding under OrbStack, which silently kills
+  # `dig` from the laptop against ALPHA - the one check Stage 1 ends on.
+
+  # Containers stay up with no process of their own. Start a service with
+  # `docker compose exec alpha pnpm ...` while you are building it, and give a
+  # node a real `command:` once its service is worth running on boot.
+  command: ["sleep", "infinity"]
+  stop_grace_period: 2s
+
+services:
+  # Names and front door: DNS, then proxy and load balancer.
+  alpha:
+    <<: *node
+    hostname: alpha
+    container_name: alpha
+    networks:
+      tiny-internet:
+        ipv4_address: 10.53.0.10
+    ports:
+      # DNS, so `dig @127.0.0.1 -p 5354 bravo.pi.world` works from the laptop.
+      # Not 5353: that is mDNS/Bonjour, and a macOS host already has it bound
+      # wildcard, which silently eats the replies coming back from the node.
+      - "127.0.0.1:5354:53/udp"
+      - "127.0.0.1:5354:53/tcp"
+      # The public entry point, once the proxy exists.
+      - "127.0.0.1:8080:80"
+
+  # Web backend: HTTP server, then cache.
+  bravo:
+    <<: *node
+    hostname: bravo
+    container_name: bravo
+    networks:
+      tiny-internet:
+        ipv4_address: 10.53.0.11
+    ports:
+      - "127.0.0.1:8081:80"
+      # The TCP server from Stage 2, reachable from the laptop.
+      - "127.0.0.1:3001:3000"
+
+  # Web backend: HTTP server, then cache.
+  charlie:
+    <<: *node
+    hostname: charlie
+    container_name: charlie
+    networks:
+      tiny-internet:
+        ipv4_address: 10.53.0.12
+    ports:
+      - "127.0.0.1:8082:80"
+      - "127.0.0.1:3002:3000"
+
+networks:
+  tiny-internet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.53.0.0/24
+
+volumes:
+  node_modules:
+  dns_node_modules:
+  pnpm_store:
