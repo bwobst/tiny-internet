@@ -1,73 +1,43 @@
 ### Stage 2 · Transport
 
-> Build the transport mechanism that lets the machines communicate.
+> Accept a TCP connection from another node and echo bytes back across it.
 
-**In the platform:** Every service above this line rides on it. The connection lifecycle, framing, and backpressure you work out here are the same failure modes you will be handling for the rest of the project.
+**Enables:** ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.
 
-**Scope:** a socket server you can reason about and build a protocol on top of. You are using the OS TCP stack, not writing one.
+**Scope:** a socket server on BRAVO that accepts a connection and echoes whatever bytes arrive. No framing, no backpressure handling, no application protocol on top.
 
 *Formerly: TCP Server.*
 
-**Recommended stack:** Node.js (`net` module)
+#### Step 1 - Accept and echo across Nodes
 
-#### Step 1 - Accept connections and echo data
+**Goal:** Listen on BRAVO, accept a connection from ALPHA, and echo back whatever bytes arrive.
 
-**Goal:** Open a TCP socket, accept client connections, and echo back whatever bytes arrive.
-
-**Inputs & outputs:**
-- Input: raw bytes from a `telnet` or `nc` client
-- Output: the same bytes written back to the same socket
+**Shape:**
+- Input: bytes written by a client into an accepted connection
+- Output: the same bytes, written back on that same connection
 
 **Key questions:**
-- What is the difference between a listening socket and a connection socket?
-- What events does a `net.Server` and a `net.Socket` emit in Node.js?
-- What does it mean for TCP to be a *stream* protocol - why can't you assume each `data` event is one "message"?
+- What is the difference between a listening socket and a connection socket, and what has to exist on each side before bytes can flow?
+- What does it mean for TCP to be a byte stream - why can't a receiver assume one write on one side arrives as exactly one read on the other?
+- Which address does BRAVO bind to so a connection from ALPHA, not just from BRAVO itself, is accepted?
+
+**Watch out:** Compose publishes BRAVO's port to the host on a different number than the port the server binds inside the container. A Sample run from another node's container uses the in-Node port; a Sample run from the laptop uses the published one.
+
+**Samples:**
+
+##### Sample 1 - accept and echo across Nodes
+
+```
+docker compose exec alpha sh -c "printf 'hello bravo\n' | nc bravo 3000"
+```
+
+```
+hello bravo
+```
 
 **Done when:**
-- `echo "hello" | nc localhost 3000` prints `hello` back
-- Multiple simultaneous `nc` sessions each get their own echo (connections are isolated)
-
-**Watch out:** TCP is a byte stream. A single `write("hello world")` from the client may arrive as two separate `data` events: `"hello "` and `"world"`. Never treat one event as one message.
+- accept and echo across Nodes
 
 ---
 
-#### Step 2 - Implement a length-prefixed framing protocol
-
-**Goal:** Define an application-level message boundary so you can send and receive complete messages reliably.
-
-**Inputs & outputs:**
-- Input: a message string from the client, prefixed with a 4-byte big-endian length header
-- Output: the parsed message string (no length prefix) logged on the server; echoed back with a new length prefix
-
-**Key questions:**
-- How do you handle the case where a `data` event delivers only part of a length header?
-- Where do you store the incomplete buffer across events?
-- How many bytes should you wait for before attempting to parse a message?
-
-**Done when:**
-- Sending a 1 MB message arrives as exactly one complete parsed message, regardless of how TCP fragments it
-- Your test client can send 1000 messages sequentially and the server processes all 1000 in order
-
-**Watch out:** Buffer the incoming bytes in a per-connection accumulator. A common mistake is using a module-level buffer that gets mixed between connections.
-
----
-
-#### Step 3 - Handle connection lifecycle and backpressure
-
-**Goal:** Gracefully handle slow clients, half-closes, and connection errors without crashing.
-
-**Inputs & outputs:**
-- Input: a client that connects, sends some data, then closes - or drops without closing
-- Output: clean resource cleanup; no lingering connections; no memory leaks
-
-**Key questions:**
-- What is the difference between `end` (half-close) and `destroy` (hard close)?
-- How does `socket.write()` signal backpressure, and what should you do if it returns `false`?
-- How do you detect a connection that has gone silent without sending a FIN?
-
-**Done when:**
-- After 100 connect/disconnect cycles, your server's open connection count returns to 0
-- A client that stops reading (blocked consumer) causes the server to pause sending, not crash
-- A `socket.setTimeout()` correctly closes an idle connection after N seconds
-
-**Watch out:** Forgetting to handle the `error` event on a socket will crash the process with an unhandled exception when a client resets the connection (RST packet).
+**Next:** bytes cross the network, but nothing above them understands a request yet. [Stage 3 · HTTP](./3-http-server.md).

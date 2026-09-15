@@ -12,7 +12,7 @@ Each layer exists because the system needs it.
 
 **Start here:** [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md), implemented in Node.js under [`packages/dns/`](../packages/dns/).
 
-Stage files for 2-11 still use old names on disk.
+Stage files for 3-11 still use old names on disk.
 A later session rewrites them to this contract.
 Do not treat those files as the locked step lists.
 
