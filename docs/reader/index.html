@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tiny Internet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --font-sans: "DM Sans", system-ui, sans-serif;
+      --font-serif: "Source Serif 4", Georgia, serif;
+      --bg: #f6f3ec;
+      --bg-elevated: #fffdf8;
+      --sidebar: #1c1917;
+      --sidebar-text: #e7e5e4;
+      --sidebar-muted: #a8a29e;
+      --text: #1c1917;
+      --text-muted: #57534e;
+      --accent: #b45309;
+      --accent-soft: #fef3c7;
+      --border: #e7e5e4;
+      --shadow: 0 18px 50px rgba(28, 25, 23, 0.08);
+      --layer-1: #2563eb;
+      --layer-2: #7c3aed;
+      --layer-3: #059669;
+      --layer-4: #d97706;
+      --layer-5: #dc2626;
+      --radius: 14px;
+      --content-width: 42rem;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0c0a09;
+      --bg-elevated: #171412;
+      --sidebar: #090807;
+      --sidebar-text: #f5f5f4;
+      --sidebar-muted: #a8a29e;
+      --text: #fafaf9;
+      --text-muted: #a8a29e;
+      --accent: #fbbf24;
+      --accent-soft: rgba(251, 191, 36, 0.12);
+      --border: #292524;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-serif);
+      font-size: 1.0625rem;
+      line-height: 1.75;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 18.5rem minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      background: var(--sidebar);
+      color: var(--sidebar-text);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 1.25rem 0 2rem;
+    }
+
+    .brand {
+      padding: 0 1.25rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 1rem;
+    }
+
+    .brand-kicker {
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sidebar-muted);
+      margin: 0 0 0.35rem;
+    }
+
+    .brand-title {
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin: 0;
+      color: #fff;
+    }
+
+    .sidebar-tools {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0 1.25rem 1rem;
+    }
+
+    .tool-btn {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--sidebar-text);
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+    }
+
+    .tool-btn:hover { background: rgba(255, 255, 255, 0.08); }
+
+    .nav-section { margin-bottom: 1.1rem; }
+
+    .nav-heading {
+      font-family: var(--font-sans);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sidebar-muted);
+      margin: 0 0 0.45rem;
+      padding: 0 1.25rem;
+    }
+
+    .nav-section ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-section a {
+      display: block;
+      padding: 0.55rem 1.25rem;
+      color: inherit;
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .nav-section a:hover { background: rgba(255, 255, 255, 0.05); }
+
+    .nav-section a.active {
+      background: rgba(255, 255, 255, 0.08);
+      border-left-color: var(--accent);
+    }
+
+    .nav-section[data-layer="1"] a.active { border-left-color: var(--layer-1); }
+    .nav-section[data-layer="2"] a.active { border-left-color: var(--layer-2); }
+    .nav-section[data-layer="3"] a.active { border-left-color: var(--layer-3); }
+    .nav-section[data-layer="4"] a.active { border-left-color: var(--layer-4); }
+    .nav-section[data-layer="5"] a.active { border-left-color: var(--layer-5); }
+
+    .nav-subtitle {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.68rem;
+      color: var(--sidebar-muted);
+      margin-bottom: 0.1rem;
+    }
+
+    .nav-title {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .main {
+      padding: 2rem clamp(1.25rem, 4vw, 3rem) 4rem;
+    }
+
+    .page {
+      max-width: calc(var(--content-width) + 14rem);
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-eyebrow {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 0.35rem;
+      font-weight: 600;
+    }
+
+    .page-header h1 {
+      font-family: var(--font-sans);
+      font-size: clamp(1.85rem, 4vw, 2.5rem);
+      line-height: 1.15;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .page-layout {
+      display: grid;
+      grid-template-columns: 11rem minmax(0, var(--content-width));
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    .page-toc {
+      position: sticky;
+      top: 2rem;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+    }
+
+    .page-toc-label {
+      margin: 0 0 0.65rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .page-toc ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-left: 1px solid var(--border);
+    }
+
+    .page-toc li { margin: 0; }
+
+    .page-toc a {
+      display: block;
+      padding: 0.3rem 0 0.3rem 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      line-height: 1.35;
+    }
+
+    .page-toc a:hover { color: var(--accent); }
+    .page-toc .depth-4 a { padding-left: 1.35rem; font-size: 0.78rem; }
+
+    .prose h3, .prose h4 {
+      font-family: var(--font-sans);
+      scroll-margin-top: 1.5rem;
+    }
+
+    .prose h3 {
+      font-size: 1.15rem;
+      margin: 2rem 0 0.75rem;
+      color: var(--text);
+    }
+
+    .prose h4 {
+      font-size: 1rem;
+      margin: 1.75rem 0 0.65rem;
+      color: var(--text);
+    }
+
+    .prose p { margin: 0 0 1rem; }
+
+    .prose strong {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .prose blockquote {
+      margin: 1.25rem 0;
+      padding: 0.85rem 1rem;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .prose blockquote p { margin: 0; }
+
+    .prose ul {
+      margin: 0 0 1rem;
+      padding-left: 1.25rem;
+    }
+
+    .prose li { margin-bottom: 0.35rem; }
+
+    .prose hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    .prose code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88em;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.12rem 0.35rem;
+    }
+
+    .prose a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1.25rem 0 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-elevated);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 20;
+      font-family: var(--font-sans);
+      border: 0;
+      border-radius: 999px;
+      padding: 0.85rem 1rem;
+      background: var(--sidebar);
+      color: #fff;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+    }
+
+    @media (max-width: 960px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: min(18.5rem, 88vw);
+        transform: translateX(-105%);
+        transition: transform 0.2s ease;
+        z-index: 30;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-toggle { display: inline-flex; }
+      .page-layout { grid-template-columns: 1fr; }
+      .page-toc {
+        position: static;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <p class="brand-kicker">Three machines, built by hand</p>
+        <h1 class="brand-title">Tiny Internet</h1>
+      </div>
+      <div class="sidebar-tools">
+        <button class="tool-btn" id="theme-toggle" type="button">Toggle theme</button>
+      </div>
+      <nav aria-label="Build path"><section class="nav-section" data-layer="0">
+      <h2 class="nav-heading">Start</h2>
+      <ul>
+        <li><a href="#curriculum" data-page="curriculum"><span class="nav-subtitle">Tiny Internet</span><span class="nav-title">Overview</span></a></li>
+      </ul>
+    </section>
+<section class="nav-section" data-layer="1">
+      <h2 class="nav-heading">Layer 1 — Networking</h2>
+      <ul>
+        <li><a href="#dns-resolver" data-page="dns-resolver"><span class="nav-subtitle">Stage 1</span><span class="nav-title">Naming</span></a></li>
+<li><a href="#tcp-server" data-page="tcp-server"><span class="nav-subtitle">Stage 2</span><span class="nav-title">Transport</span></a></li>
+<li><a href="#http-server" data-page="http-server"><span class="nav-subtitle">Stage 3</span><span class="nav-title">HTTP</span></a></li>
+      </ul>
+    </section>
+<section class="nav-section" data-layer="2">
+      <h2 class="nav-heading">Layer 2 — Traffic & Routing</h2>
+      <ul>
+        <li><a href="#reverse-proxy" data-page="reverse-proxy"><span class="nav-subtitle">Stage 4</span><span class="nav-title">Reverse Proxy</span></a></li>
+<li><a href="#load-balancer" data-page="load-balancer"><span class="nav-subtitle">Stage 5</span><span class="nav-title">Load Balancing</span></a></li>
+<li><a href="#api-gateway" data-page="api-gateway"><span class="nav-subtitle">Stage 6</span><span class="nav-title">API Gateway</span></a></li>
+      </ul>
+    </section>
+<section class="nav-section" data-layer="3">
+      <h2 class="nav-heading">Layer 3 — Caching & Delivery</h2>
+      <ul>
+        <li><a href="#http-cache-layer" data-page="http-cache-layer"><span class="nav-subtitle">Stage 7</span><span class="nav-title">HTTP Cache Layer</span></a></li>
+<li><a href="#cdn" data-page="cdn"><span class="nav-subtitle">Stage 8</span><span class="nav-title">Content Delivery</span></a></li>
+<li><a href="#key-value-store" data-page="key-value-store"><span class="nav-subtitle">Stage 9</span><span class="nav-title">Key-Value Store</span></a></li>
+      </ul>
+    </section>
+<section class="nav-section" data-layer="4">
+      <h2 class="nav-heading">Layer 4 — Reliability</h2>
+      <ul>
+        <li><a href="#metrics-collector" data-page="metrics-collector"><span class="nav-subtitle">Stage 10</span><span class="nav-title">Metrics Collector</span></a></li>
+<li><a href="#distributed-tracing" data-page="distributed-tracing"><span class="nav-subtitle">Stage 11</span><span class="nav-title">Distributed Tracing</span></a></li>
+<li><a href="#circuit-breaker" data-page="circuit-breaker"><span class="nav-subtitle">Stage 12</span><span class="nav-title">Circuit Breaker</span></a></li>
+      </ul>
+    </section>
+<section class="nav-section" data-layer="5">
+      <h2 class="nav-heading">Layer 5 — Data & Storage</h2>
+      <ul>
+        <li><a href="#write-ahead-log" data-page="write-ahead-log"><span class="nav-subtitle">Stage 13</span><span class="nav-title">Write-Ahead Log</span></a></li>
+<li><a href="#message-queue" data-page="message-queue"><span class="nav-subtitle">Stage 14</span><span class="nav-title">Message Queue</span></a></li>
+<li><a href="#object-storage" data-page="object-storage"><span class="nav-subtitle">Stage 15</span><span class="nav-title">Object Storage</span></a></li>
+      </ul>
+    </section></nav>
+    </aside>
+    <main class="main"><article class="page" id="page-curriculum" data-page="curriculum" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Tiny Internet</p>
+        <h1>Overview</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#curriculum/curriculum-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-4-reverse-proxy">Stage 4 · Reverse proxy</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-5-load-balancing">Stage 5 · Load balancing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-6-api-gateway">Stage 6 · API gateway</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-7-http-cache-layer">Stage 7 · HTTP cache layer</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-8-content-delivery">Stage 8 · Content delivery</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-9-key-value-store">Stage 9 · Key-value store</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-10-metrics-collector">Stage 10 · Metrics collector</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-11-distributed-tracing">Stage 11 · Distributed tracing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-12-circuit-breaker">Stage 12 · Circuit breaker</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-13-write-ahead-log">Stage 13 · Write-ahead log</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-14-message-queue">Stage 14 · Message queue</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-15-object-storage">Stage 15 · Object storage</a></li></ul></nav>
+        <div class="page-content prose"><h1 id="curriculum-tiny-internet---build-path">Tiny Internet - Build Path</h1>
+<p>You are going to build a tiny web platform from scratch and run it across three physical computers.</p>
+<p>There is no framework, no cloud platform, no managed database, no CDN, and no observability service hiding underneath it.</p>
+<p>You implement the infrastructure yourself, one layer at a time.</p>
+<p>At first the system can barely communicate.</p>
+<p>By the end it serves a website, distributes traffic across machines, survives node failures, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.</p>
+<p>Each layer exists because the system needs it.</p>
+<p><strong>Start here:</strong> <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/dns/"><code>packages/dns/</code></a>.</p>
+<hr />
+<h2 id="curriculum-the-machines">The machines</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Node</th>
+<th>Starting role</th>
+</tr></thead><tbody>
+<tr>
+<td>ALPHA</td>
+<td>Names and front door: DNS, then proxy and load balancer</td>
+</tr>
+<tr>
+<td>BRAVO</td>
+<td>Web backend: HTTP server, then cache</td>
+</tr>
+<tr>
+<td>CHARLIE</td>
+<td>Web backend: HTTP server, then cache</td>
+</tr>
+</tbody></table></div>
+<p>Roles are a starting point.</p>
+<p>Any node must eventually be allowed to disappear without taking the website with it.</p>
+<p>The nodes do not have to be Raspberry Pis.</p>
+<p>They have to be separate machines on a real network, where pulling a power cable is a valid test.</p>
+<hr />
+<h2 id="curriculum-the-product">The product</h2>
+<p>The platform serves <code>pi.world</code>, a site about the platform itself.</p>
+<p>The site grows with the infrastructure.</p>
+<p>Do not build the site up front.</p>
+<p>Each stage below unlocks the next thing the site can honestly show.</p>
+<div class="table-wrap"><table>
+<thead><tr>
+<th>Page</th>
+<th>Needs</th>
+</tr></thead><tbody>
+<tr>
+<td><code>/</code></td>
+<td>HTTP server</td>
+</tr>
+<tr>
+<td><code>/status</code></td>
+<td>Metrics, health checks</td>
+</tr>
+<tr>
+<td><code>/requests</code></td>
+<td>Load balancer, request logging</td>
+</tr>
+<tr>
+<td><code>/metrics</code></td>
+<td>Metrics collector</td>
+</tr>
+<tr>
+<td><code>/events</code></td>
+<td>Message queue</td>
+</tr>
+<tr>
+<td><code>/architecture</code></td>
+<td>Tracing</td>
+</tr>
+<tr>
+<td><code>/lab</code></td>
+<td>Everything, plus nerve</td>
+</tr>
+</tbody></table></div>
+<hr />
+<h2 id="curriculum-methodology---guided-spec">Methodology - Guided Spec</h2>
+<p>For each stage, you receive a <strong>guided spec</strong> rather than implementation code: enough detail to know what to build and how to verify it, but the design and implementation decisions belong to you.</p>
+<p>Each build step includes:</p>
+<ul>
+<li><strong>Goal</strong> - what this step accomplishes in one sentence</li>
+<li><strong>Inputs &amp; outputs</strong> - data shapes, not code</li>
+<li><strong>Key questions</strong> - things to answer before writing a line</li>
+<li><strong>Done when</strong> - a checklist verifiable with a real tool or console output</li>
+<li><strong>Watch out</strong> - the one thing that most commonly trips people up</li>
+</ul>
+<p>Each stage also answers one question: <strong>what does this component enable in the platform?</strong></p>
+<p>If a component does not enable anything, it does not belong in the build path yet.</p>
+<p>When you get stuck on a specific bug, concept, or decision between approaches, bring it to Claude and work through it together.</p>
+<p>Implementation code is not volunteered unprompted.</p>
+<hr />
+<h2 id="curriculum-rules">Rules</h2>
+<p><strong>Write the code by hand.</strong> That is the point of the project.</p>
+<p><strong>Do not use a library to solve the thing this stage is meant to teach.</strong></p>
+<p>OS primitives are fine: sockets, filesystem, processes, threads, timers.</p>
+<p>Express is not an HTTP server you built. Redis is not a key-value store you built.</p>
+<p><strong>Keep scope bounded.</strong> You are not recreating production systems.</p>
+<p>You are understanding one deeply enough to build a small working version and watch it behave in a real environment.</p>
+<p><strong>Let failure be real.</strong> Physical failure is part of the project, not something to mock away.</p>
+<hr />
+<h2 id="curriculum-stage-0---network">Stage 0 - Network</h2>
+<p>Three machines that can reach each other, with fixed addresses, SSH access, and a way to run a process on each one.</p>
+<p><strong>Enables:</strong> everything.</p>
+<p><strong>Done when:</strong> you can <code>ssh bravo</code> from ALPHA, and a process on ALPHA can open a socket to a process on CHARLIE.</p>
+<hr />
+<h2 id="curriculum-layer-1---networking-fundamentals">Layer 1 - Networking Fundamentals</h2>
+<p>Turn three addressable machines into something that can serve a page.</p>
+<h3 id="curriculum-stage-1-naming"><a href="#dns-resolver">Stage 1 · Naming</a></h3>
+<p>Build the naming system for your tiny internet.</p>
+<p><strong>Enables:</strong> <code>pi.world</code>, <code>alpha.pi.world</code>, <code>bravo.pi.world</code>, <code>charlie.pi.world</code>. Nothing later has to hardcode an IP address.</p>
+<h3 id="curriculum-stage-2-transport"><a href="#tcp-server">Stage 2 · Transport</a></h3>
+<p>Build the transport mechanism that lets the machines communicate.</p>
+<p><strong>Enables:</strong> every service above this line. Connections, backpressure, and the failure modes you will spend the rest of the project handling.</p>
+<h3 id="curriculum-stage-3-http"><a href="#http-server">Stage 3 · HTTP</a></h3>
+<p>Build the first thing a person can see.</p>
+<p><strong>Enables:</strong> <code>pi.world/</code> serves a static page from BRAVO. The project becomes visible to someone who is not you.</p>
+<hr />
+<h2 id="curriculum-layer-2---traffic-routing">Layer 2 - Traffic &amp; Routing</h2>
+<p>Make the website a property of the cluster instead of a property of one machine.</p>
+<h3 id="curriculum-stage-4-reverse-proxy"><a href="#reverse-proxy">Stage 4 · Reverse proxy</a></h3>
+<p>Put something in front of the backends.</p>
+<p><strong>Enables:</strong> one public entry point on ALPHA. Backends stop being directly addressable.</p>
+<h3 id="curriculum-stage-5-load-balancing"><a href="#load-balancer">Stage 5 · Load balancing</a></h3>
+<p>Spread traffic across BRAVO and CHARLIE, and notice when one stops answering.</p>
+<p><strong>Enables:</strong> the defining moment. The page says <code>Served by BRAVO</code>. You shut BRAVO down. The page says <code>Served by CHARLIE</code>.</p>
+<h3 id="curriculum-stage-6-api-gateway"><a href="#api-gateway">Stage 6 · API gateway</a></h3>
+<p>Give the front door policy: routing rules, rate limits, auth boundaries.</p>
+<p><strong>Enables:</strong> <code>/api/*</code> on the site can be treated differently from static pages.</p>
+<hr />
+<h2 id="curriculum-layer-3---caching-content-delivery">Layer 3 - Caching &amp; Content Delivery</h2>
+<p>Make the system fast, and make its speed observable.</p>
+<h3 id="curriculum-stage-7-http-cache-layer"><a href="#http-cache-layer">Stage 7 · HTTP cache layer</a></h3>
+<p>Cache expensive responses at the edge.</p>
+<p><strong>Enables:</strong> the site reports its own cache behavior - <code>MISS origin: bravo 42ms</code>, then <code>HIT age: 1.2s 0.7ms</code>.</p>
+<h3 id="curriculum-stage-8-content-delivery"><a href="#cdn">Stage 8 · Content delivery</a></h3>
+<p>Treat the three nodes as content locations and decide where content lives.</p>
+<p><strong>Enables:</strong> experiments with placement, invalidation, and what &quot;close to the user&quot; means when the user is in the next room.</p>
+<h3 id="curriculum-stage-9-key-value-store"><a href="#key-value-store">Stage 9 · Key-value store</a></h3>
+<p>Build the storage engine the cache and the app both need.</p>
+<p><strong>Enables:</strong> shared state across nodes instead of per-node memory.</p>
+<hr />
+<h2 id="curriculum-layer-4---reliability-observability">Layer 4 - Reliability &amp; Observability</h2>
+<p>Find out what your tiny internet is actually doing, then make it survive.</p>
+<h3 id="curriculum-stage-10-metrics-collector"><a href="#metrics-collector">Stage 10 · Metrics collector</a></h3>
+<p>Count and time everything.</p>
+<p><strong>Enables:</strong> <code>/metrics</code> and <code>/status</code>. <code>http_requests_total</code>, <code>http_request_duration_ms</code>, <code>cache_hits_total</code>, <code>active_connections</code>.</p>
+<h3 id="curriculum-stage-11-distributed-tracing"><a href="#distributed-tracing">Stage 11 · Distributed tracing</a></h3>
+<p>Follow one request across every machine it touched.</p>
+<p><strong>Enables:</strong> <code>/architecture</code> shows a live request path - DNS, proxy, cache, backend, storage, with a duration on each hop.</p>
+<h3 id="curriculum-stage-12-circuit-breaker"><a href="#circuit-breaker">Stage 12 · Circuit breaker</a></h3>
+<p>Stop sending traffic to a backend that is hurting.</p>
+<p><strong>Enables:</strong> degraded-but-alive behavior instead of cascading failure. Makes <code>/lab</code> survivable.</p>
+<hr />
+<h2 id="curriculum-layer-5---data-storage">Layer 5 - Data &amp; Storage</h2>
+<p>Give the system memory.</p>
+<h3 id="curriculum-stage-13-write-ahead-log"><a href="#write-ahead-log">Stage 13 · Write-ahead log</a></h3>
+<p>Make writes survive a process that dies mid-write.</p>
+<p><strong>Enables:</strong> kill a node during a write, restart it, verify the data is intact.</p>
+<h3 id="curriculum-stage-14-message-queue"><a href="#message-queue">Stage 14 · Message queue</a></h3>
+<p>Decouple request handling from request processing.</p>
+<p><strong>Enables:</strong> <code>/events</code>. HTTP request goes to a queue, an analytics consumer drains it, the database records it, and none of that slows down the page.</p>
+<h3 id="curriculum-stage-15-object-storage"><a href="#object-storage">Stage 15 · Object storage</a></h3>
+<p>Store the blobs the site serves.</p>
+<p><strong>Enables:</strong> static assets and uploads that live in the cluster rather than on one node's disk.</p>
+<hr />
+<h2 id="curriculum-do-not-design-the-whole-thing-first">Do not design the whole thing first</h2>
+<p>The stage list above is a direction, not an architecture.</p>
+<p>Build the smallest thing that works, then let the next problem force the next piece of infrastructure.</p>
+<p>Discovering *why* a system is built the way it is - by hitting the problem it solves - is the point.</p>
+<p>If you reach a stage and the system does not yet need it, skip it.</p>
+<p>If the system needs something not on this list, build that instead.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-dns-resolver" data-page="dns-resolver" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 1</p>
+        <h1>Naming</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#dns-resolver/dns-resolver-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-1---parse-a-response">Step 1 - Parse a response</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-2---send-a-raw-udp-dns-query">Step 2 - Send a raw UDP DNS query</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-3---walk-the-hierarchy-iterative-resolution">Step 3 - Walk the hierarchy (iterative resolution)</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-4---add-a-ttl-aware-cache">Step 4 - Add a TTL-aware cache</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-5---answer-authoritatively-for-piworld">Step 5 - Answer authoritatively for `pi.world`</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-6---make-it-the-platforms-resolver">Step 6 - Make it the platform's resolver</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="dns-resolver-stage-1-naming">Stage 1 · Naming</h3>
+<blockquote><p>Build the naming system for your tiny internet.</p></blockquote>
+<p><strong>In the platform:</strong> Nothing in the platform should hardcode an IP address. This stage gives you <code>pi.world</code>, <code>alpha.pi.world</code>, <code>bravo.pi.world</code>, and <code>charlie.pi.world</code>, so every later layer can refer to a node by name and keep working when that node's address changes.</p>
+<p><strong>Scope:</strong> enough DNS to authoritatively answer for your own zone and to resolve names outside it. Not a production resolver.</p>
+<p>*Formerly: DNS Resolver.*</p>
+<p><strong>Recommended stack:</strong> Node.js (built-in <code>dgram</code> for UDP)</p>
+<h4 id="dns-resolver-step-1---parse-a-response">Step 1 - Parse a response</h4>
+<p><strong>Goal:</strong> Decode a raw response buffer into a structured JavaScript object.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: raw response Buffer</li>
+<li>Output: <code>{ id, flags, questions: [...], answers: [{ name, type, class, ttl, rdata }], ... }</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you read a 16-bit big-endian integer from a Buffer at a given offset?</li>
+<li>What is DNS message compression, and how does a pointer (0xC0 prefix) work?</li>
+<li>How many answer records does the ANCOUNT field tell you to expect?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Querying <code>example.com</code> returns at least one answer with <code>type: &quot;A&quot;</code> and a valid IPv4 address string</li>
+<li>You can also parse the TTL as a number (seconds)</li>
+</ul>
+<p><strong>Watch out:</strong> DNS name compression uses 2-byte pointers that jump to an earlier offset in the *same packet*. If you parse names linearly without following pointers, you'll get garbage for most real-world responses.</p>
+<hr />
+<h4 id="dns-resolver-step-2---send-a-raw-udp-dns-query">Step 2 - Send a raw UDP DNS query</h4>
+<p><strong>Goal:</strong> Construct a valid DNS query packet by hand and send it to a public resolver.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a domain name string (e.g. <code>&quot;example.com&quot;</code>) and a record type (<code>A</code>)</li>
+<li>Output: a raw UDP response buffer from <code>8.8.8.8:53</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the wire format of a DNS message? (RFC 1035 §4)</li>
+<li>What fields live in the header, and what are their sizes in bits?</li>
+<li>How is a domain name encoded as a sequence of labels?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>You can send a query and <code>console.log</code> a non-empty Buffer back</li>
+<li>The first two bytes of the response match the ID you sent</li>
+</ul>
+<p><strong>Watch out:</strong> DNS labels are length-prefixed, not dot-separated on the wire. <code>example.com</code> becomes <code>\x07example\x03com\x00</code> - the trailing null byte is required.</p>
+<hr />
+<h4 id="dns-resolver-step-3---walk-the-hierarchy-iterative-resolution">Step 3 - Walk the hierarchy (iterative resolution)</h4>
+<p><strong>Goal:</strong> Resolve a domain from the root servers down without relying on a forwarder.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: domain name string</li>
+<li>Output: resolved IP address(es), reached via root → TLD → authoritative nameserver</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What are the root server IP addresses, and where do you hardcode them?</li>
+<li>What response code and section tell you to follow a referral vs. accept a final answer?</li>
+<li>What is the difference between a REFERRAL (no answer, authority section populated) and a NOERROR with answers?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Running your resolver against <code>dig</code> output for the same domain produces identical A records</li>
+<li>The console shows each hop: root → TLD nameserver → authoritative nameserver → answer</li>
+</ul>
+<p><strong>Watch out:</strong> Authoritative servers often return glue records (A records for the nameservers themselves) in the Additional section. If you ignore those, you'll have to do an extra lookup just to contact the nameserver - follow the glue when it's present.</p>
+<hr />
+<h4 id="dns-resolver-step-4---add-a-ttl-aware-cache">Step 4 - Add a TTL-aware cache</h4>
+<p><strong>Goal:</strong> Cache resolved records and serve them from cache until TTL expires.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a query for a domain you've already resolved</li>
+<li>Output: cached answer with remaining TTL (not the original TTL)</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Should you store the absolute expiry timestamp or the original TTL? Which makes remaining-TTL calculation easier?</li>
+<li>What is your cache key? Just the domain, or domain + record type?</li>
+<li>What should happen on a cache miss after the TTL expires?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A second query for the same domain returns instantly and logs <code>[cache hit]</code></li>
+<li>After waiting for the TTL to expire (test with a low-TTL domain), the next query triggers a fresh lookup</li>
+<li>The returned TTL decrements correctly across repeated queries</li>
+</ul>
+<p><strong>Watch out:</strong> Store the expiry time (<code>Date.now() + ttl * 1000</code>), not the original TTL. Returning a stale TTL value on cache hits is a common off-by-one that violates RFC 1035 §3.2.1.</p>
+<hr />
+<h4 id="dns-resolver-step-5---answer-authoritatively-for-piworld">Step 5 - Answer authoritatively for <code>pi.world</code></h4>
+<p><strong>Goal:</strong> Stop being only a client. Listen on port 53 and answer queries for your own zone.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: an inbound query packet for <code>pi.world</code>, <code>alpha.pi.world</code>, <code>bravo.pi.world</code>, or <code>charlie.pi.world</code></li>
+<li>Output: a response packet carrying the A records for your nodes, with AA set</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Which header bits change between a query and a response, and which one claims authority?</li>
+<li>Where does the zone data live - hardcoded, a file, or something a node can update when its address changes?</li>
+<li>What do you return for a name in your zone that does not exist, versus a name outside your zone entirely?</li>
+<li>Port 53 is privileged. How will you run this on the Pi - root, <code>CAP_NET_BIND_SERVICE</code>, or a high port plus a redirect?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>dig @alpha.local bravo.pi.world</code> returns the right A record with the <code>aa</code> flag set</li>
+<li><code>dig @alpha.local nope.pi.world</code> returns NXDOMAIN, not an empty NOERROR</li>
+<li>Pointing your laptop's resolver at ALPHA lets you <code>ping charlie.pi.world</code> with no <code>/etc/hosts</code> entry</li>
+</ul>
+<p><strong>Watch out:</strong> A name that does not exist is NXDOMAIN. A name that exists with no record of the requested type is NOERROR with zero answers. Getting these backwards makes clients retry in ways that are confusing to debug later.</p>
+<hr />
+<h4 id="dns-resolver-step-6---make-it-the-platforms-resolver">Step 6 - Make it the platform's resolver</h4>
+<p><strong>Goal:</strong> Run it as a real service on ALPHA, and let the rest of the network use it.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: every DNS query from your laptop and from the other two nodes</li>
+<li>Output: authoritative answers for <code>pi.world</code>, resolved answers for everything else</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What happens to the rest of the platform when ALPHA's DNS process dies? Is that acceptable yet?</li>
+<li>Should nodes query you over UDP only? What makes a response too large for UDP, and what does a client do about it?</li>
+<li>How do you keep the service running across a reboot, and how do you see its logs?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Your laptop is configured to use ALPHA as its resolver and normal web browsing still works</li>
+<li>BRAVO and CHARLIE resolve each other by name through your server</li>
+<li>You reboot ALPHA and DNS comes back without you starting it by hand</li>
+</ul>
+<p><strong>Watch out:</strong> The moment your laptop depends on this for all DNS, a bug in it takes your internet down, not just your project. Keep a second resolver configured, and know how to switch back.</p>
+<hr />
+<p><strong>Next:</strong> the names resolve, but nothing answers on the other end yet. <a href="#">Stage 2 · Transport</a>.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-tcp-server" data-page="tcp-server" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 2</p>
+        <h1>Transport</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#tcp-server/tcp-server-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-1---accept-connections-and-echo-data">Step 1 - Accept connections and echo data</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-2---implement-a-length-prefixed-framing-protocol">Step 2 - Implement a length-prefixed framing protocol</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-3---handle-connection-lifecycle-and-backpressure">Step 3 - Handle connection lifecycle and backpressure</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="tcp-server-stage-2-transport">Stage 2 · Transport</h3>
+<blockquote><p>Build the transport mechanism that lets the machines communicate.</p></blockquote>
+<p><strong>In the platform:</strong> Every service above this line rides on it. The connection lifecycle, framing, and backpressure you work out here are the same failure modes you will be handling for the rest of the project.</p>
+<p><strong>Scope:</strong> a socket server you can reason about and build a protocol on top of. You are using the OS TCP stack, not writing one.</p>
+<p>*Formerly: TCP Server.*</p>
+<p><strong>Recommended stack:</strong> Node.js (<code>net</code> module)</p>
+<h4 id="tcp-server-step-1---accept-connections-and-echo-data">Step 1 - Accept connections and echo data</h4>
+<p><strong>Goal:</strong> Open a TCP socket, accept client connections, and echo back whatever bytes arrive.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: raw bytes from a <code>telnet</code> or <code>nc</code> client</li>
+<li>Output: the same bytes written back to the same socket</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the difference between a listening socket and a connection socket?</li>
+<li>What events does a <code>net.Server</code> and a <code>net.Socket</code> emit in Node.js?</li>
+<li>What does it mean for TCP to be a *stream* protocol - why can't you assume each <code>data</code> event is one &quot;message&quot;?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>echo &quot;hello&quot; | nc localhost 3000</code> prints <code>hello</code> back</li>
+<li>Multiple simultaneous <code>nc</code> sessions each get their own echo (connections are isolated)</li>
+</ul>
+<p><strong>Watch out:</strong> TCP is a byte stream. A single <code>write(&quot;hello world&quot;)</code> from the client may arrive as two separate <code>data</code> events: <code>&quot;hello &quot;</code> and <code>&quot;world&quot;</code>. Never treat one event as one message.</p>
+<hr />
+<h4 id="tcp-server-step-2---implement-a-length-prefixed-framing-protocol">Step 2 - Implement a length-prefixed framing protocol</h4>
+<p><strong>Goal:</strong> Define an application-level message boundary so you can send and receive complete messages reliably.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a message string from the client, prefixed with a 4-byte big-endian length header</li>
+<li>Output: the parsed message string (no length prefix) logged on the server; echoed back with a new length prefix</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you handle the case where a <code>data</code> event delivers only part of a length header?</li>
+<li>Where do you store the incomplete buffer across events?</li>
+<li>How many bytes should you wait for before attempting to parse a message?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Sending a 1 MB message arrives as exactly one complete parsed message, regardless of how TCP fragments it</li>
+<li>Your test client can send 1000 messages sequentially and the server processes all 1000 in order</li>
+</ul>
+<p><strong>Watch out:</strong> Buffer the incoming bytes in a per-connection accumulator. A common mistake is using a module-level buffer that gets mixed between connections.</p>
+<hr />
+<h4 id="tcp-server-step-3---handle-connection-lifecycle-and-backpressure">Step 3 - Handle connection lifecycle and backpressure</h4>
+<p><strong>Goal:</strong> Gracefully handle slow clients, half-closes, and connection errors without crashing.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a client that connects, sends some data, then closes - or drops without closing</li>
+<li>Output: clean resource cleanup; no lingering connections; no memory leaks</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the difference between <code>end</code> (half-close) and <code>destroy</code> (hard close)?</li>
+<li>How does <code>socket.write()</code> signal backpressure, and what should you do if it returns <code>false</code>?</li>
+<li>How do you detect a connection that has gone silent without sending a FIN?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>After 100 connect/disconnect cycles, your server's open connection count returns to 0</li>
+<li>A client that stops reading (blocked consumer) causes the server to pause sending, not crash</li>
+<li>A <code>socket.setTimeout()</code> correctly closes an idle connection after N seconds</li>
+</ul>
+<p><strong>Watch out:</strong> Forgetting to handle the <code>error</code> event on a socket will crash the process with an unhandled exception when a client resets the connection (RST packet).</p></div>
+      </div>
+    </article>
+<article class="page" id="page-http-server" data-page="http-server" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 3</p>
+        <h1>HTTP</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-server/http-server-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-4"><a href="#http-server/http-server-step-1---parse-a-raw-http-request">Step 1 - Parse a raw HTTP request</a></li><li class="depth-4"><a href="#http-server/http-server-step-2---send-valid-http-responses">Step 2 - Send valid HTTP responses</a></li><li class="depth-4"><a href="#http-server/http-server-step-3---implement-keep-alive-connection-reuse">Step 3 - Implement keep-alive connection reuse</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="http-server-stage-3-http">Stage 3 · HTTP</h3>
+<blockquote><p>Build the first thing a person can actually see.</p></blockquote>
+<p><strong>In the platform:</strong> This turns BRAVO into a web server and gives <code>pi.world/</code> a page to return. The platform stops being three processes talking to each other and becomes something you can open in a browser.</p>
+<p><strong>Scope:</strong> enough HTTP/1.1 to serve the site correctly to a real browser. No framework - you build this on your Stage 2 transport.</p>
+<p>*Formerly: HTTP/1.1 Server.*</p>
+<p><strong>Recommended stack:</strong> Node.js (built on your Stage 2 transport)</p>
+<h4 id="http-server-step-1---parse-a-raw-http-request">Step 1 - Parse a raw HTTP request</h4>
+<p><strong>Goal:</strong> Read the bytes off a TCP connection and parse them into a structured request object.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: raw HTTP/1.1 request bytes (e.g. from <code>curl --http1.1</code>)</li>
+<li>Output: <code>{ method, path, httpVersion, headers: Map, body: Buffer }</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Where does the request line end and the headers begin?</li>
+<li>How do you know when the headers are complete? (Hint: <code>\r\n\r\n</code>)</li>
+<li>How do you know how many body bytes to read? Which headers tell you?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl -v http://localhost:3000/hello</code> shows your parsed method (<code>GET</code>), path (<code>/hello</code>), and all headers logged on the server</li>
+<li>A POST with a body is parsed with the correct body content</li>
+</ul>
+<p><strong>Watch out:</strong> HTTP headers are terminated by <code>\r\n\r\n</code>, but TCP may deliver that sequence across multiple <code>data</code> events. Buffer until you see the terminator before parsing.</p>
+<hr />
+<h4 id="http-server-step-2---send-valid-http-responses">Step 2 - Send valid HTTP responses</h4>
+<p><strong>Goal:</strong> Write properly formatted HTTP/1.1 responses that browsers and <code>curl</code> accept.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a parsed request object and a desired response <code>{ statusCode, headers, body }</code></li>
+<li>Output: a raw HTTP response written to the socket</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the mandatory format of the status line?</li>
+<li>Which response headers are required for the client to correctly determine message length?</li>
+<li>When is <code>Content-Length</code> required, and when is <code>Transfer-Encoding: chunked</code> preferred?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl -i http://localhost:3000/</code> shows <code>HTTP/1.1 200 OK</code>, correct headers, and your body</li>
+<li>A browser can load a simple HTML page served by your server</li>
+</ul>
+<p><strong>Watch out:</strong> If you omit <code>Content-Length</code> and don't use chunked encoding, most clients will hang waiting for more data. Always signal message end.</p>
+<hr />
+<h4 id="http-server-step-3---implement-keep-alive-connection-reuse">Step 3 - Implement keep-alive connection reuse</h4>
+<p><strong>Goal:</strong> Serve multiple requests over a single TCP connection instead of closing after each one.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>Connection: keep-alive</code> header in the request</li>
+<li>Output: the connection stays open after the response; subsequent requests on the same socket are handled</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you know where one request ends and the next begins on the same socket?</li>
+<li>What should you do when a request includes <code>Connection: close</code>?</li>
+<li>How do you prevent a keep-alive connection from living forever?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl --http1.1 -v http://localhost:3000/ http://localhost:3000/about</code> shows both responses on a *single* TCP connection (look for &quot;Re-using existing connection&quot; in curl output)</li>
+<li>After an idle timeout, the server closes the connection and a new request opens a fresh one</li>
+</ul>
+<p><strong>Watch out:</strong> After sending a response, don't destroy the socket - return to the &quot;waiting for request&quot; state on the same socket. Destroying it is correct only for <code>Connection: close</code> or after the idle timeout fires.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-reverse-proxy" data-page="reverse-proxy" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 4</p>
+        <h1>Reverse Proxy</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#reverse-proxy/reverse-proxy-stage-4-reverse-proxy">Stage 4 · Reverse proxy</a></li><li class="depth-4"><a href="#reverse-proxy/reverse-proxy-step-1---http-request-forwarding-with-header-rewriting">Step 1 - HTTP request forwarding with header rewriting</a></li><li class="depth-4"><a href="#reverse-proxy/reverse-proxy-step-2---ssltls-termination">Step 2 - SSL/TLS termination</a></li><li class="depth-4"><a href="#reverse-proxy/reverse-proxy-step-3---virtual-host-routing">Step 3 - Virtual host routing</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="reverse-proxy-stage-4-reverse-proxy">Stage 4 · Reverse proxy</h3>
+<blockquote><p>Put something in front of the backends.</p></blockquote>
+<p><strong>In the platform:</strong> ALPHA becomes the single public entry point for <code>pi.world</code>. Backends stop being directly addressable, which is what makes the next stage - moving traffic between them - possible at all.</p>
+<p><strong>Scope:</strong> forwarding, header handling, and connection management for your own site.</p>
+<p>*Formerly: Reverse Proxy.*</p>
+<p><strong>Recommended stack:</strong> Node.js (<code>http</code>, <code>https</code>, <code>tls</code>)</p>
+<h4 id="reverse-proxy-step-1---http-request-forwarding-with-header-rewriting">Step 1 - HTTP request forwarding with header rewriting</h4>
+<p><strong>Goal:</strong> Accept a request, rewrite necessary headers, forward to an upstream, and return the upstream's response.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: client HTTP request with original <code>Host</code>, <code>Connection</code>, and other headers</li>
+<li>Output: forwarded request with <code>X-Forwarded-For</code>, <code>X-Forwarded-Proto</code>, and <code>Via</code> added; upstream response returned verbatim</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Which hop-by-hop headers (e.g. <code>Connection</code>, <code>Transfer-Encoding</code>) must be stripped before forwarding?</li>
+<li>How do you handle streaming response bodies without buffering them entirely in memory?</li>
+<li>What is the <code>Via</code> header and what format does it use?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl -H &quot;Host: myapp.local&quot; http://localhost:8080/</code> is forwarded to the correct upstream</li>
+<li>The upstream's access log shows the correct client IP in <code>X-Forwarded-For</code></li>
+<li>Large file downloads stream through without memory usage growing</li>
+</ul>
+<p><strong>Watch out:</strong> Don't forget to strip <code>Connection</code> and its nominated headers before forwarding. Passing <code>Connection: keep-alive</code> to some upstreams causes protocol errors.</p>
+<hr />
+<h4 id="reverse-proxy-step-2---ssltls-termination">Step 2 - SSL/TLS termination</h4>
+<p><strong>Goal:</strong> Accept HTTPS connections from clients, terminate TLS, and forward plain HTTP to upstream backends.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: HTTPS request (TLS) on port 443</li>
+<li>Output: decrypted HTTP request forwarded to upstream on port 80; upstream's HTTP response re-encrypted back to client</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you create a self-signed certificate for local testing?</li>
+<li>What Node.js APIs are used to create an HTTPS server vs. an HTTP server?</li>
+<li>What header should you set so the upstream knows the original protocol was HTTPS?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl -k https://localhost:8443/</code> returns the upstream's response</li>
+<li>The upstream receives <code>X-Forwarded-Proto: https</code></li>
+<li><code>openssl s_client -connect localhost:8443</code> shows your certificate in the handshake</li>
+</ul>
+<p><strong>Watch out:</strong> <code>https.createServer</code> needs <code>key</code> and <code>cert</code> options - the raw PEM strings, not file paths. Read the files and pass their contents.</p>
+<hr />
+<h4 id="reverse-proxy-step-3---virtual-host-routing">Step 3 - Virtual host routing</h4>
+<p><strong>Goal:</strong> Route requests to different upstreams based on the <code>Host</code> header.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a routing table mapping hostnames to upstream URLs: <code>{ &quot;api.local&quot;: &quot;http://localhost:3001&quot;, &quot;app.local&quot;: &quot;http://localhost:3002&quot; }</code></li>
+<li>Output: requests routed to the correct upstream; unrecognized hosts receive <code>502 Bad Gateway</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Where do you strip the port from the <code>Host</code> header before matching?</li>
+<li>How do you handle wildcard or prefix matching (e.g. <code>*.example.com</code>)?</li>
+<li>What response should an unrecognized host receive, and what body?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Requests with <code>Host: api.local</code> consistently reach the API upstream, and <code>Host: app.local</code> consistently reach the app upstream</li>
+<li>An unknown host returns <code>502</code> with a meaningful error body (not a silent connection close)</li>
+</ul>
+<p><strong>Watch out:</strong> <code>Host</code> headers include the port when it's non-standard (e.g. <code>api.local:8080</code>). Split on <code>:</code> and match on the hostname portion only.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-load-balancer" data-page="load-balancer" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 5</p>
+        <h1>Load Balancing</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#load-balancer/load-balancer-stage-5-load-balancing">Stage 5 · Load balancing</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-1---round-robin-request-forwarding">Step 1 - Round-robin request forwarding</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-2---least-connections-load-balancing">Step 2 - Least-connections load balancing</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-3---active-health-checks">Step 3 - Active health checks</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="load-balancer-stage-5-load-balancing">Stage 5 · Load balancing</h3>
+<blockquote><p>Spread traffic across BRAVO and CHARLIE, and notice when one stops answering.</p></blockquote>
+<p><strong>In the platform:</strong> This is the defining moment of the project. The page says <code>Served by BRAVO</code>. You <code>ssh bravo; sudo shutdown now</code>. The page says <code>Served by CHARLIE</code>. Health checking exists here because a real machine really went away.</p>
+<p><strong>Scope:</strong> balancing across two real backends with real health checks. Failure is physical, not simulated.</p>
+<p>*Formerly: Load Balancer.*</p>
+<p><strong>Recommended stack:</strong> Node.js (<code>http</code> or <code>net</code>)</p>
+<h4 id="load-balancer-step-1---round-robin-request-forwarding">Step 1 - Round-robin request forwarding</h4>
+<p><strong>Goal:</strong> Accept incoming HTTP requests and forward them to a rotating pool of backend servers.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: HTTP request from a client</li>
+<li>Output: the request proxied to one backend; the backend's response returned to the client</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you forward a request - do you open a new connection to the backend per request, or reuse connections?</li>
+<li>Which request headers must you pass through unchanged, and which should you add (e.g. <code>X-Forwarded-For</code>)?</li>
+<li>How do you pass the response status, headers, and body back to the original client?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Three backend servers started on ports 3001–3003 each respond with their own port number</li>
+<li>300 sequential requests distribute ~100 each to all three (verify with access logs)</li>
+</ul>
+<p><strong>Watch out:</strong> HTTP/1.1 <code>Host</code> header on the forwarded request must match what the backend expects. Forgetting to rewrite it breaks backends that do virtual hosting.</p>
+<hr />
+<h4 id="load-balancer-step-2---least-connections-load-balancing">Step 2 - Least-connections load balancing</h4>
+<p><strong>Goal:</strong> Route each new request to the backend with the fewest in-flight requests.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: incoming request + current in-flight count per backend</li>
+<li>Output: the chosen backend; count incremented on dispatch, decremented on response end</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Where do you track the in-flight count - in a module-level map, or on a backend object?</li>
+<li>When exactly do you decrement? On response <code>end</code>? On socket <code>close</code>? What about errors?</li>
+<li>What happens when all backends are tied? (Any tiebreak is valid - pick one and stick with it.)</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>With one slow backend (simulated with <code>setTimeout</code>), new requests avoid it and pile onto the faster backends</li>
+<li>After all in-flight requests complete, counts return to 0 for all backends</li>
+</ul>
+<p><strong>Watch out:</strong> Decrement the counter in a <code>finally</code>-equivalent handler that fires on *both* success and error. Missing the error path leaks the counter upward until that backend is never chosen again.</p>
+<hr />
+<h4 id="load-balancer-step-3---active-health-checks">Step 3 - Active health checks</h4>
+<p><strong>Goal:</strong> Periodically probe each backend and remove unhealthy ones from rotation until they recover.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a configurable probe interval and endpoint (e.g. <code>GET /health</code>)</li>
+<li>Output: backends marked healthy/unhealthy; unhealthy backends skipped during routing; re-added after N consecutive successes</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What constitutes &quot;unhealthy&quot;? HTTP 5xx? Connection refused? Timeout?</li>
+<li>How many consecutive failures before marking unhealthy, and how many successes to recover?</li>
+<li>What should happen to in-flight requests on a backend that just became unhealthy?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Killing a backend process causes it to drop from rotation within one probe interval</li>
+<li>Restarting the backend causes it to rejoin after N successful probes</li>
+<li>A client making continuous requests never sees an error response due to a downed backend (after the first probe cycle)</li>
+</ul>
+<p><strong>Watch out:</strong> Don't remove a backend from the pool mid-request. Mark it unhealthy so *new* requests skip it, but let in-flight requests complete (or fail naturally).</p></div>
+      </div>
+    </article>
+<article class="page" id="page-api-gateway" data-page="api-gateway" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 6</p>
+        <h1>API Gateway</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#api-gateway/api-gateway-stage-6-api-gateway">Stage 6 · API gateway</a></li><li class="depth-4"><a href="#api-gateway/api-gateway-step-1---request-routing-to-microservices">Step 1 - Request routing to microservices</a></li><li class="depth-4"><a href="#api-gateway/api-gateway-step-2---token-based-authentication-middleware">Step 2 - Token-based authentication middleware</a></li><li class="depth-4"><a href="#api-gateway/api-gateway-step-3---rate-limiting-per-client">Step 3 - Rate limiting per client</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="api-gateway-stage-6-api-gateway">Stage 6 · API gateway</h3>
+<blockquote><p>Give the front door policy.</p></blockquote>
+<p><strong>In the platform:</strong> The site's <code>/api/*</code> routes need to behave differently from its static pages - different rate limits, different auth, different backends. The gateway is where that policy lives instead of being scattered through each backend.</p>
+<p><strong>Scope:</strong> the routing and policy rules your own site needs. Build it when the site has API routes worth protecting.</p>
+<p>*Formerly: API Gateway.*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="api-gateway-step-1---request-routing-to-microservices">Step 1 - Request routing to microservices</h4>
+<p><strong>Goal:</strong> Match incoming request paths to backend services using a configurable routing table.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: incoming request + routing config like <code>[{ prefix: &quot;/users&quot;, upstream: &quot;http://localhost:3001&quot; }, ...]</code></li>
+<li>Output: request forwarded to the matching upstream; path prefix stripped or preserved per config</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Should prefix matching be first-match or longest-match wins? Why does it matter?</li>
+<li>Do you strip the matched prefix before forwarding (e.g. <code>/users/123</code> → <code>/123</code>) or pass it through?</li>
+<li>What happens when no route matches?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>GET /users/42</code> reaches the users service at <code>/42</code> (if stripping) or <code>/users/42</code> (if not)</li>
+<li><code>GET /orders/7</code> reaches the orders service</li>
+<li><code>GET /unknown</code> returns <code>404</code> from the gateway, not from any upstream</li>
+</ul>
+<p><strong>Watch out:</strong> A prefix <code>/api</code> will also match <code>/api-docs</code>. Match on <code>/api/</code> or check for exact segment boundaries to avoid this.</p>
+<hr />
+<h4 id="api-gateway-step-2---token-based-authentication-middleware">Step 2 - Token-based authentication middleware</h4>
+<p><strong>Goal:</strong> Validate a bearer token on every request before forwarding, and reject unauthorized requests.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>Authorization: Bearer &lt;token&gt;</code> header</li>
+<li>Output: validated identity object attached to the request context (forwarded as a header to the upstream); <code>401</code> on missing/invalid token</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Are you validating a JWT (verify signature + claims) or doing a lookup against a token store?</li>
+<li>What information should you forward to the upstream so it doesn't need to re-authenticate?</li>
+<li>What is the difference between 401 (unauthenticated) and 403 (unauthorized)?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A request with a valid token reaches the upstream and includes an <code>X-User-Id</code> (or similar) header</li>
+<li>A request with no token or an expired token returns <code>401</code> and never reaches the upstream</li>
+<li>Rotating the signing secret immediately invalidates all existing tokens</li>
+</ul>
+<p><strong>Watch out:</strong> If using JWTs, validate the <code>exp</code> claim - an expired but well-signed token must be rejected. Checking only the signature is not enough.</p>
+<hr />
+<h4 id="api-gateway-step-3---rate-limiting-per-client">Step 3 - Rate limiting per client</h4>
+<p><strong>Goal:</strong> Limit each client to N requests per time window using a sliding window or token bucket algorithm.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: incoming request + client identifier (IP, API key, or user ID)</li>
+<li>Output: request forwarded if within limit; <code>429 Too Many Requests</code> with <code>Retry-After</code> header if exceeded</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is your rate limit key? Per-IP, per-token, or per-user-ID?</li>
+<li>Fixed window vs. sliding window vs. token bucket - what are the trade-offs?</li>
+<li>Where do you store the counters? In-memory is fine for a single instance; what breaks at scale?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Sending 11 requests/second with a limit of 10/s causes the 11th to return <code>429</code></li>
+<li>The <code>Retry-After</code> header reflects the correct number of seconds until the window resets</li>
+<li>After the window resets, the client can make requests again without restarting the server</li>
+</ul>
+<p><strong>Watch out:</strong> Fixed windows have a burst problem at window boundaries - a client can fire 10 requests just before midnight and 10 more just after, effectively getting 20 in 2 seconds. Know this trade-off before defending your design.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-http-cache-layer" data-page="http-cache-layer" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 7</p>
+        <h1>HTTP Cache Layer</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-cache-layer/http-cache-layer-stage-7-http-cache-layer">Stage 7 · HTTP cache layer</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-1---generate-and-validate-etags">Step 1 - Generate and validate ETags</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-2---last-modified-and-conditional-range-requests">Step 2 - Last-Modified and conditional range requests</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-3---vary-header-and-content-negotiation-caching">Step 3 - Vary header and content negotiation caching</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="http-cache-layer-stage-7-http-cache-layer">Stage 7 · HTTP cache layer</h3>
+<blockquote><p>Cache expensive responses at the edge.</p></blockquote>
+<p><strong>In the platform:</strong> The site reports its own cache behavior. <code>/api/status</code> returns <code>MISS origin: bravo 42ms</code>, then on refresh <code>HIT age: 1.2s 0.7ms</code>. The optimization is only interesting because you can watch it work.</p>
+<p><strong>Scope:</strong> correct revalidation and expiry for your own responses. Correctness matters more than hit rate here.</p>
+<p>*Formerly: HTTP Cache Layer.*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="http-cache-layer-step-1---generate-and-validate-etags">Step 1 - Generate and validate ETags</h4>
+<p><strong>Goal:</strong> Compute a fingerprint for each response body and use it to avoid re-sending unchanged content.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: response body bytes</li>
+<li>Output: <code>ETag</code> header on the response; <code>304 Not Modified</code> (with no body) when a conditional GET matches</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you generate an ETag? (MD5, SHA-1, content length + mtime - pick one and know its trade-offs)</li>
+<li>What is the <code>If-None-Match</code> request header, and how do you validate it?</li>
+<li>What headers must you still include in a <code>304</code> response even though there's no body?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl -I http://localhost:3000/file.js</code> returns an <code>ETag</code> header</li>
+<li><code>curl -H 'If-None-Match: &lt;etag&gt;'</code> returns <code>304</code> with no body and the same <code>ETag</code></li>
+<li>Modifying the resource changes the <code>ETag</code> and the next conditional request returns <code>200</code></li>
+</ul>
+<p><strong>Watch out:</strong> A <code>304</code> response must still include <code>Cache-Control</code>, <code>ETag</code>, <code>Expires</code>, and <code>Vary</code> - the same headers you'd send on a <code>200</code>. Omitting them prevents the client from updating its cache metadata.</p>
+<hr />
+<h4 id="http-cache-layer-step-2---last-modified-and-conditional-range-requests">Step 2 - Last-Modified and conditional range requests</h4>
+<p><strong>Goal:</strong> Support time-based conditional requests using <code>Last-Modified</code> / <code>If-Modified-Since</code>.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>If-Modified-Since</code> header in a GET request</li>
+<li>Output: <code>304</code> if resource hasn't changed since that date; <code>200</code> with full body if it has</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What HTTP date format does <code>Last-Modified</code> use? (RFC 7231)</li>
+<li>What is the precedence rule when both <code>If-None-Match</code> and <code>If-Modified-Since</code> are present?</li>
+<li>How do you get the mtime of a file in Node.js, and how do you format it correctly?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl -z &quot;Thu, 01 Jan 2099 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>304</code></li>
+<li><code>curl -z &quot;Thu, 01 Jan 2000 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>200</code> with the full file</li>
+</ul>
+<p><strong>Watch out:</strong> HTTP dates use a specific format (<code>Mon, 02 Jan 2006 15:04:05 GMT</code>). JavaScript's <code>new Date().toUTCString()</code> is close but not always RFC 7231-compliant across environments. Use <code>toUTCString()</code> and verify the output format manually.</p>
+<hr />
+<h4 id="http-cache-layer-step-3---vary-header-and-content-negotiation-caching">Step 3 - Vary header and content negotiation caching</h4>
+<p><strong>Goal:</strong> Store and serve different cached variants of the same URL based on client capabilities.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: same URL requested by clients with different <code>Accept-Encoding</code> (gzip vs. identity)</li>
+<li>Output: <code>Vary: Accept-Encoding</code> on response; separate cache entries per encoding; correct variant served to each client</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you incorporate <code>Vary</code> fields into your cache key?</li>
+<li>What happens if you cache a gzip-encoded response and serve it to a client that doesn't accept gzip?</li>
+<li>Should you normalize <code>Accept-Encoding</code> values before using them as cache keys? Why?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A gzip-capable client receives the compressed variant; a non-gzip client receives the uncompressed variant, from the same cache</li>
+<li>Both variants are stored and retrieved independently without one overwriting the other</li>
+</ul>
+<p><strong>Watch out:</strong> <code>Accept-Encoding</code> values can be <code>gzip, deflate, br</code> in any order with varying quality values (<code>;q=0.9</code>). Normalize to a canonical form (e.g. sorted, lowercased, quality stripped) before hashing into your cache key.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-cdn" data-page="cdn" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 8</p>
+        <h1>Content Delivery</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#cdn/cdn-stage-8-content-delivery">Stage 8 · Content delivery</a></li><li class="depth-4"><a href="#cdn/cdn-step-1---cache-responses-from-the-origin">Step 1 - Cache responses from the origin</a></li><li class="depth-4"><a href="#cdn/cdn-step-2---respect-cache-control-directives">Step 2 - Respect Cache-Control directives</a></li><li class="depth-4"><a href="#cdn/cdn-step-3---ttl-expiry-and-origin-fallback">Step 3 - TTL expiry and origin fallback</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="cdn-stage-8-content-delivery">Stage 8 · Content delivery</h3>
+<blockquote><p>Treat the three nodes as content locations and decide where content lives.</p></blockquote>
+<p><strong>In the platform:</strong> With three machines holding content, you have to answer where a given object should live, who serves it, and what happens when it changes. <code>/architecture</code> can show the answer moving in real time.</p>
+<p><strong>Scope:</strong> placement, origin fallback, and invalidation across three nodes in one house. Not a global edge network.</p>
+<p>*Formerly: CDN (Content Delivery Simulation).*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="cdn-step-1---cache-responses-from-the-origin">Step 1 - Cache responses from the origin</h4>
+<p><strong>Goal:</strong> Forward a request to the origin server and store the response; serve subsequent requests from cache.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: HTTP request for a cacheable resource</li>
+<li>Output: on miss, fetch from origin and store; on hit, return stored response with <code>X-Cache: HIT</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What makes a response cacheable? Which HTTP methods and status codes qualify?</li>
+<li>What is your cache key? Just the path, or path + query string + <code>Vary</code> headers?</li>
+<li>Where do you store the cached response - in memory, on disk, or both?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>First request logs <code>[MISS]</code> and takes ≥50ms (simulate origin latency); second request logs <code>[HIT]</code> and takes &lt;5ms</li>
+<li><code>X-Cache: HIT</code> and <code>X-Cache: MISS</code> headers are set correctly on all responses</li>
+</ul>
+<p><strong>Watch out:</strong> The <code>Vary</code> header from the origin tells you which request headers affect the response (e.g. <code>Vary: Accept-Encoding</code>). Ignoring it means serving a gzipped response to a client that didn't ask for compression.</p>
+<hr />
+<h4 id="cdn-step-2---respect-cache-control-directives">Step 2 - Respect Cache-Control directives</h4>
+<p><strong>Goal:</strong> Honor <code>Cache-Control</code> headers from both the origin (response) and the client (request).</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: responses with <code>Cache-Control: max-age=N</code>, <code>no-store</code>, <code>private</code>, <code>no-cache</code>; requests with <code>Cache-Control: no-cache</code></li>
+<li>Output: correct caching behavior for each directive</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the difference between <code>no-cache</code> and <code>no-store</code>?</li>
+<li>What does <code>private</code> mean for a shared cache like a CDN?</li>
+<li>When a client sends <code>Cache-Control: no-cache</code>, what should your edge node do?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A response with <code>Cache-Control: no-store</code> is never stored</li>
+<li>A response with <code>Cache-Control: private</code> is served to the original client but not cached for others</li>
+<li>A client <code>no-cache</code> request causes revalidation with the origin even if a fresh cached copy exists</li>
+</ul>
+<p><strong>Watch out:</strong> <code>no-cache</code> does <strong>not</strong> mean &quot;don't cache&quot; - it means &quot;revalidate before serving from cache.&quot; Only <code>no-store</code> means don't cache at all. Swapping these is the most common CDN misconfiguration.</p>
+<hr />
+<h4 id="cdn-step-3---ttl-expiry-and-origin-fallback">Step 3 - TTL expiry and origin fallback</h4>
+<p><strong>Goal:</strong> Expire stale cache entries using <code>max-age</code> and re-fetch from origin; serve stale content if origin is unreachable.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a cached entry whose <code>max-age</code> has elapsed; optionally an unavailable origin</li>
+<li>Output: on expiry with reachable origin, fetch fresh copy; on expiry with unreachable origin, serve stale with <code>Warning: 110</code> header</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you calculate when a cached entry expires? (Creation time + <code>max-age</code>)</li>
+<li>What is <code>stale-while-revalidate</code>, and how would you implement it?</li>
+<li>What is the correct HTTP warning code for &quot;response is stale&quot;?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Waiting for <code>max-age</code> to expire causes the next request to fetch from origin (<code>[MISS]</code>)</li>
+<li>Stopping the origin server causes stale content to be served with the correct <code>Warning</code> header, rather than a <code>502</code></li>
+</ul>
+<p><strong>Watch out:</strong> Clock skew between your server and the client can cause entries to expire too early or too late. Use the origin's <code>Date</code> response header as the reference point for age calculations, not your local clock at store time.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-key-value-store" data-page="key-value-store" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 9</p>
+        <h1>Key-Value Store</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#key-value-store/key-value-store-stage-9-key-value-store">Stage 9 · Key-value store</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-1---core-getsetdelete-operations">Step 1 - Core get/set/delete operations</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-2---ttl-expiry">Step 2 - TTL expiry</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-3---lru-eviction">Step 3 - LRU eviction</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="key-value-store-stage-9-key-value-store">Stage 9 · Key-value store</h3>
+<blockquote><p>Build the storage engine the cache and the app both need.</p></blockquote>
+<p><strong>In the platform:</strong> Per-node memory stops being enough once BRAVO and CHARLIE need to agree on something - a visitor count, a session, a cached object. This is the platform's first shared state.</p>
+<p><strong>Scope:</strong> a store your own services can depend on. Not Redis. Do not use Redis to build it.</p>
+<p>*Formerly: Key-Value Store.*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="key-value-store-step-1---core-getsetdelete-operations">Step 1 - Core get/set/delete operations</h4>
+<p><strong>Goal:</strong> Implement a simple in-memory key-value store with string keys and arbitrary value types.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>set(key, value)</code>, <code>get(key)</code>, <code>delete(key)</code> calls</li>
+<li>Output: stored/retrieved values; <code>null</code> for missing keys; <code>true</code>/<code>false</code> for delete</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What data structure backs the store? Plain object, <code>Map</code>, or something else?</li>
+<li>What value types will you support - strings only, or arbitrary serializable values?</li>
+<li>What is the return value of <code>get</code> on a missing key vs. a key explicitly set to <code>null</code>?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>10,000 sequential set/get/delete operations complete without errors</li>
+<li><code>get</code> on a deleted key returns <code>null</code>, not the previous value</li>
+<li>Keys with identical content but different types (e.g. <code>1</code> vs <code>&quot;1&quot;</code>) are handled predictably</li>
+</ul>
+<p><strong>Watch out:</strong> JavaScript object keys are always strings. If you use a plain object as your backing store, the integer key <code>1</code> and the string key <code>&quot;1&quot;</code> collide. Use <code>Map</code> to avoid this.</p>
+<hr />
+<h4 id="key-value-store-step-2---ttl-expiry">Step 2 - TTL expiry</h4>
+<p><strong>Goal:</strong> Allow keys to be set with an expiry time; return <code>null</code> for expired keys and clean them up.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>set(key, value, ttlSeconds)</code></li>
+<li>Output: <code>get</code> returns the value until TTL expires; returns <code>null</code> afterward</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Do you use <code>setTimeout</code> per key, a periodic sweep, or lazy expiry on <code>get</code>?</li>
+<li>What are the memory trade-offs of each approach?</li>
+<li>What happens to a key's TTL if you <code>set</code> it again without a TTL argument?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>set(&quot;x&quot;, 1, 1)</code> followed by a 1.1-second wait causes <code>get(&quot;x&quot;)</code> to return <code>null</code></li>
+<li><code>set(&quot;x&quot;, 2)</code> after expiry correctly stores the new value without TTL</li>
+<li>10,000 expired keys are eventually cleaned from memory (verify with <code>process.memoryUsage()</code>)</li>
+</ul>
+<p><strong>Watch out:</strong> One <code>setTimeout</code> per key sounds simple but creates memory pressure under high write volume. A lazy expiry check on <code>get</code> + periodic sweep is typically more efficient. Know the trade-off.</p>
+<hr />
+<h4 id="key-value-store-step-3---lru-eviction">Step 3 - LRU eviction</h4>
+<p><strong>Goal:</strong> Enforce a maximum capacity; when full, evict the least recently used key.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>new KVStore({ maxSize: N })</code>; <code>set</code> calls beyond capacity</li>
+<li>Output: the LRU key is evicted automatically; recently accessed keys survive eviction</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What data structure gives O(1) get/set/evict? (Hint: doubly linked list + hash map)</li>
+<li>Does a <code>get</code> access count as &quot;recently used&quot;?</li>
+<li>What happens when you <code>set</code> an existing key - does it move to the front?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>With <code>maxSize: 3</code>, setting a 4th key evicts the least-recently-used (not the least-recently-set) key</li>
+<li>A <code>get</code> access promotes a key so it is not the next to be evicted</li>
+<li>All operations remain O(1) - verified by timing 100,000 operations against 1000 operations and confirming linear (not quadratic) scaling</li>
+</ul>
+<p><strong>Watch out:</strong> JavaScript's <code>Map</code> preserves insertion order, which you can exploit to fake an LRU - but only if you delete and re-insert on every access. That's a valid approach, but understand its cost vs. a true doubly linked list implementation.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-metrics-collector" data-page="metrics-collector" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 10</p>
+        <h1>Metrics Collector</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#metrics-collector/metrics-collector-stage-10-metrics-collector">Stage 10 · Metrics collector</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-1---counter-and-gauge-primitives">Step 1 - Counter and gauge primitives</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-2---histogram-for-latency-tracking">Step 2 - Histogram for latency tracking</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-3---prometheus-compatible-scrape-endpoint">Step 3 - Prometheus-compatible scrape endpoint</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="metrics-collector-stage-10-metrics-collector">Stage 10 · Metrics collector</h3>
+<blockquote><p>Count and time everything.</p></blockquote>
+<p><strong>In the platform:</strong> This is what <code>/status</code> and <code>/metrics</code> display: <code>http_requests_total</code>, <code>http_request_duration_ms</code>, <code>http_errors_total</code>, <code>cache_hits_total</code>, <code>cache_misses_total</code>, <code>active_connections</code>. Until this exists, you are guessing about your own system.</p>
+<p><strong>Scope:</strong> collection, storage, and exposition for three nodes. Not Prometheus. Do not use Prometheus to build it.</p>
+<p>*Formerly: Metrics Collector.*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="metrics-collector-step-1---counter-and-gauge-primitives">Step 1 - Counter and gauge primitives</h4>
+<p><strong>Goal:</strong> Implement counter (monotonically increasing) and gauge (current value) metric types with label support.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>counter.increment({ method: &quot;GET&quot;, status: &quot;200&quot; })</code>, <code>gauge.set(42, { service: &quot;api&quot; })</code></li>
+<li>Output: current values accessible via <code>counter.get(labels)</code> and <code>gauge.get(labels)</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you store metrics with multi-dimensional labels? (A nested map keyed on label hashes?)</li>
+<li>What is the difference between a counter and a gauge? Can a counter decrease?</li>
+<li>How do you serialize a label set to a stable string key?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Two counters with different label sets are tracked independently</li>
+<li>Incrementing <code>{ method: &quot;GET&quot; }</code> does not affect <code>{ method: &quot;POST&quot; }</code></li>
+<li><code>counter.get({ method: &quot;GET&quot;, status: &quot;200&quot; })</code> returns the exact increment count</li>
+</ul>
+<p><strong>Watch out:</strong> Label key order matters for your cache key - <code>{a: 1, b: 2}</code> and <code>{b: 2, a: 1}</code> should map to the same metric. Sort label keys before serializing.</p>
+<hr />
+<h4 id="metrics-collector-step-2---histogram-for-latency-tracking">Step 2 - Histogram for latency tracking</h4>
+<p><strong>Goal:</strong> Record observations into configurable buckets; expose count, sum, and per-bucket totals.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>histogram.observe(durationMs, labels)</code> with predefined buckets e.g. <code>[10, 50, 100, 500, 1000]</code></li>
+<li>Output: <code>{ buckets: { &quot;10&quot;: N, &quot;50&quot;: N, ... }, sum, count }</code> per label set</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Are histogram buckets inclusive (<code>≤</code>) or exclusive (<code>&lt;</code>)? What does Prometheus use?</li>
+<li>How do you calculate the p95 from a histogram? (You can't exactly - explain why.)</li>
+<li>What is a cumulative histogram vs. a non-cumulative one?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>1000 observations distributed across buckets are counted correctly (verify by summing all observations)</li>
+<li>The <code>+Inf</code> bucket count equals the total observation count</li>
+<li><code>sum / count</code> gives the correct mean</li>
+</ul>
+<p><strong>Watch out:</strong> Prometheus histograms are *cumulative* - the <code>100ms</code> bucket counts all observations ≤100ms, not just those between 50ms and 100ms. If you implement non-cumulative buckets, your data will not be compatible with standard tooling.</p>
+<hr />
+<h4 id="metrics-collector-step-3---prometheus-compatible-scrape-endpoint">Step 3 - Prometheus-compatible scrape endpoint</h4>
+<p><strong>Goal:</strong> Expose all metrics in Prometheus text format at <code>GET /metrics</code>.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: HTTP GET <code>/metrics</code></li>
+<li>Output: Prometheus exposition format text: <code># HELP</code>, <code># TYPE</code>, and metric lines</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the Prometheus text format specification for counters, gauges, and histograms?</li>
+<li>What Content-Type header does Prometheus expect?</li>
+<li>How do you format label sets in the <code>{key=&quot;value&quot;}</code> syntax, including escaping?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl http://localhost:9090/metrics</code> returns parseable Prometheus text</li>
+<li>Pointing a real Prometheus instance (or <code>promtool check metrics</code>) at your endpoint reports no parse errors</li>
+<li>All three metric types render correctly with their <code># TYPE</code> annotations</li>
+</ul>
+<p><strong>Watch out:</strong> Label values containing <code>\</code>, <code>&quot;</code>, or <code>\n</code> must be escaped in the exposition format. Forgetting this causes parse failures that are difficult to diagnose.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-distributed-tracing" data-page="distributed-tracing" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 11</p>
+        <h1>Distributed Tracing</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#distributed-tracing/distributed-tracing-stage-11-distributed-tracing">Stage 11 · Distributed tracing</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-1---create-and-manage-spans">Step 1 - Create and manage spans</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-2---propagate-trace-context-across-async-operations">Step 2 - Propagate trace context across async operations</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-3---export-spans-in-otlpjson-format">Step 3 - Export spans in OTLP/JSON format</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="distributed-tracing-stage-11-distributed-tracing">Stage 11 · Distributed tracing</h3>
+<blockquote><p>Follow one request across every machine it touched.</p></blockquote>
+<p><strong>In the platform:</strong> Metrics tell you the platform is slow. Tracing tells you where. <code>/architecture</code> shows one request's real path: DNS, proxy, cache, backend, storage, with a duration on each hop.</p>
+<p><strong>Scope:</strong> context propagation and span collection across your own services.</p>
+<p>*Formerly: Distributed Tracing.*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="distributed-tracing-step-1---create-and-manage-spans">Step 1 - Create and manage spans</h4>
+<p><strong>Goal:</strong> Implement a span - a named, timed unit of work - with start/end timestamps and key-value attributes.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>tracer.startSpan(name, attributes?)</code>, followed by <code>span.end()</code></li>
+<li>Output: a completed span object: <code>{ traceId, spanId, name, startTime, endTime, duration, attributes }</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you generate a random 128-bit trace ID and 64-bit span ID? (hex strings are conventional)</li>
+<li>What timestamp resolution do you use - milliseconds or microseconds?</li>
+<li>What is the difference between a trace ID and a span ID?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Starting and ending a span produces a complete span object with non-zero duration</li>
+<li>Two spans started in the same &quot;request&quot; share the same <code>traceId</code> but have different <code>spanId</code>s</li>
+</ul>
+<p><strong>Watch out:</strong> Use <code>process.hrtime.bigint()</code> for nanosecond precision, not <code>Date.now()</code> which has millisecond resolution. High-frequency operations will otherwise show 0ms duration.</p>
+<hr />
+<h4 id="distributed-tracing-step-2---propagate-trace-context-across-async-operations">Step 2 - Propagate trace context across async operations</h4>
+<p><strong>Goal:</strong> Pass the active trace context through async call chains so child spans are linked to their parent.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a parent span; async child operations that should appear nested under it</li>
+<li>Output: each child span has a <code>parentSpanId</code> pointing to the parent; the complete tree is reconstructable</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you make the current span available inside async callbacks without passing it explicitly? (Hint: Node.js <code>AsyncLocalStorage</code>)</li>
+<li>What is <code>parentSpanId</code> and how does it link spans into a tree?</li>
+<li>How do you propagate context across an HTTP boundary? (W3C TraceContext: <code>traceparent</code> header)</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Three nested async operations produce three spans with correct <code>parentSpanId</code> linkages</li>
+<li>Reconstructing the tree from flat span data produces the correct hierarchy</li>
+</ul>
+<p><strong>Watch out:</strong> <code>AsyncLocalStorage</code> context does not automatically propagate into <code>EventEmitter</code> callbacks in all Node.js versions. Use <code>AsyncResource.bind()</code> for event listeners that need context.</p>
+<hr />
+<h4 id="distributed-tracing-step-3---export-spans-in-otlpjson-format">Step 3 - Export spans in OTLP/JSON format</h4>
+<p><strong>Goal:</strong> Batch completed spans and export them to a trace collector in a standard format.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: completed spans collected in memory</li>
+<li>Output: HTTP POST to a collector endpoint with OTLP-JSON payload; spans visible in Jaeger UI (or logged to stdout as valid OTLP JSON)</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the OTLP JSON schema for a <code>ResourceSpans</code> envelope?</li>
+<li>How do you batch spans - by count, by time interval, or both?</li>
+<li>What should happen to spans collected while the export is in-flight?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Spans exported to Jaeger (via its OTLP HTTP endpoint) are visible in the Jaeger UI with correct parent-child relationships</li>
+<li>If Jaeger is unavailable, spans are dropped gracefully (no crash, no retry storm)</li>
+</ul>
+<p><strong>Watch out:</strong> OTLP timestamps are in nanoseconds since Unix epoch as <code>fixed64</code> (or string in JSON mode). Sending milliseconds produces traces that appear to have occurred in 1970 in the Jaeger UI.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-circuit-breaker" data-page="circuit-breaker" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 12</p>
+        <h1>Circuit Breaker</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#circuit-breaker/circuit-breaker-stage-12-circuit-breaker">Stage 12 · Circuit breaker</a></li><li class="depth-4"><a href="#circuit-breaker/circuit-breaker-step-1---closed-and-open-states">Step 1 - Closed and open states</a></li><li class="depth-4"><a href="#circuit-breaker/circuit-breaker-step-2---half-open-state-and-recovery">Step 2 - Half-open state and recovery</a></li><li class="depth-4"><a href="#circuit-breaker/circuit-breaker-step-3---metrics-and-observability">Step 3 - Metrics and observability</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="circuit-breaker-stage-12-circuit-breaker">Stage 12 · Circuit breaker</h3>
+<blockquote><p>Stop sending traffic to a backend that is hurting.</p></blockquote>
+<p><strong>In the platform:</strong> A slow backend is worse than a dead one - it ties up connections everywhere upstream. The breaker is what lets the platform degrade instead of cascading, and it is what makes <code>/lab</code> survivable when you start injecting failure on purpose.</p>
+<p><strong>Scope:</strong> protecting your own calls between your own nodes.</p>
+<p>*Formerly: Circuit Breaker.*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="circuit-breaker-step-1---closed-and-open-states">Step 1 - Closed and open states</h4>
+<p><strong>Goal:</strong> Track failures against a threshold; trip to OPEN state and reject calls immediately when exceeded.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: wrapped function calls; some succeed, some throw errors</li>
+<li>Output: calls pass through in CLOSED state; <code>CircuitOpenError</code> thrown immediately in OPEN state without calling the wrapped function</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What counts as a failure? Any thrown error? Specific error types? Timeouts?</li>
+<li>What is your failure threshold - count, or percentage of recent calls?</li>
+<li>When the breaker trips OPEN, how long should it stay open before attempting recovery?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>After 5 consecutive failures, all subsequent calls throw <code>CircuitOpenError</code> without hitting the wrapped function</li>
+<li>A manual call count confirms zero calls to the wrapped function while OPEN</li>
+</ul>
+<p><strong>Watch out:</strong> Count *consecutive* failures, not total failures, unless you're implementing a sliding-window approach. A single success resetting a 4-failure count is typically the right behavior.</p>
+<hr />
+<h4 id="circuit-breaker-step-2---half-open-state-and-recovery">Step 2 - Half-open state and recovery</h4>
+<p><strong>Goal:</strong> After a timeout, allow a single test call through; recover to CLOSED on success, re-trip on failure.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: OPEN circuit after timeout elapses</li>
+<li>Output: exactly one call passes through in HALF-OPEN; success → CLOSED (counters reset); failure → back to OPEN</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you prevent multiple concurrent callers from all passing through in HALF-OPEN?</li>
+<li>What is the correct sequence of state transitions: CLOSED → OPEN → HALF-OPEN → CLOSED?</li>
+<li>Should you reset the failure counter on transition to HALF-OPEN, or only on transition to CLOSED?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>After the open timeout, exactly one call reaches the wrapped function</li>
+<li>A second concurrent call during HALF-OPEN receives <code>CircuitOpenError</code></li>
+<li>A successful probe transitions to CLOSED and subsequent calls all pass through</li>
+</ul>
+<p><strong>Watch out:</strong> Without a guard, 20 concurrent requests arriving during HALF-OPEN will all be let through at once, defeating the purpose. Use a flag (e.g. <code>probeSent</code>) to allow only the first.</p>
+<hr />
+<h4 id="circuit-breaker-step-3---metrics-and-observability">Step 3 - Metrics and observability</h4>
+<p><strong>Goal:</strong> Track state transitions and call outcomes; expose them for external monitoring.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: any call passing through the breaker</li>
+<li>Output: <code>{ state, totalCalls, successCount, failureCount, rejectedCount, lastStateChange }</code> from a <code>stats()</code> method</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Should stats be per-instance or global?</li>
+<li>How do you emit state change events so external systems can react (e.g. alert on trip)?</li>
+<li>What is a rolling window for counting failures, and why is it more useful than a total count?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>stats()</code> returns accurate counts after 100 mixed success/failure calls</li>
+<li>An <code>EventEmitter</code>-style <code>on('stateChange', handler)</code> fires on every CLOSED↔OPEN transition</li>
+<li>Stats reset correctly when the circuit recovers to CLOSED</li>
+</ul>
+<p><strong>Watch out:</strong> <code>rejectedCount</code> (calls blocked by an OPEN circuit) is a separate metric from <code>failureCount</code> (calls that reached the wrapped function and threw). Mixing them makes dashboards misleading.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-write-ahead-log" data-page="write-ahead-log" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 13</p>
+        <h1>Write-Ahead Log</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#write-ahead-log/write-ahead-log-stage-13-write-ahead-log">Stage 13 · Write-ahead log</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-1---append-entries-to-a-durable-log">Step 1 - Append entries to a durable log</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-2---replay-the-log-for-crash-recovery">Step 2 - Replay the log for crash recovery</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-3---log-compaction">Step 3 - Log compaction</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="write-ahead-log-stage-13-write-ahead-log">Stage 13 · Write-ahead log</h3>
+<blockquote><p>Make writes survive a process that dies mid-write.</p></blockquote>
+<p><strong>In the platform:</strong> This is the stage you validate by hand: start a write, kill the node, bring it back, and check that the data is intact and not half-written. The power cable is the test harness.</p>
+<p><strong>Scope:</strong> durability and recovery for your own store. Understand what <code>fsync</code> actually guarantees on your hardware.</p>
+<p>*Formerly: Write-Ahead Log.*</p>
+<p><strong>Recommended stack:</strong> Node.js (<code>fs</code> with <code>O_SYNC</code> or <code>fsync</code>)</p>
+<h4 id="write-ahead-log-step-1---append-entries-to-a-durable-log">Step 1 - Append entries to a durable log</h4>
+<p><strong>Goal:</strong> Write structured log entries to disk in a format that survives process crashes.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: arbitrary operation record <code>{ type, key, value }</code></li>
+<li>Output: entry written to log file with a length prefix and checksum; <code>fsync</code> called before returning</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What is the on-disk format of an entry? (Length prefix + payload + checksum is conventional)</li>
+<li>Why is <code>fsync</code> necessary, and what does it guarantee vs. what does <code>write</code> guarantee?</li>
+<li>How do you detect a partially written entry at recovery time?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Writing 1000 entries and killing the process mid-write produces a log where all complete entries are intact and the partial entry (if any) is detectable via checksum mismatch</li>
+</ul>
+<p><strong>Watch out:</strong> Node.js <code>fs.writeFile</code> does not call <code>fsync</code> by default - data may sit in the OS page cache and be lost on crash. Use <code>fs.open</code> with <code>O_SYNC</code> flag, or call <code>fs.fsync</code> explicitly after each write.</p>
+<hr />
+<h4 id="write-ahead-log-step-2---replay-the-log-for-crash-recovery">Step 2 - Replay the log for crash recovery</h4>
+<p><strong>Goal:</strong> On startup, read the log file sequentially and reconstruct in-memory state by replaying entries.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: existing log file on disk</li>
+<li>Output: in-memory key-value state identical to what it would be if the process had never crashed</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you handle a corrupted or truncated entry at the end of the log?</li>
+<li>In what order do you replay entries? Is replay idempotent?</li>
+<li>How do you know when you've reached the end of valid entries?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Write 500 entries, kill with <code>kill -9</code>, restart - in-memory state matches all successfully flushed entries</li>
+<li>A truncated final entry (simulate by truncating the file) is skipped without error</li>
+</ul>
+<p><strong>Watch out:</strong> Replay must apply entries in strict log order. If your in-memory state is not deterministic given the same log, recovery will produce inconsistent results.</p>
+<hr />
+<h4 id="write-ahead-log-step-3---log-compaction">Step 3 - Log compaction</h4>
+<p><strong>Goal:</strong> Collapse the full log history into a snapshot, discarding entries superseded by later writes.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: log file with 10,000 entries, many overwriting the same keys</li>
+<li>Output: compacted log (or snapshot file) containing only the latest value per key; old log truncated or replaced</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>When is it safe to compact? (Not mid-write - you need a quiescent point.)</li>
+<li>Do you compact in place or write a new file and atomically replace?</li>
+<li>How do you ensure the snapshot is complete before deleting the old log? (What if the process crashes mid-compaction?)</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>After 10,000 writes to 100 unique keys, compaction produces a file with exactly 100 entries</li>
+<li>Crash-recovery from the compacted log produces identical state to recovery from the full log</li>
+<li>A crash during compaction does not corrupt either the old or new log</li>
+</ul>
+<p><strong>Watch out:</strong> Write the new compacted file, fsync it, then atomically rename it over the old file. Never truncate the existing log in place - a crash mid-truncation leaves you with no log and no snapshot.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-message-queue" data-page="message-queue" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 14</p>
+        <h1>Message Queue</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#message-queue/message-queue-stage-14-message-queue">Stage 14 · Message queue</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-1---basic-publish-and-consume">Step 1 - Basic publish and consume</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-2---acknowledgement-and-redelivery">Step 2 - Acknowledgement and redelivery</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-3---dead-letter-queue">Step 3 - Dead-letter queue</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="message-queue-stage-14-message-queue">Stage 14 · Message queue</h3>
+<blockquote><p>Decouple request handling from request processing.</p></blockquote>
+<p><strong>In the platform:</strong> <code>/events</code> is backed by this. An HTTP request drops an event on a queue, a consumer drains it, the store records it - and none of that work happens while the visitor is waiting for the page.</p>
+<p><strong>Scope:</strong> a broker your own producers and consumers use. Not Kafka, and do not build it on a real broker.</p>
+<p>*Formerly: Message Queue.*</p>
+<p><strong>Recommended stack:</strong> Node.js</p>
+<h4 id="message-queue-step-1---basic-publish-and-consume">Step 1 - Basic publish and consume</h4>
+<p><strong>Goal:</strong> Implement a queue where producers enqueue messages and consumers dequeue them in FIFO order.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>queue.publish({ topic, payload })</code>; <code>queue.consume(topic, handler)</code></li>
+<li>Output: messages delivered to the handler in publish order; each message delivered to at most one consumer</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What data structure backs the queue? Array, linked list, or something else?</li>
+<li>With multiple consumers on the same topic, how do you ensure each message goes to exactly one?</li>
+<li>What happens if no consumer is registered when a message is published?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>1000 messages published to 3 competing consumers are each delivered exactly once (verified by summing consumer counts)</li>
+<li>Messages arrive at consumers in the order they were published</li>
+</ul>
+<p><strong>Watch out:</strong> If you call handlers synchronously within <code>publish</code>, a slow handler blocks the publisher. Deliver messages asynchronously (e.g. <code>setImmediate</code>) to decouple producer and consumer timing.</p>
+<hr />
+<h4 id="message-queue-step-2---acknowledgement-and-redelivery">Step 2 - Acknowledgement and redelivery</h4>
+<p><strong>Goal:</strong> Hold messages in an &quot;in-flight&quot; state until the consumer explicitly acknowledges them; redeliver if no ack arrives within a timeout.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>ack(messageId)</code> or <code>nack(messageId)</code> from consumer</li>
+<li>Output: acked messages removed from the queue; nacked messages returned to the head of the queue for redelivery</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you track which messages are in-flight and their delivery timestamps?</li>
+<li>What is your redelivery timeout, and how do you implement it without polling too frequently?</li>
+<li>What happens if a consumer dies without acking? How does the message get back?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A consumer that receives a message but never acks causes the message to be redelivered after the timeout</li>
+<li><code>nack</code> immediately returns the message to the queue for the next available consumer</li>
+<li><code>ack</code> removes the message permanently - no redelivery</li>
+</ul>
+<p><strong>Watch out:</strong> Redelivered messages must be marked with an <code>attempt</code> count. Without it, you can't distinguish a first delivery from a 50th, and you'll never know when to give up.</p>
+<hr />
+<h4 id="message-queue-step-3---dead-letter-queue">Step 3 - Dead-letter queue</h4>
+<p><strong>Goal:</strong> After N failed delivery attempts, route a message to a dead-letter queue instead of retrying indefinitely.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: a message that has been nacked (or not acked) more than <code>maxAttempts</code> times</li>
+<li>Output: message moved to <code>&lt;topic&gt;.dlq</code> with metadata: <code>{ originalTopic, attemptCount, lastFailureReason, firstPublishedAt }</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What triggers DLQ routing - exceeding max attempts, or explicit <code>nack</code> with a <code>reason</code>?</li>
+<li>Who consumes the DLQ, and what can they do with messages there?</li>
+<li>Should DLQ messages themselves be acked/nacked, or are they terminal?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A message nacked 3 times (with <code>maxAttempts: 3</code>) appears in the DLQ with correct metadata</li>
+<li>The original topic's queue is empty after DLQ routing</li>
+<li>A DLQ consumer can inspect and optionally replay messages to the original topic</li>
+</ul>
+<p><strong>Watch out:</strong> Don't route to the DLQ on the first nack. Give messages a fair number of attempts before giving up - set <code>maxAttempts</code> to at least 3 in your default config and make it configurable.</p></div>
+      </div>
+    </article>
+<article class="page" id="page-object-storage" data-page="object-storage" hidden>
+      <header class="page-header">
+        <p class="page-eyebrow">Stage 15</p>
+        <h1>Object Storage</h1>
+      </header>
+      <div class="page-layout">
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#object-storage/object-storage-stage-15-object-storage">Stage 15 · Object storage</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-1---put-and-get-objects">Step 1 - Put and Get objects</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-2---multipart-upload">Step 2 - Multipart upload</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-3---presigned-urls">Step 3 - Presigned URLs</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="object-storage-stage-15-object-storage">Stage 15 · Object storage</h3>
+<blockquote><p>Store the blobs the site serves.</p></blockquote>
+<p><strong>In the platform:</strong> Static assets and uploads stop living on one node's disk and start living in the cluster, which means they survive losing the node that received them.</p>
+<p><strong>Scope:</strong> storing and retrieving objects across your nodes. S3 compatibility is optional and only worth it if it teaches you something.</p>
+<p>*Formerly: Object Storage.*</p>
+<p><strong>Recommended stack:</strong> Node.js (<code>http</code>, <code>crypto</code>, <code>fs</code>)</p>
+<h4 id="object-storage-step-1---put-and-get-objects">Step 1 - Put and Get objects</h4>
+<p><strong>Goal:</strong> Implement <code>PUT /{bucket}/{key}</code> and <code>GET /{bucket}/{key}</code> over HTTP, storing objects on the local filesystem.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: HTTP PUT with object bytes in the body; HTTP GET for an existing key</li>
+<li>Output: stored file on disk with an MD5 ETag; GET returns file bytes with correct Content-Type and Content-Length</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>How do you map <code>bucket/key</code> to a filesystem path safely? (Prevent path traversal attacks)</li>
+<li>How do you compute and return the ETag? (MD5 of the object bytes, hex-encoded, quoted)</li>
+<li>What HTTP status codes do S3 use for PUT (201? 200?), GET-hit, and GET-miss?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li><code>curl -T file.txt http://localhost:3000/mybucket/myfile.txt</code> stores the file and returns an ETag</li>
+<li><code>curl http://localhost:3000/mybucket/myfile.txt</code> retrieves the original bytes exactly</li>
+<li><code>curl http://localhost:3000/mybucket/missing.txt</code> returns <code>404</code> with an XML error body</li>
+</ul>
+<p><strong>Watch out:</strong> S3 returns <code>200 OK</code> for PUT, not <code>201 Created</code>, and the ETag is the MD5 wrapped in double quotes (<code>&quot;d41d8cd98f00b204e9800998ecf8427e&quot;</code>). Matching this exactly matters for AWS SDK compatibility.</p>
+<hr />
+<h4 id="object-storage-step-2---multipart-upload">Step 2 - Multipart upload</h4>
+<p><strong>Goal:</strong> Allow large objects to be uploaded in parts, then assembled atomically.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>POST /{bucket}/{key}?uploads</code> → uploadId; <code>PUT /{bucket}/{key}?partNumber=N&amp;uploadId=X</code> for each part; <code>POST /{bucket}/{key}?uploadId=X</code> with part manifest to complete</li>
+<li>Output: parts stored temporarily; completed object assembled and stored as a single file</li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>Where do you store incomplete parts? In a temp directory keyed by <code>uploadId</code>?</li>
+<li>What is the minimum part size for all but the last part? (S3 enforces 5MB - do you?)</li>
+<li>How do you validate the part manifest? (Part numbers, ETags)</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>Uploading a 20MB file in 5MB parts (4 parts) produces an assembled object identical to uploading it in one PUT (verify with SHA-256 hash)</li>
+<li>Incomplete uploads (missing parts) return a descriptive error on complete</li>
+<li>A <code>DELETE /{bucket}/{key}?uploadId=X</code> cleans up partial parts</li>
+</ul>
+<p><strong>Watch out:</strong> Assemble parts by concatenating them in part-number order, not upload order. Clients may upload parts out of order.</p>
+<hr />
+<h4 id="object-storage-step-3---presigned-urls">Step 3 - Presigned URLs</h4>
+<p><strong>Goal:</strong> Generate time-limited, pre-authenticated URLs that allow third parties to GET or PUT objects without credentials.</p>
+<p><strong>Inputs &amp; outputs:</strong></p>
+<ul>
+<li>Input: <code>generatePresignedUrl({ bucket, key, method, expiresIn })</code> → URL with embedded signature and expiry</li>
+<li>Output: the URL, when requested within the expiry window, is served without any <code>Authorization</code> header; expired or tampered URLs return <code>403</code></li>
+</ul>
+<p><strong>Key questions:</strong></p>
+<ul>
+<li>What parameters must be signed? (Method, bucket, key, expiry timestamp, and your &quot;secret key&quot;)</li>
+<li>How do you embed and verify the expiry without trusting the client to send it unspoofed?</li>
+<li>What is the canonical string-to-sign, and why does order matter?</li>
+</ul>
+<p><strong>Done when:</strong></p>
+<ul>
+<li>A presigned GET URL works in a browser (no auth headers required)</li>
+<li>The same URL after <code>expiresIn</code> seconds returns <code>403 Forbidden</code></li>
+<li>Modifying any URL parameter (key, expiry, bucket) causes a <code>403</code> due to signature mismatch</li>
+</ul>
+<p><strong>Watch out:</strong> Include the expiry timestamp in the signed string - don't just check it separately. If the expiry is not part of the signature, a client can extend it by modifying the URL parameter without breaking the signature.</p></div>
+      </div>
+    </article></main>
+  </div>
+  <button class="mobile-toggle" id="menu-toggle" type="button" aria-label="Open navigation">Menu</button>
+  <script>
+    const pages = ["curriculum","dns-resolver","tcp-server","http-server","reverse-proxy","load-balancer","api-gateway","http-cache-layer","cdn","key-value-store","metrics-collector","distributed-tracing","circuit-breaker","write-ahead-log","message-queue","object-storage"];
+    const sidebar = document.getElementById("sidebar");
+    const menuToggle = document.getElementById("menu-toggle");
+    const themeToggle = document.getElementById("theme-toggle");
+
+    function setTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      localStorage.setItem("curriculum-theme", theme);
+    }
+
+    const savedTheme = localStorage.getItem("curriculum-theme");
+    if (savedTheme === "dark" || savedTheme === "light") {
+      setTheme(savedTheme);
+    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("dark");
+    }
+
+    themeToggle.addEventListener("click", () => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      setTheme(next);
+    });
+
+    menuToggle.addEventListener("click", () => sidebar.classList.toggle("open"));
+
+    function showPage(pageId, anchor) {
+      if (!pages.includes(pageId)) pageId = "curriculum";
+
+      document.querySelectorAll(".page").forEach((el) => {
+        el.hidden = el.dataset.page !== pageId;
+      });
+
+      document.querySelectorAll("[data-page]").forEach((link) => {
+        if (link.tagName === "A" && link.closest(".nav-section")) {
+          link.classList.toggle("active", link.dataset.page === pageId);
+        }
+      });
+
+      document.title = pageId === "curriculum"
+        ? "Tiny Internet"
+        : document.querySelector("#page-" + pageId + " .page-header h1").textContent + " · Tiny Internet";
+
+      sidebar.classList.remove("open");
+
+      if (anchor) {
+        requestAnimationFrame(() => {
+          const target = document.getElementById(anchor);
+          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
+    function parseHash() {
+      const raw = location.hash.replace(/^#/, "");
+      if (!raw) return { pageId: "curriculum", anchor: null };
+      const slash = raw.indexOf("/");
+      if (slash === -1) return { pageId: raw, anchor: null };
+      return { pageId: raw.slice(0, slash), anchor: raw.slice(slash + 1) };
+    }
+
+    window.addEventListener("hashchange", () => {
+      const { pageId, anchor } = parseHash();
+      showPage(pageId, anchor);
+    });
+
+    document.querySelectorAll(".nav-section a[data-page]").forEach((link) => {
+      link.addEventListener("click", () => sidebar.classList.remove("open"));
+    });
+
+    document.querySelectorAll(".page-toc a").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        location.hash = link.getAttribute("href").slice(1);
+      });
+    });
+
+    const initial = parseHash();
+    if (!location.hash) location.hash = "curriculum";
+    showPage(initial.pageId, initial.anchor);
+  </script>
+</body>
+</html>

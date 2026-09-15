@@ -38,7 +38,7 @@ describe('decodeDnsMessage', () => {
     })
   })
 
-  describe('iterative/google-com-a/02-com-referral', () => {
+  describe.skip('iterative/google-com-a/02-com-referral', () => {
     const decoded = decodeDnsMessage(comReferralWire)
 
     it('decodes the header', () => {

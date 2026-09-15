@@ -1,10 +1,16 @@
-### Project 2 · TCP Server
+### Stage 2 · Transport
 
-> Raw sockets, connection lifecycle, framing.
+> Build the transport mechanism that lets the machines communicate.
+
+**In the platform:** Every service above this line rides on it. The connection lifecycle, framing, and backpressure you work out here are the same failure modes you will be handling for the rest of the project.
+
+**Scope:** a socket server you can reason about and build a protocol on top of. You are using the OS TCP stack, not writing one.
+
+*Formerly: TCP Server.*
 
 **Recommended stack:** Node.js (`net` module)
 
-#### Step 1 — Accept connections and echo data
+#### Step 1 - Accept connections and echo data
 
 **Goal:** Open a TCP socket, accept client connections, and echo back whatever bytes arrive.
 
@@ -15,7 +21,7 @@
 **Key questions:**
 - What is the difference between a listening socket and a connection socket?
 - What events does a `net.Server` and a `net.Socket` emit in Node.js?
-- What does it mean for TCP to be a *stream* protocol — why can't you assume each `data` event is one "message"?
+- What does it mean for TCP to be a *stream* protocol - why can't you assume each `data` event is one "message"?
 
 **Done when:**
 - `echo "hello" | nc localhost 3000` prints `hello` back
@@ -25,7 +31,7 @@
 
 ---
 
-#### Step 2 — Implement a length-prefixed framing protocol
+#### Step 2 - Implement a length-prefixed framing protocol
 
 **Goal:** Define an application-level message boundary so you can send and receive complete messages reliably.
 
@@ -46,12 +52,12 @@
 
 ---
 
-#### Step 3 — Handle connection lifecycle and backpressure
+#### Step 3 - Handle connection lifecycle and backpressure
 
 **Goal:** Gracefully handle slow clients, half-closes, and connection errors without crashing.
 
 **Inputs & outputs:**
-- Input: a client that connects, sends some data, then closes — or drops without closing
+- Input: a client that connects, sends some data, then closes - or drops without closing
 - Output: clean resource cleanup; no lingering connections; no memory leaks
 
 **Key questions:**

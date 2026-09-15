@@ -1,10 +1,16 @@
-### Project 10 · Circuit Breaker
+### Stage 12 · Circuit breaker
 
-> Failure thresholds, half-open state, auto-recovery.
+> Stop sending traffic to a backend that is hurting.
+
+**In the platform:** A slow backend is worse than a dead one - it ties up connections everywhere upstream. The breaker is what lets the platform degrade instead of cascading, and it is what makes `/lab` survivable when you start injecting failure on purpose.
+
+**Scope:** protecting your own calls between your own nodes.
+
+*Formerly: Circuit Breaker.*
 
 **Recommended stack:** Node.js
 
-#### Step 1 — Closed and open states
+#### Step 1 - Closed and open states
 
 **Goal:** Track failures against a threshold; trip to OPEN state and reject calls immediately when exceeded.
 
@@ -14,7 +20,7 @@
 
 **Key questions:**
 - What counts as a failure? Any thrown error? Specific error types? Timeouts?
-- What is your failure threshold — count, or percentage of recent calls?
+- What is your failure threshold - count, or percentage of recent calls?
 - When the breaker trips OPEN, how long should it stay open before attempting recovery?
 
 **Done when:**
@@ -25,7 +31,7 @@
 
 ---
 
-#### Step 2 — Half-open state and recovery
+#### Step 2 - Half-open state and recovery
 
 **Goal:** After a timeout, allow a single test call through; recover to CLOSED on success, re-trip on failure.
 
@@ -47,7 +53,7 @@
 
 ---
 
-#### Step 3 — Metrics and observability
+#### Step 3 - Metrics and observability
 
 **Goal:** Track state transitions and call outcomes; expose them for external monitoring.
 

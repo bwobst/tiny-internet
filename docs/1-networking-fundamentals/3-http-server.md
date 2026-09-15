@@ -1,10 +1,16 @@
-### Project 3 · HTTP/1.1 Server
+### Stage 3 · HTTP
 
-> Parse requests, handle headers, keep-alive.
+> Build the first thing a person can actually see.
 
-**Recommended stack:** Node.js (built on your TCP server from Project 2)
+**In the platform:** This turns BRAVO into a web server and gives `pi.world/` a page to return. The platform stops being three processes talking to each other and becomes something you can open in a browser.
 
-#### Step 1 — Parse a raw HTTP request
+**Scope:** enough HTTP/1.1 to serve the site correctly to a real browser. No framework - you build this on your Stage 2 transport.
+
+*Formerly: HTTP/1.1 Server.*
+
+**Recommended stack:** Node.js (built on your Stage 2 transport)
+
+#### Step 1 - Parse a raw HTTP request
 
 **Goal:** Read the bytes off a TCP connection and parse them into a structured request object.
 
@@ -25,7 +31,7 @@
 
 ---
 
-#### Step 2 — Send valid HTTP responses
+#### Step 2 - Send valid HTTP responses
 
 **Goal:** Write properly formatted HTTP/1.1 responses that browsers and `curl` accept.
 
@@ -46,7 +52,7 @@
 
 ---
 
-#### Step 3 — Implement keep-alive connection reuse
+#### Step 3 - Implement keep-alive connection reuse
 
 **Goal:** Serve multiple requests over a single TCP connection instead of closing after each one.
 
@@ -63,4 +69,4 @@
 - `curl --http1.1 -v http://localhost:3000/ http://localhost:3000/about` shows both responses on a *single* TCP connection (look for "Re-using existing connection" in curl output)
 - After an idle timeout, the server closes the connection and a new request opens a fresh one
 
-**Watch out:** After sending a response, don't destroy the socket — return to the "waiting for request" state on the same socket. Destroying it is correct only for `Connection: close` or after the idle timeout fires.
+**Watch out:** After sending a response, don't destroy the socket - return to the "waiting for request" state on the same socket. Destroying it is correct only for `Connection: close` or after the idle timeout fires.

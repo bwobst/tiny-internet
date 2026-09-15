@@ -1,5 +1,5 @@
 {
-  "name": "web-internals-from-scratch",
+  "name": "tiny-internet",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r run typecheck"
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r run typecheck",
+    "docs:reader": "node scripts/build-curriculum-reader.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.0",

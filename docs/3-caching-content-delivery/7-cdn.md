@@ -1,10 +1,16 @@
-### Project 7 · CDN (Content Delivery Simulation)
+### Stage 8 · Content delivery
 
-> Edge caching, cache-control headers, origin fallback.
+> Treat the three nodes as content locations and decide where content lives.
+
+**In the platform:** With three machines holding content, you have to answer where a given object should live, who serves it, and what happens when it changes. `/architecture` can show the answer moving in real time.
+
+**Scope:** placement, origin fallback, and invalidation across three nodes in one house. Not a global edge network.
+
+*Formerly: CDN (Content Delivery Simulation).*
 
 **Recommended stack:** Node.js
 
-#### Step 1 — Cache responses from the origin
+#### Step 1 - Cache responses from the origin
 
 **Goal:** Forward a request to the origin server and store the response; serve subsequent requests from cache.
 
@@ -15,7 +21,7 @@
 **Key questions:**
 - What makes a response cacheable? Which HTTP methods and status codes qualify?
 - What is your cache key? Just the path, or path + query string + `Vary` headers?
-- Where do you store the cached response — in memory, on disk, or both?
+- Where do you store the cached response - in memory, on disk, or both?
 
 **Done when:**
 - First request logs `[MISS]` and takes ≥50ms (simulate origin latency); second request logs `[HIT]` and takes <5ms
@@ -25,7 +31,7 @@
 
 ---
 
-#### Step 2 — Respect Cache-Control directives
+#### Step 2 - Respect Cache-Control directives
 
 **Goal:** Honor `Cache-Control` headers from both the origin (response) and the client (request).
 
@@ -43,11 +49,11 @@
 - A response with `Cache-Control: private` is served to the original client but not cached for others
 - A client `no-cache` request causes revalidation with the origin even if a fresh cached copy exists
 
-**Watch out:** `no-cache` does **not** mean "don't cache" — it means "revalidate before serving from cache." Only `no-store` means don't cache at all. Swapping these is the most common CDN misconfiguration.
+**Watch out:** `no-cache` does **not** mean "don't cache" - it means "revalidate before serving from cache." Only `no-store` means don't cache at all. Swapping these is the most common CDN misconfiguration.
 
 ---
 
-#### Step 3 — TTL expiry and origin fallback
+#### Step 3 - TTL expiry and origin fallback
 
 **Goal:** Expire stale cache entries using `max-age` and re-fetch from origin; serve stale content if origin is unreachable.
 

@@ -1,10 +1,16 @@
-### Project 8 · HTTP Cache Layer
+### Stage 7 · HTTP cache layer
 
-> ETags, conditional requests, Vary header.
+> Cache expensive responses at the edge.
+
+**In the platform:** The site reports its own cache behavior. `/api/status` returns `MISS origin: bravo 42ms`, then on refresh `HIT age: 1.2s 0.7ms`. The optimization is only interesting because you can watch it work.
+
+**Scope:** correct revalidation and expiry for your own responses. Correctness matters more than hit rate here.
+
+*Formerly: HTTP Cache Layer.*
 
 **Recommended stack:** Node.js
 
-#### Step 1 — Generate and validate ETags
+#### Step 1 - Generate and validate ETags
 
 **Goal:** Compute a fingerprint for each response body and use it to avoid re-sending unchanged content.
 
@@ -13,7 +19,7 @@
 - Output: `ETag` header on the response; `304 Not Modified` (with no body) when a conditional GET matches
 
 **Key questions:**
-- How do you generate an ETag? (MD5, SHA-1, content length + mtime — pick one and know its trade-offs)
+- How do you generate an ETag? (MD5, SHA-1, content length + mtime - pick one and know its trade-offs)
 - What is the `If-None-Match` request header, and how do you validate it?
 - What headers must you still include in a `304` response even though there's no body?
 
@@ -22,11 +28,11 @@
 - `curl -H 'If-None-Match: <etag>'` returns `304` with no body and the same `ETag`
 - Modifying the resource changes the `ETag` and the next conditional request returns `200`
 
-**Watch out:** A `304` response must still include `Cache-Control`, `ETag`, `Expires`, and `Vary` — the same headers you'd send on a `200`. Omitting them prevents the client from updating its cache metadata.
+**Watch out:** A `304` response must still include `Cache-Control`, `ETag`, `Expires`, and `Vary` - the same headers you'd send on a `200`. Omitting them prevents the client from updating its cache metadata.
 
 ---
 
-#### Step 2 — Last-Modified and conditional range requests
+#### Step 2 - Last-Modified and conditional range requests
 
 **Goal:** Support time-based conditional requests using `Last-Modified` / `If-Modified-Since`.
 
@@ -47,7 +53,7 @@
 
 ---
 
-#### Step 3 — Vary header and content negotiation caching
+#### Step 3 - Vary header and content negotiation caching
 
 **Goal:** Store and serve different cached variants of the same URL based on client capabilities.
 

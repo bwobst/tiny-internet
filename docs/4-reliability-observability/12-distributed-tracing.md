@@ -1,12 +1,18 @@
-### Project 12 · Distributed Tracing
+### Stage 11 · Distributed tracing
 
-> Trace context propagation, spans, Jaeger-lite.
+> Follow one request across every machine it touched.
+
+**In the platform:** Metrics tell you the platform is slow. Tracing tells you where. `/architecture` shows one request's real path: DNS, proxy, cache, backend, storage, with a duration on each hop.
+
+**Scope:** context propagation and span collection across your own services.
+
+*Formerly: Distributed Tracing.*
 
 **Recommended stack:** Node.js
 
-#### Step 1 — Create and manage spans
+#### Step 1 - Create and manage spans
 
-**Goal:** Implement a span — a named, timed unit of work — with start/end timestamps and key-value attributes.
+**Goal:** Implement a span - a named, timed unit of work - with start/end timestamps and key-value attributes.
 
 **Inputs & outputs:**
 - Input: `tracer.startSpan(name, attributes?)`, followed by `span.end()`
@@ -14,7 +20,7 @@
 
 **Key questions:**
 - How do you generate a random 128-bit trace ID and 64-bit span ID? (hex strings are conventional)
-- What timestamp resolution do you use — milliseconds or microseconds?
+- What timestamp resolution do you use - milliseconds or microseconds?
 - What is the difference between a trace ID and a span ID?
 
 **Done when:**
@@ -25,7 +31,7 @@
 
 ---
 
-#### Step 2 — Propagate trace context across async operations
+#### Step 2 - Propagate trace context across async operations
 
 **Goal:** Pass the active trace context through async call chains so child spans are linked to their parent.
 
@@ -46,7 +52,7 @@
 
 ---
 
-#### Step 3 — Export spans in OTLP/JSON format
+#### Step 3 - Export spans in OTLP/JSON format
 
 **Goal:** Batch completed spans and export them to a trace collector in a standard format.
 
@@ -56,7 +62,7 @@
 
 **Key questions:**
 - What is the OTLP JSON schema for a `ResourceSpans` envelope?
-- How do you batch spans — by count, by time interval, or both?
+- How do you batch spans - by count, by time interval, or both?
 - What should happen to spans collected while the export is in-flight?
 
 **Done when:**

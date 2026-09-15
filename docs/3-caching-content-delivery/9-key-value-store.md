@@ -1,10 +1,16 @@
-### Project 9 · Key-Value Store
+### Stage 9 · Key-value store
 
-> LRU eviction, TTL expiry, Redis-lite from scratch.
+> Build the storage engine the cache and the app both need.
+
+**In the platform:** Per-node memory stops being enough once BRAVO and CHARLIE need to agree on something - a visitor count, a session, a cached object. This is the platform's first shared state.
+
+**Scope:** a store your own services can depend on. Not Redis. Do not use Redis to build it.
+
+*Formerly: Key-Value Store.*
 
 **Recommended stack:** Node.js
 
-#### Step 1 — Core get/set/delete operations
+#### Step 1 - Core get/set/delete operations
 
 **Goal:** Implement a simple in-memory key-value store with string keys and arbitrary value types.
 
@@ -14,7 +20,7 @@
 
 **Key questions:**
 - What data structure backs the store? Plain object, `Map`, or something else?
-- What value types will you support — strings only, or arbitrary serializable values?
+- What value types will you support - strings only, or arbitrary serializable values?
 - What is the return value of `get` on a missing key vs. a key explicitly set to `null`?
 
 **Done when:**
@@ -26,7 +32,7 @@
 
 ---
 
-#### Step 2 — TTL expiry
+#### Step 2 - TTL expiry
 
 **Goal:** Allow keys to be set with an expiry time; return `null` for expired keys and clean them up.
 
@@ -48,7 +54,7 @@
 
 ---
 
-#### Step 3 — LRU eviction
+#### Step 3 - LRU eviction
 
 **Goal:** Enforce a maximum capacity; when full, evict the least recently used key.
 
@@ -59,11 +65,11 @@
 **Key questions:**
 - What data structure gives O(1) get/set/evict? (Hint: doubly linked list + hash map)
 - Does a `get` access count as "recently used"?
-- What happens when you `set` an existing key — does it move to the front?
+- What happens when you `set` an existing key - does it move to the front?
 
 **Done when:**
 - With `maxSize: 3`, setting a 4th key evicts the least-recently-used (not the least-recently-set) key
 - A `get` access promotes a key so it is not the next to be evicted
-- All operations remain O(1) — verified by timing 100,000 operations against 1000 operations and confirming linear (not quadratic) scaling
+- All operations remain O(1) - verified by timing 100,000 operations against 1000 operations and confirming linear (not quadratic) scaling
 
-**Watch out:** JavaScript's `Map` preserves insertion order, which you can exploit to fake an LRU — but only if you delete and re-insert on every access. That's a valid approach, but understand its cost vs. a true doubly linked list implementation.
+**Watch out:** JavaScript's `Map` preserves insertion order, which you can exploit to fake an LRU - but only if you delete and re-insert on every access. That's a valid approach, but understand its cost vs. a true doubly linked list implementation.

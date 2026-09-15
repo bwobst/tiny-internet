@@ -1,10 +1,16 @@
-### Project 6 · API Gateway
+### Stage 6 · API gateway
 
-> Rate limiting, auth, routing to microservices.
+> Give the front door policy.
+
+**In the platform:** The site's `/api/*` routes need to behave differently from its static pages - different rate limits, different auth, different backends. The gateway is where that policy lives instead of being scattered through each backend.
+
+**Scope:** the routing and policy rules your own site needs. Build it when the site has API routes worth protecting.
+
+*Formerly: API Gateway.*
 
 **Recommended stack:** Node.js
 
-#### Step 1 — Request routing to microservices
+#### Step 1 - Request routing to microservices
 
 **Goal:** Match incoming request paths to backend services using a configurable routing table.
 
@@ -26,7 +32,7 @@
 
 ---
 
-#### Step 2 — Token-based authentication middleware
+#### Step 2 - Token-based authentication middleware
 
 **Goal:** Validate a bearer token on every request before forwarding, and reject unauthorized requests.
 
@@ -44,11 +50,11 @@
 - A request with no token or an expired token returns `401` and never reaches the upstream
 - Rotating the signing secret immediately invalidates all existing tokens
 
-**Watch out:** If using JWTs, validate the `exp` claim — an expired but well-signed token must be rejected. Checking only the signature is not enough.
+**Watch out:** If using JWTs, validate the `exp` claim - an expired but well-signed token must be rejected. Checking only the signature is not enough.
 
 ---
 
-#### Step 3 — Rate limiting per client
+#### Step 3 - Rate limiting per client
 
 **Goal:** Limit each client to N requests per time window using a sliding window or token bucket algorithm.
 
@@ -58,7 +64,7 @@
 
 **Key questions:**
 - What is your rate limit key? Per-IP, per-token, or per-user-ID?
-- Fixed window vs. sliding window vs. token bucket — what are the trade-offs?
+- Fixed window vs. sliding window vs. token bucket - what are the trade-offs?
 - Where do you store the counters? In-memory is fine for a single instance; what breaks at scale?
 
 **Done when:**
@@ -66,4 +72,4 @@
 - The `Retry-After` header reflects the correct number of seconds until the window resets
 - After the window resets, the client can make requests again without restarting the server
 
-**Watch out:** Fixed windows have a burst problem at window boundaries — a client can fire 10 requests just before midnight and 10 more just after, effectively getting 20 in 2 seconds. Know this trade-off before defending your design.
+**Watch out:** Fixed windows have a burst problem at window boundaries - a client can fire 10 requests just before midnight and 10 more just after, effectively getting 20 in 2 seconds. Know this trade-off before defending your design.

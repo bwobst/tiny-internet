@@ -1,6 +1,10 @@
 # @dns
 
-DNS learning utilities — wire-format parsing, capture scripts, and (eventually) a recursive resolver.
+The naming layer of [Tiny Internet](../../README.md).
+
+This package answers authoritatively for the `pi.world` zone and resolves everything else, so no other part of the platform has to hardcode an IP address. It runs on ALPHA.
+
+Spec: [Stage 1 · Naming](../../docs/1-networking-fundamentals/1-dns-resolver.md).
 
 ## Scripts
 
@@ -14,7 +18,7 @@ pnpm --filter @dns test:coverage       # this package, with coverage
 pnpm --filter @dns test:watch          # watch mode
 ```
 
-Tests live next to source as `*.test.ts`. Step 1 **Done when** criteria belong in `src/wire-format-parser/index.test.ts` (see curriculum spec).
+Tests live next to source as `*.test.ts`. Step 1 **Done when** criteria belong in `src/wire-format-parser/index.test.ts` (see the stage spec).
 
 ### One-time script execution
 

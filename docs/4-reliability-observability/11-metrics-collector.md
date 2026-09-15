@@ -1,10 +1,16 @@
-### Project 11 · Metrics Collector
+### Stage 10 · Metrics collector
 
-> Counters, histograms, scraping, time-series storage.
+> Count and time everything.
+
+**In the platform:** This is what `/status` and `/metrics` display: `http_requests_total`, `http_request_duration_ms`, `http_errors_total`, `cache_hits_total`, `cache_misses_total`, `active_connections`. Until this exists, you are guessing about your own system.
+
+**Scope:** collection, storage, and exposition for three nodes. Not Prometheus. Do not use Prometheus to build it.
+
+*Formerly: Metrics Collector.*
 
 **Recommended stack:** Node.js
 
-#### Step 1 — Counter and gauge primitives
+#### Step 1 - Counter and gauge primitives
 
 **Goal:** Implement counter (monotonically increasing) and gauge (current value) metric types with label support.
 
@@ -22,11 +28,11 @@
 - Incrementing `{ method: "GET" }` does not affect `{ method: "POST" }`
 - `counter.get({ method: "GET", status: "200" })` returns the exact increment count
 
-**Watch out:** Label key order matters for your cache key — `{a: 1, b: 2}` and `{b: 2, a: 1}` should map to the same metric. Sort label keys before serializing.
+**Watch out:** Label key order matters for your cache key - `{a: 1, b: 2}` and `{b: 2, a: 1}` should map to the same metric. Sort label keys before serializing.
 
 ---
 
-#### Step 2 — Histogram for latency tracking
+#### Step 2 - Histogram for latency tracking
 
 **Goal:** Record observations into configurable buckets; expose count, sum, and per-bucket totals.
 
@@ -36,7 +42,7 @@
 
 **Key questions:**
 - Are histogram buckets inclusive (`≤`) or exclusive (`<`)? What does Prometheus use?
-- How do you calculate the p95 from a histogram? (You can't exactly — explain why.)
+- How do you calculate the p95 from a histogram? (You can't exactly - explain why.)
 - What is a cumulative histogram vs. a non-cumulative one?
 
 **Done when:**
@@ -44,11 +50,11 @@
 - The `+Inf` bucket count equals the total observation count
 - `sum / count` gives the correct mean
 
-**Watch out:** Prometheus histograms are *cumulative* — the `100ms` bucket counts all observations ≤100ms, not just those between 50ms and 100ms. If you implement non-cumulative buckets, your data will not be compatible with standard tooling.
+**Watch out:** Prometheus histograms are *cumulative* - the `100ms` bucket counts all observations ≤100ms, not just those between 50ms and 100ms. If you implement non-cumulative buckets, your data will not be compatible with standard tooling.
 
 ---
 
-#### Step 3 — Prometheus-compatible scrape endpoint
+#### Step 3 - Prometheus-compatible scrape endpoint
 
 **Goal:** Expose all metrics in Prometheus text format at `GET /metrics`.
 

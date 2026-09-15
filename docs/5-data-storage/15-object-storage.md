@@ -1,10 +1,16 @@
-### Project 15 · Object Storage
+### Stage 15 · Object storage
 
-> S3-compatible API, multipart upload, presigned URLs.
+> Store the blobs the site serves.
+
+**In the platform:** Static assets and uploads stop living on one node's disk and start living in the cluster, which means they survive losing the node that received them.
+
+**Scope:** storing and retrieving objects across your nodes. S3 compatibility is optional and only worth it if it teaches you something.
+
+*Formerly: Object Storage.*
 
 **Recommended stack:** Node.js (`http`, `crypto`, `fs`)
 
-#### Step 1 — Put and Get objects
+#### Step 1 - Put and Get objects
 
 **Goal:** Implement `PUT /{bucket}/{key}` and `GET /{bucket}/{key}` over HTTP, storing objects on the local filesystem.
 
@@ -26,7 +32,7 @@
 
 ---
 
-#### Step 2 — Multipart upload
+#### Step 2 - Multipart upload
 
 **Goal:** Allow large objects to be uploaded in parts, then assembled atomically.
 
@@ -36,7 +42,7 @@
 
 **Key questions:**
 - Where do you store incomplete parts? In a temp directory keyed by `uploadId`?
-- What is the minimum part size for all but the last part? (S3 enforces 5MB — do you?)
+- What is the minimum part size for all but the last part? (S3 enforces 5MB - do you?)
 - How do you validate the part manifest? (Part numbers, ETags)
 
 **Done when:**
@@ -48,7 +54,7 @@
 
 ---
 
-#### Step 3 — Presigned URLs
+#### Step 3 - Presigned URLs
 
 **Goal:** Generate time-limited, pre-authenticated URLs that allow third parties to GET or PUT objects without credentials.
 
@@ -66,4 +72,4 @@
 - The same URL after `expiresIn` seconds returns `403 Forbidden`
 - Modifying any URL parameter (key, expiry, bucket) causes a `403` due to signature mismatch
 
-**Watch out:** Include the expiry timestamp in the signed string — don't just check it separately. If the expiry is not part of the signature, a client can extend it by modifying the URL parameter without breaking the signature.
+**Watch out:** Include the expiry timestamp in the signed string - don't just check it separately. If the expiry is not part of the signature, a client can extend it by modifying the URL parameter without breaking the signature.

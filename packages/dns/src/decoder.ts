@@ -125,35 +125,41 @@ const decodeResourceRecord = (
 const decodeDnsMessage = (buffer: Buffer): DnsMessageResponse => {
   const questions = decodeQuestions(buffer.subarray(HEADER_LENGTH))
 
-  const result = {
+  const result: DnsMessageResponse = {
     header: decodeHeader(buffer),
   }
 
   // On an invalid response, only the header is returned so only parse that
   if (buffer.length === HEADER_LENGTH) return result
 
-  return {
-    header: decodeHeader(buffer),
-    questions,
-    answers: [
+  result.questions = questions
+
+  result.answers = [
+    decodeResourceRecord(
+      buffer.subarray(HEADER_LENGTH + questions.totalLength),
+      buffer,
+    ),
+  ]
+
+  if (result.header.nscount > 0) {
+    result.authority = [
       decodeResourceRecord(
         buffer.subarray(HEADER_LENGTH + questions.totalLength),
         buffer,
       ),
-    ],
-    authority: [
-      decodeResourceRecord(
-        buffer.subarray(HEADER_LENGTH + questions.totalLength),
-        buffer,
-      ),
-    ],
-    additional: [
-      decodeResourceRecord(
-        buffer.subarray(HEADER_LENGTH + questions.totalLength),
-        buffer,
-      ),
-    ],
+    ]
   }
+
+  if (result.header.arcount > 0) {
+    result.additional = [
+      decodeResourceRecord(
+        buffer.subarray(HEADER_LENGTH + questions.totalLength),
+        buffer,
+      ),
+    ]
+  }
+
+  return result
 }
 
 export default decodeDnsMessage

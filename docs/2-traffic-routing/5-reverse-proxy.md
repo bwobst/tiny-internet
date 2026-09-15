@@ -1,10 +1,16 @@
-### Project 5 · Reverse Proxy
+### Stage 4 · Reverse proxy
 
-> Request forwarding, SSL termination, header rewriting.
+> Put something in front of the backends.
+
+**In the platform:** ALPHA becomes the single public entry point for `pi.world`. Backends stop being directly addressable, which is what makes the next stage - moving traffic between them - possible at all.
+
+**Scope:** forwarding, header handling, and connection management for your own site.
+
+*Formerly: Reverse Proxy.*
 
 **Recommended stack:** Node.js (`http`, `https`, `tls`)
 
-#### Step 1 — HTTP request forwarding with header rewriting
+#### Step 1 - HTTP request forwarding with header rewriting
 
 **Goal:** Accept a request, rewrite necessary headers, forward to an upstream, and return the upstream's response.
 
@@ -26,7 +32,7 @@
 
 ---
 
-#### Step 2 — SSL/TLS termination
+#### Step 2 - SSL/TLS termination
 
 **Goal:** Accept HTTPS connections from clients, terminate TLS, and forward plain HTTP to upstream backends.
 
@@ -44,11 +50,11 @@
 - The upstream receives `X-Forwarded-Proto: https`
 - `openssl s_client -connect localhost:8443` shows your certificate in the handshake
 
-**Watch out:** `https.createServer` needs `key` and `cert` options — the raw PEM strings, not file paths. Read the files and pass their contents.
+**Watch out:** `https.createServer` needs `key` and `cert` options - the raw PEM strings, not file paths. Read the files and pass their contents.
 
 ---
 
-#### Step 3 — Virtual host routing
+#### Step 3 - Virtual host routing
 
 **Goal:** Route requests to different upstreams based on the `Host` header.
 
