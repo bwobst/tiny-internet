@@ -1,0 +1,5 @@
+GET / HTTP/1.1
+Host: pi.world
+User-Agent: curl/8.0
+Accept: */*
+

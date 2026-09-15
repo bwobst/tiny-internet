@@ -569,7 +569,7 @@
 <p>By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.</p>
 <p>Each layer exists because the system needs it.</p>
 <p><strong>Start here:</strong> <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/dns/"><code>packages/dns/</code></a>.</p>
-<p>Stage files for 2-11 still use old names on disk.</p>
+<p>Stage files for 3-11 still use old names on disk.</p>
 <p>A later session rewrites them to this contract.</p>
 <p>Do not treat those files as the locked step lists.</p>
 <hr />
@@ -1300,95 +1300,44 @@ bravo.pi.world.		300	IN	A	10.53.0.11
         <h1>Transport</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#tcp-server/tcp-server-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-1---accept-connections-and-echo-data">Step 1 - Accept connections and echo data</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-2---implement-a-length-prefixed-framing-protocol">Step 2 - Implement a length-prefixed framing protocol</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-3---handle-connection-lifecycle-and-backpressure">Step 3 - Handle connection lifecycle and backpressure</a></li></ul></nav>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#tcp-server/tcp-server-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-1---accept-and-echo-across-nodes">Step 1 - Accept and echo across Nodes</a></li></ul></nav>
         <div class="page-content prose"><h3 id="tcp-server-stage-2-transport">Stage 2 · Transport</h3>
-<blockquote><p>Build the transport mechanism that lets the machines communicate.</p></blockquote>
-<p><strong>In the platform:</strong> Every service above this line rides on it. The connection lifecycle, framing, and backpressure you work out here are the same failure modes you will be handling for the rest of the project.</p>
-<p><strong>Scope:</strong> a socket server you can reason about and build a protocol on top of. You are using the OS TCP stack, not writing one.</p>
+<blockquote><p>Accept a TCP connection from another node and echo bytes back across it.</p></blockquote>
+<p><strong>Enables:</strong> ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.</p>
+<p><strong>Scope:</strong> a socket server on BRAVO that accepts a connection and echoes whatever bytes arrive. No framing, no backpressure handling, no application protocol on top.</p>
 <p>*Formerly: TCP Server.*</p>
-<p><strong>Recommended stack:</strong> Node.js (<code>net</code> module)</p>
-<h4 id="tcp-server-step-1---accept-connections-and-echo-data">Step 1 - Accept connections and echo data</h4>
-<p><strong>Goal:</strong> Open a TCP socket, accept client connections, and echo back whatever bytes arrive.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="tcp-server-step-1---accept-and-echo-across-nodes">Step 1 - Accept and echo across Nodes</h4>
+<p><strong>Goal:</strong> Listen on BRAVO, accept a connection from ALPHA, and echo back whatever bytes arrive.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: raw bytes from a <code>telnet</code> or <code>nc</code> client
+<li>Input: bytes written by a client into an accepted connection
 </li>
-<li>Output: the same bytes written back to the same socket
+<li>Output: the same bytes, written back on that same connection
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the difference between a listening socket and a connection socket?
+<li>What is the difference between a listening socket and a connection socket, and what has to exist on each side before bytes can flow?
 </li>
-<li>What events does a <code>net.Server</code> and a <code>net.Socket</code> emit in Node.js?
+<li>What does it mean for TCP to be a byte stream - why can't a receiver assume one write on one side arrives as exactly one read on the other?
 </li>
-<li>What does it mean for TCP to be a *stream* protocol - why can't you assume each <code>data</code> event is one &quot;message&quot;?
+<li>Which address does BRAVO bind to so a connection from ALPHA, not just from BRAVO itself, is accepted?
 </li>
 </ul>
+<p><strong>Watch out:</strong> Compose publishes BRAVO's port to the host on a different number than the port the server binds inside the container. A Sample run from another node's container uses the in-Node port; a Sample run from the laptop uses the published one.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="tcp-server-sample-1---accept-and-echo-across-nodes">Sample 1 - accept and echo across Nodes</h5>
+<pre><code>docker compose exec alpha sh -c &quot;printf 'hello bravo\n' | nc bravo 3000&quot;
+</code></pre>
+<pre><code>hello bravo
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>echo &quot;hello&quot; | nc localhost 3000</code> prints <code>hello</code> back
-</li>
-<li>Multiple simultaneous <code>nc</code> sessions each get their own echo (connections are isolated)
+<li>accept and echo across Nodes
 </li>
 </ul>
-<p><strong>Watch out:</strong> TCP is a byte stream. A single <code>write(&quot;hello world&quot;)</code> from the client may arrive as two separate <code>data</code> events: <code>&quot;hello &quot;</code> and <code>&quot;world&quot;</code>. Never treat one event as one message.</p>
 <hr />
-<h4 id="tcp-server-step-2---implement-a-length-prefixed-framing-protocol">Step 2 - Implement a length-prefixed framing protocol</h4>
-<p><strong>Goal:</strong> Define an application-level message boundary so you can send and receive complete messages reliably.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: a message string from the client, prefixed with a 4-byte big-endian length header
-</li>
-<li>Output: the parsed message string (no length prefix) logged on the server; echoed back with a new length prefix
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>How do you handle the case where a <code>data</code> event delivers only part of a length header?
-</li>
-<li>Where do you store the incomplete buffer across events?
-</li>
-<li>How many bytes should you wait for before attempting to parse a message?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Sending a 1 MB message arrives as exactly one complete parsed message, regardless of how TCP fragments it
-</li>
-<li>Your test client can send 1000 messages sequentially and the server processes all 1000 in order
-</li>
-</ul>
-<p><strong>Watch out:</strong> Buffer the incoming bytes in a per-connection accumulator. A common mistake is using a module-level buffer that gets mixed between connections.</p>
-<hr />
-<h4 id="tcp-server-step-3---handle-connection-lifecycle-and-backpressure">Step 3 - Handle connection lifecycle and backpressure</h4>
-<p><strong>Goal:</strong> Gracefully handle slow clients, half-closes, and connection errors without crashing.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: a client that connects, sends some data, then closes - or drops without closing
-</li>
-<li>Output: clean resource cleanup; no lingering connections; no memory leaks
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What is the difference between <code>end</code> (half-close) and <code>destroy</code> (hard close)?
-</li>
-<li>How does <code>socket.write()</code> signal backpressure, and what should you do if it returns <code>false</code>?
-</li>
-<li>How do you detect a connection that has gone silent without sending a FIN?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>After 100 connect/disconnect cycles, your server's open connection count returns to 0
-</li>
-<li>A client that stops reading (blocked consumer) causes the server to pause sending, not crash
-</li>
-<li>A <code>socket.setTimeout()</code> correctly closes an idle connection after N seconds
-</li>
-</ul>
-<p><strong>Watch out:</strong> Forgetting to handle the <code>error</code> event on a socket will crash the process with an unhandled exception when a client resets the connection (RST packet).</p></div>
+<p><strong>Next:</strong> bytes cross the network, but nothing above them understands a request yet. <a href="#http-server">Stage 3 · HTTP</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-http-server" data-page="http-server" hidden>
@@ -1397,93 +1346,142 @@ bravo.pi.world.		300	IN	A	10.53.0.11
         <h1>HTTP</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-server/http-server-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-4"><a href="#http-server/http-server-step-1---parse-a-raw-http-request">Step 1 - Parse a raw HTTP request</a></li><li class="depth-4"><a href="#http-server/http-server-step-2---send-valid-http-responses">Step 2 - Send valid HTTP responses</a></li><li class="depth-4"><a href="#http-server/http-server-step-3---implement-keep-alive-connection-reuse">Step 3 - Implement keep-alive connection reuse</a></li></ul></nav>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-server/http-server-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-4"><a href="#http-server/http-server-step-1---parse-a-request">Step 1 - Parse a request</a></li><li class="depth-4"><a href="#http-server/http-server-step-2---encode-a-response">Step 2 - Encode a response</a></li><li class="depth-4"><a href="#http-server/http-server-step-3---serve-piworld-on-bravo">Step 3 - Serve pi.world/ on BRAVO</a></li></ul></nav>
         <div class="page-content prose"><h3 id="http-server-stage-3-http">Stage 3 · HTTP</h3>
 <blockquote><p>Build the first thing a person can actually see.</p></blockquote>
-<p><strong>In the platform:</strong> This turns BRAVO into a web server and gives <code>pi.world/</code> a page to return. The platform stops being three processes talking to each other and becomes something you can open in a browser.</p>
-<p><strong>Scope:</strong> enough HTTP/1.1 to serve the site correctly to a real browser. No framework - you build this on your Stage 2 transport.</p>
+<p><strong>Enables:</strong> <code>pi.world/</code> serves a static page from BRAVO.</p>
+<p><strong>Scope:</strong> Enough HTTP/1.1 to parse a request, write a valid response, and answer <code>GET /</code> on BRAVO. No keep-alive, no chunked encoding, no framework - you build this on your Stage 2 transport.</p>
 <p>*Formerly: HTTP/1.1 Server.*</p>
-<p><strong>Recommended stack:</strong> Node.js (built on your Stage 2 transport)</p>
-<h4 id="http-server-step-1---parse-a-raw-http-request">Step 1 - Parse a raw HTTP request</h4>
-<p><strong>Goal:</strong> Read the bytes off a TCP connection and parse them into a structured request object.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="http-server-step-1---parse-a-request">Step 1 - Parse a request</h4>
+<p><strong>Goal:</strong> Decode an inbound HTTP/1.1 request into a request object.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: raw HTTP/1.1 request bytes (e.g. from <code>curl --http1.1</code>)
+<li>Input: TCP bytes from an accepted connection
 </li>
-<li>Output: <code>{ method, path, httpVersion, headers: Map, body: Buffer }</code>
+<li>Output:
+<ul>
+<li>method: string
+</li>
+<li>path: string
+</li>
+<li>httpVersion: string
+</li>
+<li>headers: list of
+<ul>
+<li>name: string
+</li>
+<li>value: string
+</li>
+</ul>
+</li>
+<li>body: bytes
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Where does the request line end and the headers begin?
+<li>Where does the request line end and the headers begin? (RFC 7230 §3)
 </li>
-<li>How do you know when the headers are complete? (Hint: <code>\r\n\r\n</code>)
+<li>TCP delivers bytes as a stream with no message boundaries. How do you know the header block is complete before you try to parse it?
 </li>
-<li>How do you know how many body bytes to read? Which headers tell you?
+<li>Which header tells you how many body bytes follow, and what do you read when a request has no body at all?
 </li>
 </ul>
+<p><strong>Watch out:</strong> The blank line that ends the headers can arrive split across two separate reads from the socket. Buffer until the terminator shows up in the accumulated bytes; don't assume one read gives you one message.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="http-server-sample-1---get-request">Sample 1 - GET / request</h5>
+<p>The oracle is the bytes in <a href="../../packages/http/src/fixtures/get-root/01-request.bin"><code>01-request.bin</code></a> and the decoded object in <a href="../../packages/http/src/fixtures/get-root/01-request.ts"><code>01-request.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -v http://localhost:3000/hello</code> shows your parsed method (<code>GET</code>), path (<code>/hello</code>), and all headers logged on the server
-</li>
-<li>A POST with a body is parsed with the correct body content
+<li>GET / request
 </li>
 </ul>
-<p><strong>Watch out:</strong> HTTP headers are terminated by <code>\r\n\r\n</code>, but TCP may deliver that sequence across multiple <code>data</code> events. Buffer until you see the terminator before parsing.</p>
 <hr />
-<h4 id="http-server-step-2---send-valid-http-responses">Step 2 - Send valid HTTP responses</h4>
-<p><strong>Goal:</strong> Write properly formatted HTTP/1.1 responses that browsers and <code>curl</code> accept.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="http-server-step-2---encode-a-response">Step 2 - Encode a response</h4>
+<p><strong>Goal:</strong> Encode a response object into HTTP/1.1 response bytes.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: a parsed request object and a desired response <code>{ statusCode, headers, body }</code>
+<li>Input:
+<ul>
+<li>statusCode: integer
 </li>
-<li>Output: a raw HTTP response written to the socket
+<li>statusText: string
+</li>
+<li>headers: list of
+<ul>
+<li>name: string
+</li>
+<li>value: string
+</li>
+</ul>
+</li>
+<li>body: bytes
+</li>
+</ul>
+</li>
+<li>Output: bytes
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the mandatory format of the status line?
+<li>What is the required format of the status line? (RFC 7230 §3.1.2)
 </li>
-<li>Which response headers are required for the client to correctly determine message length?
+<li>With no chunked encoding, which header tells the client where the body ends?
 </li>
-<li>When is <code>Content-Length</code> required, and when is <code>Transfer-Encoding: chunked</code> preferred?
+<li>Where does the header block end and the body begin on the wire?
 </li>
 </ul>
+<p><strong>Watch out:</strong> A response with no <code>Content-Length</code> and no <code>Connection: close</code> gives the client no way to know the message is finished. It will sit waiting for more bytes even after the body already arrived.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="http-server-sample-1---200-response-for-piworld">Sample 1 - 200 response for pi.world</h5>
+<p>The oracle is the bytes in <a href="../../packages/http/src/fixtures/get-root/02-response.bin"><code>02-response.bin</code></a> and the decoded object in <a href="../../packages/http/src/fixtures/get-root/02-response.ts"><code>02-response.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -i http://localhost:3000/</code> shows <code>HTTP/1.1 200 OK</code>, correct headers, and your body
-</li>
-<li>A browser can load a simple HTML page served by your server
+<li>200 response for pi.world
 </li>
 </ul>
-<p><strong>Watch out:</strong> If you omit <code>Content-Length</code> and don't use chunked encoding, most clients will hang waiting for more data. Always signal message end.</p>
 <hr />
-<h4 id="http-server-step-3---implement-keep-alive-connection-reuse">Step 3 - Implement keep-alive connection reuse</h4>
-<p><strong>Goal:</strong> Serve multiple requests over a single TCP connection instead of closing after each one.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="http-server-step-3---serve-piworld-on-bravo">Step 3 - Serve pi.world/ on BRAVO</h4>
+<p><strong>Goal:</strong> Listen on BRAVO and answer <code>GET /</code> with the product page, so Compose <code>curl</code> matches this transcript.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>Connection: keep-alive</code> header in the request
+<li>Input: a <code>GET /</code> request arriving on BRAVO's HTTP port
 </li>
-<li>Output: the connection stays open after the response; subsequent requests on the same socket are handled
+<li>Output: the Step 2 response for the page, written back on the same connection, then the connection closes
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you know where one request ends and the next begins on the same socket?
+<li>Which address does BRAVO bind to so a request from ALPHA, not just from BRAVO itself, is answered?
 </li>
-<li>What should you do when a request includes <code>Connection: close</code>?
+<li>What does the server send back for a path other than <code>/</code>?
 </li>
-<li>How do you prevent a keep-alive connection from living forever?
+<li>Compose publishes BRAVO's HTTP port to a different number on the host than the port the server binds inside the container. Which port does a request from inside another Node's container use?
 </li>
 </ul>
+<p><strong>Watch out:</strong> Without <code>Connection: close</code> (or a correct <code>Content-Length</code>), <code>curl</code> hangs past the point the body already arrived, waiting for a server that thinks the response isn't done. Keep the connection semantics from Step 2 - this stage does not add keep-alive.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="http-server-sample-1---curl-piworld-from-alpha">Sample 1 - curl pi.world from alpha</h5>
+<pre><code>docker compose exec alpha curl -s -i http://bravo/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 53
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;pi.world&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl --http1.1 -v http://localhost:3000/ http://localhost:3000/about</code> shows both responses on a *single* TCP connection (look for &quot;Re-using existing connection&quot; in curl output)
-</li>
-<li>After an idle timeout, the server closes the connection and a new request opens a fresh one
+<li>curl pi.world from alpha
 </li>
 </ul>
-<p><strong>Watch out:</strong> After sending a response, don't destroy the socket - return to the &quot;waiting for request&quot; state on the same socket. Destroying it is correct only for <code>Connection: close</code> or after the idle timeout fires.</p></div>
+<hr />
+<p><strong>Next:</strong> BRAVO answers, but only over a connection you opened straight to it. <a href="#curriculum">Stage 4 · Front door</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-reverse-proxy" data-page="reverse-proxy" hidden>
