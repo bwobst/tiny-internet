@@ -207,7 +207,7 @@ bravo
 - The listener binds a port. Which addresses does it accept on, and does that matter on a Node with one interface?
 - Ports under 1024 need a capability or root. Which range are you using here, and why does Naming not get that choice?
 
-**Watch out:** A connection that hangs instead of being refused is a filter, not a dead process. Refused means the Node answered and nothing was listening. The source port in the listener transcript changes every run - match the Node name and the bytes.
+**Watch out:** A connection that hangs instead of being refused is a filter, not a dead process. Refused means the Node answered and nothing was listening. Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange. The source port in the listener transcript changes every run - match the Node name and the bytes.
 
 **Samples:**
 

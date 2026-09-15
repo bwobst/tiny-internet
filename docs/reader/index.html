@@ -514,7 +514,7 @@
       </ul>
     </section>
 <section class="nav-section" data-layer="1">
-      <h2 class="nav-heading">Layer 1 — Networking</h2>
+      <h2 class="nav-heading">Layer 1 · Networking fundamentals</h2>
       <ul>
         <li><a href="#dns-resolver" data-page="dns-resolver"><span class="nav-subtitle">Stage 1</span><span class="nav-title">Naming</span></a></li>
 <li><a href="#tcp-server" data-page="tcp-server"><span class="nav-subtitle">Stage 2</span><span class="nav-title">Transport</span></a></li>
@@ -522,7 +522,7 @@
       </ul>
     </section>
 <section class="nav-section" data-layer="2">
-      <h2 class="nav-heading">Layer 2 — Traffic & Routing</h2>
+      <h2 class="nav-heading">Layer 2 · Traffic</h2>
       <ul>
         <li><a href="#reverse-proxy" data-page="reverse-proxy"><span class="nav-subtitle">Stage 4</span><span class="nav-title">Reverse Proxy</span></a></li>
 <li><a href="#load-balancer" data-page="load-balancer"><span class="nav-subtitle">Stage 5</span><span class="nav-title">Load Balancing</span></a></li>
@@ -530,7 +530,7 @@
       </ul>
     </section>
 <section class="nav-section" data-layer="3">
-      <h2 class="nav-heading">Layer 3 — Caching & Delivery</h2>
+      <h2 class="nav-heading">Layer 3 · Caching and shared state</h2>
       <ul>
         <li><a href="#http-cache-layer" data-page="http-cache-layer"><span class="nav-subtitle">Stage 7</span><span class="nav-title">HTTP Cache Layer</span></a></li>
 <li><a href="#cdn" data-page="cdn"><span class="nav-subtitle">Stage 8</span><span class="nav-title">Content Delivery</span></a></li>
@@ -538,7 +538,7 @@
       </ul>
     </section>
 <section class="nav-section" data-layer="4">
-      <h2 class="nav-heading">Layer 4 — Reliability</h2>
+      <h2 class="nav-heading">Layer 4 · Observability</h2>
       <ul>
         <li><a href="#metrics-collector" data-page="metrics-collector"><span class="nav-subtitle">Stage 10</span><span class="nav-title">Metrics Collector</span></a></li>
 <li><a href="#distributed-tracing" data-page="distributed-tracing"><span class="nav-subtitle">Stage 11</span><span class="nav-title">Distributed Tracing</span></a></li>
@@ -546,7 +546,7 @@
       </ul>
     </section>
 <section class="nav-section" data-layer="5">
-      <h2 class="nav-heading">Layer 5 — Data & Storage</h2>
+      <h2 class="nav-heading">Layer 5 · Data and storage</h2>
       <ul>
         <li><a href="#write-ahead-log" data-page="write-ahead-log"><span class="nav-subtitle">Stage 13</span><span class="nav-title">Write-Ahead Log</span></a></li>
 <li><a href="#message-queue" data-page="message-queue"><span class="nav-subtitle">Stage 14</span><span class="nav-title">Message Queue</span></a></li>
@@ -981,7 +981,7 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 <li>Ports under 1024 need a capability or root. Which range are you using here, and why does Naming not get that choice?
 </li>
 </ul>
-<p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process. Refused means the Node answered and nothing was listening. The source port in the listener transcript changes every run - match the Node name and the bytes.</p>
+<p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process. Refused means the Node answered and nothing was listening. Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange. The source port in the listener transcript changes every run - match the Node name and the bytes.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---listener-on-charlie">Sample 1 - listener on charlie</h5>
 <pre><code>docker compose exec charlie nc -lv -p 9000

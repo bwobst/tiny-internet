@@ -132,11 +132,11 @@ const pages = [
 
 const layerLabels = {
   0: 'Start',
-  1: 'Layer 1 — Networking',
-  2: 'Layer 2 — Traffic & Routing',
-  3: 'Layer 3 — Caching & Delivery',
-  4: 'Layer 4 — Reliability',
-  5: 'Layer 5 — Data & Storage',
+  1: 'Layer 1 · Networking fundamentals',
+  2: 'Layer 2 · Traffic',
+  3: 'Layer 3 · Caching and shared state',
+  4: 'Layer 4 · Observability',
+  5: 'Layer 5 · Data and storage',
 }
 
 function escapeHtml(text) {
