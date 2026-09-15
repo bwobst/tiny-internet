@@ -2369,93 +2369,111 @@ bravo	36
         <h1>Write-Ahead Log</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#write-ahead-log/write-ahead-log-stage-13-write-ahead-log">Stage 13 · Write-ahead log</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-1---append-entries-to-a-durable-log">Step 1 - Append entries to a durable log</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-2---replay-the-log-for-crash-recovery">Step 2 - Replay the log for crash recovery</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-3---log-compaction">Step 3 - Log compaction</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="write-ahead-log-stage-13-write-ahead-log">Stage 13 · Write-ahead log</h3>
-<blockquote><p>Make writes survive a process that dies mid-write.</p></blockquote>
-<p><strong>In the platform:</strong> This is the stage you validate by hand: start a write, kill the node, bring it back, and check that the data is intact and not half-written. The power cable is the test harness.</p>
-<p><strong>Scope:</strong> durability and recovery for your own store. Understand what <code>fsync</code> actually guarantees on your hardware.</p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#write-ahead-log/write-ahead-log-stage-9-write-ahead-log">Stage 9 · Write-ahead log</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-1---log-a-write-before-acknowledging-it">Step 1 - Log a write before acknowledging it</a></li><li class="depth-4"><a href="#write-ahead-log/write-ahead-log-step-2---kill-the-node-mid-write-restart-it-and-find-the-data-intact">Step 2 - Kill the Node mid-write, restart it, and find the data intact</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="write-ahead-log-stage-9-write-ahead-log">Stage 9 · Write-ahead log</h3>
+<blockquote><p>Make a write to the store survive a Node that dies right after acknowledging it.</p></blockquote>
+<p><strong>Enables:</strong> You kill a node during a write, restart it, and the data is intact.</p>
+<p><strong>Scope:</strong> Durability and recovery for the Stage 6 key-value store on one Node. Understand what <code>fsync</code> actually guarantees on your hardware. No compaction, no changes to how BRAVO and CHARLIE agree with each other.</p>
 <p>*Formerly: Write-Ahead Log.*</p>
-<p><strong>Recommended stack:</strong> Node.js (<code>fs</code> with <code>O_SYNC</code> or <code>fsync</code>)</p>
-<h4 id="write-ahead-log-step-1---append-entries-to-a-durable-log">Step 1 - Append entries to a durable log</h4>
-<p><strong>Goal:</strong> Write structured log entries to disk in a format that survives process crashes.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="write-ahead-log-step-1---log-a-write-before-acknowledging-it">Step 1 - Log a write before acknowledging it</h4>
+<p><strong>Goal:</strong> Append each write to an on-disk log and <code>fsync</code> it before the store acknowledges the write, then rebuild in-memory state from that log on startup.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: arbitrary operation record <code>{ type, key, value }</code>
+<li>Input: write: key: string, value: string, arriving at the Stage 6 key-value store on one Node
 </li>
-<li>Output: entry written to log file with a length prefix and checksum; <code>fsync</code> called before returning
+<li>Output: an entry appended to a log file on disk, <code>fsync</code>'d, before the write's HTTP response is sent; on startup, in-memory state rebuilt by reading the log in order
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the on-disk format of an entry? (Length prefix + payload + checksum is conventional)
+<li><code>fs.write</code> (or <code>fs.appendFile</code>) returning does not mean the bytes are on disk. What call forces them there, and what does that guarantee compared to what <code>write</code> alone guaranteed?
 </li>
-<li>Why is <code>fsync</code> necessary, and what does it guarantee vs. what does <code>write</code> guarantee?
+<li>What shape do you give an entry on disk so a later reader can tell where one entry ends and the next begins?
 </li>
-<li>How do you detect a partially written entry at recovery time?
+<li>Two writes to the same key both appear in the log. Which one does startup replay leave in memory, and why does the answer depend on log order rather than write order in general?
 </li>
 </ul>
+<p><strong>Watch out:</strong> If you send the HTTP response before <code>fsync</code> returns, an acknowledged write has no actual durability guarantee - Step 2's kill test will find it missing.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="write-ahead-log-sample-1---write-survives-a-restart">Sample 1 - write survives a restart</h5>
+<pre><code>docker compose exec alpha curl -s -i -X PUT http://bravo:7070/kv/color -d red
+docker compose restart bravo
+docker compose exec alpha curl -s -i http://bravo:7070/kv/color
+</code></pre>
+<pre><code>HTTP/1.1 204 No Content
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 3
+Connection: close
+
+red
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Writing 1000 entries and killing the process mid-write produces a log where all complete entries are intact and the partial entry (if any) is detectable via checksum mismatch
+<li>write survives a restart
 </li>
 </ul>
-<p><strong>Watch out:</strong> Node.js <code>fs.writeFile</code> does not call <code>fsync</code> by default - data may sit in the OS page cache and be lost on crash. Use <code>fs.open</code> with <code>O_SYNC</code> flag, or call <code>fs.fsync</code> explicitly after each write.</p>
 <hr />
-<h4 id="write-ahead-log-step-2---replay-the-log-for-crash-recovery">Step 2 - Replay the log for crash recovery</h4>
-<p><strong>Goal:</strong> On startup, read the log file sequentially and reconstruct in-memory state by replaying entries.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="write-ahead-log-step-2---kill-the-node-mid-write-restart-it-and-find-the-data-intact">Step 2 - Kill the Node mid-write, restart it, and find the data intact</h4>
+<p><strong>Goal:</strong> Confirm the data is intact after a hard kill and restart, whether the kill lands right after a write is acknowledged or while a write is still in flight through the log.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: existing log file on disk
+<li>Input: a Node killed with <code>kill -9</code> (or Compose's equivalent) while handling a write, followed by a restart of the same Node
 </li>
-<li>Output: in-memory key-value state identical to what it would be if the process had never crashed
+<li>Output: a read on the restarted Node returns the correct value for every write that was acknowledged before the kill, and the Node starts up without treating the log as corrupt
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you handle a corrupted or truncated entry at the end of the log?
+<li><code>kill -9</code> gives the process no chance to run any shutdown code. What has to already be true on disk, by the time a write's HTTP response was sent, for that write to survive this?
 </li>
-<li>In what order do you replay entries? Is replay idempotent?
+<li>If the kill lands mid-append, rather than between two separate writes, what does the log end in, and how does startup tell that apart from a complete entry?
 </li>
-<li>How do you know when you've reached the end of valid entries?
+<li>Does a half-written entry at the end of the log stop the rest of the log from replaying correctly?
 </li>
 </ul>
+<p><strong>Watch out:</strong> A kill timed right after a response is easy to pass and easy to mistake for the real test. The write this stage is named for is one the kill catches mid-append, not one that already finished.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="write-ahead-log-sample-2---kill-right-after-an-acknowledged-write-restart-and-read">Sample 2 - kill right after an acknowledged write, restart, and read</h5>
+<pre><code>docker compose exec alpha curl -s -i -X PUT http://bravo:7070/kv/color -d green
+docker compose kill -s SIGKILL bravo
+docker compose up -d bravo
+docker compose exec alpha curl -s -i http://bravo:7070/kv/color
+</code></pre>
+<pre><code>HTTP/1.1 204 No Content
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 5
+Connection: close
+
+green
+</code></pre>
+<h5 id="write-ahead-log-sample-3---kill-while-a-different-write-is-still-in-flight-restart-and-read-what-was-already-durable">Sample 3 - kill while a different write is still in flight, restart, and read what was already durable</h5>
+<pre><code>docker compose exec -d alpha sh -c &quot;curl -s -o /dev/null -X PUT http://bravo:7070/kv/big --data-binary @/tmp/5mb.bin&quot;
+docker compose kill -s SIGKILL bravo
+docker compose up -d bravo
+docker compose exec alpha curl -s -i http://bravo:7070/kv/color
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 5
+Connection: close
+
+green
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Write 500 entries, kill with <code>kill -9</code>, restart - in-memory state matches all successfully flushed entries
+<li>kill right after an acknowledged write, restart, and read
 </li>
-<li>A truncated final entry (simulate by truncating the file) is skipped without error
+<li>kill while a different write is still in flight, restart, and read what was already durable
 </li>
 </ul>
-<p><strong>Watch out:</strong> Replay must apply entries in strict log order. If your in-memory state is not deterministic given the same log, recovery will produce inconsistent results.</p>
 <hr />
-<h4 id="write-ahead-log-step-3---log-compaction">Step 3 - Log compaction</h4>
-<p><strong>Goal:</strong> Collapse the full log history into a snapshot, discarding entries superseded by later writes.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: log file with 10,000 entries, many overwriting the same keys
-</li>
-<li>Output: compacted log (or snapshot file) containing only the latest value per key; old log truncated or replaced
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>When is it safe to compact? (Not mid-write - you need a quiescent point.)
-</li>
-<li>Do you compact in place or write a new file and atomically replace?
-</li>
-<li>How do you ensure the snapshot is complete before deleting the old log? (What if the process crashes mid-compaction?)
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>After 10,000 writes to 100 unique keys, compaction produces a file with exactly 100 entries
-</li>
-<li>Crash-recovery from the compacted log produces identical state to recovery from the full log
-</li>
-<li>A crash during compaction does not corrupt either the old or new log
-</li>
-</ul>
-<p><strong>Watch out:</strong> Write the new compacted file, fsync it, then atomically rename it over the old file. Never truncate the existing log in place - a crash mid-truncation leaves you with no log and no snapshot.</p></div>
+<p><strong>Next:</strong> the Node's own data survives a crash, but nothing yet decouples a request from the work it triggers. <a href="#message-queue">Stage 10 · Message queue</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-message-queue" data-page="message-queue" hidden>
