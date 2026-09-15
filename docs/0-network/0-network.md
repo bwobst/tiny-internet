@@ -4,7 +4,8 @@
 
 **Enables:** From ALPHA you can `ssh bravo`, and a process on ALPHA can open a socket to a process on CHARLIE.
 
-**Scope:** Fixed addresses, names that resolve on each Node, SSH between Nodes, and one TCP connection between two Nodes. No DNS server, no HTTP, no service you wrote.
+**Scope:** Fixed addresses, names that resolve on each Node, SSH between Nodes, and one TCP connection between two Nodes.
+No DNS server, no HTTP, no service you wrote.
 
 #### Step 1 - Give each Node a fixed address
 
@@ -23,7 +24,10 @@
 - A static lease on the router and a static address on the Node both survive a reboot. Which one do you have to redo when a Node is reinstalled?
 - What is the gateway for, when every Sample here stays inside one subnet?
 
-**Watch out:** An address that came from DHCP looks right until the lease expires or the router restarts. Reboot the Node and check the address again before you call this done.
+**Watch out:** An address that came from DHCP looks right until the lease expires or the router restarts.
+Reboot the Node and check the address again before you call this done.
+Compose hands out these addresses for you, so the Checks below pass there without proving anything about a lease.
+The stage Enables line is still the Pis: the address has to come back the same after a real reboot.
 
 **Samples:**
 
@@ -75,7 +79,9 @@ default via 10.53.0.1 dev eth0
 - Which failure tells you the name did not resolve, and which tells you the address did not answer?
 - Stage 1 removes this name source. What does the Enables line for Naming say ALPHA has to do instead?
 
-**Watch out:** Names work here because something local already maps them. That mapping is a starting point, not the finished cluster: Naming replaces it, and a leftover `/etc/hosts` entry will hide a broken zone. Times and sequence numbers change every run - match the resolved address, the loss count, and the error text.
+**Watch out:** Names work here because something local already maps them.
+That mapping is a starting point, not the finished cluster: Naming replaces it, and a leftover `/etc/hosts` entry will hide a broken zone.
+Times and sequence numbers change every run - match the resolved address, the loss count, and the error text.
 
 **Samples:**
 
@@ -147,7 +153,9 @@ ping: delta: Name or service not known
 - A host key identifies the Node to you. What happens on the first connection, and what should happen if that key ever changes?
 - `ssh bravo` with no user works only if something supplies one. Where does the user name come from?
 
-**Watch out:** The first connection to a Node prints a host key warning and then succeeds. That line is not in the transcript below because the key is already known. Connect once to accept it, then take the transcript.
+**Watch out:** The first connection to a Node prints a host key warning and then succeeds.
+That line is not in the transcript below because the key is already known.
+Connect once to accept it, then take the transcript.
 
 **Samples:**
 
@@ -207,7 +215,10 @@ bravo
 - The listener binds a port. Which addresses does it accept on, and does that matter on a Node with one interface?
 - Ports under 1024 need a capability or root. Which range are you using here, and why does Naming not get that choice?
 
-**Watch out:** A connection that hangs instead of being refused is a filter, not a dead process. Refused means the Node answered and nothing was listening. Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange. The source port in the listener transcript changes every run - match the Node name and the bytes.
+**Watch out:** A connection that hangs instead of being refused is a filter, not a dead process.
+Refused means the Node answered and nothing was listening.
+Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange.
+The source port in the listener transcript changes every run - match the Node name and the bytes.
 
 **Samples:**
 

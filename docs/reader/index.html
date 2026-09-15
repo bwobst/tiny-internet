@@ -764,7 +764,8 @@
         <div class="page-content prose"><h3 id="network-stage-0-network">Stage 0 · Network</h3>
 <blockquote><p>Make the three Nodes reach each other, so the later stages have a cluster to run on.</p></blockquote>
 <p><strong>Enables:</strong> From ALPHA you can <code>ssh bravo</code>, and a process on ALPHA can open a socket to a process on CHARLIE.</p>
-<p><strong>Scope:</strong> Fixed addresses, names that resolve on each Node, SSH between Nodes, and one TCP connection between two Nodes. No DNS server, no HTTP, no service you wrote.</p>
+<p><strong>Scope:</strong> Fixed addresses, names that resolve on each Node, SSH between Nodes, and one TCP connection between two Nodes.</p>
+<p>No DNS server, no HTTP, no service you wrote.</p>
 <h4 id="network-step-1---give-each-node-a-fixed-address">Step 1 - Give each Node a fixed address</h4>
 <p><strong>Goal:</strong> Give ALPHA, BRAVO, and CHARLIE addresses that survive a reboot.</p>
 <p><strong>Shape:</strong></p>
@@ -793,7 +794,10 @@
 <li>What is the gateway for, when every Sample here stays inside one subnet?
 </li>
 </ul>
-<p><strong>Watch out:</strong> An address that came from DHCP looks right until the lease expires or the router restarts. Reboot the Node and check the address again before you call this done.</p>
+<p><strong>Watch out:</strong> An address that came from DHCP looks right until the lease expires or the router restarts.</p>
+<p>Reboot the Node and check the address again before you call this done.</p>
+<p>Compose hands out these addresses for you, so the Checks below pass there without proving anything about a lease.</p>
+<p>The stage Enables line is still the Pis: the address has to come back the same after a real reboot.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---alpha-address">Sample 1 - alpha address</h5>
 <pre><code>docker compose exec alpha ip -4 addr show eth0
@@ -850,7 +854,9 @@
 <li>Stage 1 removes this name source. What does the Enables line for Naming say ALPHA has to do instead?
 </li>
 </ul>
-<p><strong>Watch out:</strong> Names work here because something local already maps them. That mapping is a starting point, not the finished cluster: Naming replaces it, and a leftover <code>/etc/hosts</code> entry will hide a broken zone. Times and sequence numbers change every run - match the resolved address, the loss count, and the error text.</p>
+<p><strong>Watch out:</strong> Names work here because something local already maps them.</p>
+<p>That mapping is a starting point, not the finished cluster: Naming replaces it, and a leftover <code>/etc/hosts</code> entry will hide a broken zone.</p>
+<p>Times and sequence numbers change every run - match the resolved address, the loss count, and the error text.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---ping-bravo-by-name">Sample 1 - ping bravo by name</h5>
 <pre><code>docker compose exec alpha ping -c 3 bravo
@@ -921,7 +927,9 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 <li><code>ssh bravo</code> with no user works only if something supplies one. Where does the user name come from?
 </li>
 </ul>
-<p><strong>Watch out:</strong> The first connection to a Node prints a host key warning and then succeeds. That line is not in the transcript below because the key is already known. Connect once to accept it, then take the transcript.</p>
+<p><strong>Watch out:</strong> The first connection to a Node prints a host key warning and then succeeds.</p>
+<p>That line is not in the transcript below because the key is already known.</p>
+<p>Connect once to accept it, then take the transcript.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---ssh-bravo">Sample 1 - ssh bravo</h5>
 <pre><code>docker compose exec alpha ssh bravo hostname
@@ -981,7 +989,10 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 <li>Ports under 1024 need a capability or root. Which range are you using here, and why does Naming not get that choice?
 </li>
 </ul>
-<p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process. Refused means the Node answered and nothing was listening. Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange. The source port in the listener transcript changes every run - match the Node name and the bytes.</p>
+<p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process.</p>
+<p>Refused means the Node answered and nothing was listening.</p>
+<p>Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange.</p>
+<p>The source port in the listener transcript changes every run - match the Node name and the bytes.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---listener-on-charlie">Sample 1 - listener on charlie</h5>
 <pre><code>docker compose exec charlie nc -lv -p 9000
