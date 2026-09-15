@@ -1,75 +1,96 @@
-### Stage 10 · Metrics collector
+### Stage 7 · Metrics
 
-> Count and time everything.
+> Stop guessing how busy the cluster is and how long it takes to answer.
 
-**In the platform:** This is what `/status` and `/metrics` display: `http_requests_total`, `http_request_duration_ms`, `http_errors_total`, `cache_hits_total`, `cache_misses_total`, `active_connections`. Until this exists, you are guessing about your own system.
+**Enables:** `/metrics` and `/status` show request counts and timings.
 
-**Scope:** collection, storage, and exposition for three nodes. Not Prometheus. Do not use Prometheus to build it.
+**Scope:** cluster-wide request counts and per-path average duration, observed at the front door on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.
 
 *Formerly: Metrics Collector.*
 
-**Recommended stack:** Node.js
+#### Step 1 - Count every request, show it at /status
 
-#### Step 1 - Counter and gauge primitives
+**Goal:** On ALPHA, count every request the front door forwards, broken down by path, and serve the running counts at `/status`.
 
-**Goal:** Implement counter (monotonically increasing) and gauge (current value) metric types with label support.
-
-**Inputs & outputs:**
-- Input: `counter.increment({ method: "GET", status: "200" })`, `gauge.set(42, { service: "api" })`
-- Output: current values accessible via `counter.get(labels)` and `gauge.get(labels)`
+**Shape:**
+- Input: each request ALPHA forwards to a backend
+- Output:
+  - a running count per path
+  - `/status`: a page listing each path seen so far and its request count
 
 **Key questions:**
-- How do you store metrics with multi-dimensional labels? (A nested map keyed on label hashes?)
-- What is the difference between a counter and a gauge? Can a counter decrease?
-- How do you serialize a label set to a stable string key?
+- Does a count belong to the path the client requested, or the backend that answered it? If `/` is served by BRAVO once and CHARLIE once, is that one count or two?
+- Where does the increment happen relative to forwarding - before the backend answers, after, or only once a response comes back?
+- `/status` has to report on any path the site gets, not only ones you tested by hand. Does it need to know every path in advance, or can a path's first request be the thing that puts it on the page?
+
+**Watch out:** Stage 4's dead-backend handling means a request can fail before any backend answers it. If the counter only increments once a response comes back, that request disappears from `/status` instead of showing up as a failure. Decide what "a request happened" means before you start incrementing.
+
+**Samples:**
+
+##### Sample 1 - status after three requests to /
+
+```
+curl -s http://127.0.0.1:8080/ > /dev/null
+curl -s http://127.0.0.1:8080/ > /dev/null
+curl -s http://127.0.0.1:8080/ > /dev/null
+curl -s http://127.0.0.1:8080/status
+```
+
+```
+path	count
+/	3
+```
 
 **Done when:**
-- Two counters with different label sets are tracked independently
-- Incrementing `{ method: "GET" }` does not affect `{ method: "POST" }`
-- `counter.get({ method: "GET", status: "200" })` returns the exact increment count
-
-**Watch out:** Label key order matters for your cache key - `{a: 1, b: 2}` and `{b: 2, a: 1}` should map to the same metric. Sort label keys before serializing.
+- status after three requests to /
 
 ---
 
-#### Step 2 - Histogram for latency tracking
+#### Step 2 - Time every request, show it at /status and /metrics
 
-**Goal:** Record observations into configurable buckets; expose count, sum, and per-bucket totals.
+**Goal:** Alongside the count, track how long each forwarded request took, and serve the same numbers at both `/status` and `/metrics`.
 
-**Inputs & outputs:**
-- Input: `histogram.observe(durationMs, labels)` with predefined buckets e.g. `[10, 50, 100, 500, 1000]`
-- Output: `{ buckets: { "10": N, "50": N, ... }, sum, count }` per label set
+**Shape:**
+- Input: each forwarded request, plus the elapsed time until its response was returned to the client
+- Output:
+  - `/status`: count and average duration per path, human-readable
+  - `/metrics`: the same count and average duration per path, in one machine-parseable line per path
 
 **Key questions:**
-- Are histogram buckets inclusive (`≤`) or exclusive (`<`)? What does Prometheus use?
-- How do you calculate the p95 from a histogram? (You can't exactly - explain why.)
-- What is a cumulative histogram vs. a non-cumulative one?
+- Keeping every duration ever recorded to compute an average is the same unbounded-memory trap as Stage 5's cache. What running values do you keep per path instead so a new duration updates the average without storing the durations themselves?
+- `/status` and `/metrics` show the same counts and durations in different shapes. Where do those numbers live so both pages read one source instead of drifting apart?
+- What does a path with zero requests so far show on `/metrics` - is it listed at all?
+
+**Watch out:** `/status` and `/metrics` are requests too. If they get counted like any other path, checking `/status` changes the number `/status` reports next time you check it. Decide up front whether the metrics endpoints exempt themselves, and make sure both pages agree.
+
+**Samples:**
+
+##### Sample 2 - status shows counts and average duration
+
+```
+curl -s http://127.0.0.1:8080/ > /dev/null
+curl -s http://127.0.0.1:8080/status
+```
+
+```
+path	count	avg_ms
+/	4	38
+```
+
+##### Sample 3 - metrics shows the same numbers
+
+```
+curl -s http://127.0.0.1:8080/metrics
+```
+
+```
+/ count=4 avg_ms=38
+```
 
 **Done when:**
-- 1000 observations distributed across buckets are counted correctly (verify by summing all observations)
-- The `+Inf` bucket count equals the total observation count
-- `sum / count` gives the correct mean
-
-**Watch out:** Prometheus histograms are *cumulative* - the `100ms` bucket counts all observations ≤100ms, not just those between 50ms and 100ms. If you implement non-cumulative buckets, your data will not be compatible with standard tooling.
+- status shows counts and average duration
+- metrics shows the same numbers
 
 ---
 
-#### Step 3 - Prometheus-compatible scrape endpoint
-
-**Goal:** Expose all metrics in Prometheus text format at `GET /metrics`.
-
-**Inputs & outputs:**
-- Input: HTTP GET `/metrics`
-- Output: Prometheus exposition format text: `# HELP`, `# TYPE`, and metric lines
-
-**Key questions:**
-- What is the Prometheus text format specification for counters, gauges, and histograms?
-- What Content-Type header does Prometheus expect?
-- How do you format label sets in the `{key="value"}` syntax, including escaping?
-
-**Done when:**
-- `curl http://localhost:9090/metrics` returns parseable Prometheus text
-- Pointing a real Prometheus instance (or `promtool check metrics`) at your endpoint reports no parse errors
-- All three metric types render correctly with their `# TYPE` annotations
-
-**Watch out:** Label values containing `\`, `"`, or `\n` must be escaped in the exposition format. Forgetting this causes parse failures that are difficult to diagnose.
+**Next:** you can see how busy the cluster is, but not which hop of a request took the time. [Stage 8 · Tracing](./12-distributed-tracing.md).
