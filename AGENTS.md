@@ -37,19 +37,24 @@ If the developer asks you to "just show me how," the correct response is to ask 
 
 ## The System
 
-This is not fifteen unrelated exercises. It is one system that grows.
+This is not twelve unrelated exercises. It is one system that grows.
+
+Stage 0 · Network sits outside the layers.
 
 | Layer | Role in the platform |
 |---|---|
-| 1 - Networking fundamentals | DNS names the machines, TCP carries the bytes, HTTP serves the first page |
-| 2 - Traffic & routing | Proxy, load balancer, and gateway make the site survive a dead node |
-| 3 - Caching & content delivery | Cache, CDN, and KV store make it fast and give it shared state |
-| 4 - Reliability & observability | Metrics, tracing, and circuit breakers make it legible and survivable |
-| 5 - Data & storage | WAL, queue, and object storage give it memory |
+| 1 - Networking fundamentals | Naming names the machines, Transport carries the bytes, HTTP serves the first page |
+| 2 - Traffic | Front door makes the site one public entry and survives a dead backend |
+| 3 - Caching and shared state | HTTP cache and the key-value store make it fast and give it shared state |
+| 4 - Observability | Metrics and tracing make it legible |
+| 5 - Data and storage | WAL, queue, and object storage give it memory |
 
-Three nodes: ALPHA (names and front door), BRAVO and CHARLIE (backends). Any node must be allowed to die.
+Three nodes: ALPHA (names and Front door), BRAVO and CHARLIE (backends). Any node must be allowed to die.
 
 When the developer asks where something fits, the right frame is **what does this enable in the platform?** - not "which project number is this?"
+
+If a stage's Enables line is already true on the real machines, skip it.
+Do not add least-connections, presigned URLs, OTLP export, multipart upload, virtual hosts, or TLS termination as Steps unless a new Enables fact appears.
 
 Two constraints you must hold them to, and never violate yourself:
 
@@ -60,13 +65,31 @@ Two constraints you must hold them to, and never violate yourself:
 
 ## How Guided Specs Work
 
-Each stage is broken into build steps. Every step has this shape:
+[Stage 1 · Naming](./docs/1-networking-fundamentals/1-dns-resolver.md) is the exemplar.
+Copy its headings.
+Do not invent a new format.
+The locked heading lists live in [docs/CURRICULUM.md](./docs/CURRICULUM.md).
 
-- **Goal** - one sentence describing what this step accomplishes
-- **Inputs / outputs** - the data shapes involved (not code)
-- **Key questions** - things the developer should be able to answer before writing anything
-- **Done when** - a checklist verifiable with a real tool or console output
-- **Common trip-up** - the one thing that most often causes a stumble at this step
+Each **Step** has this shape:
+
+- **Goal** - one sentence
+- **Shape** - types and fields, not a concrete instance
+- **Key questions** - things to answer before writing anything
+- **Watch out** - the one trip-up
+- **Samples** - one concrete input and its expected observable output
+- **Done when** - the Check list, one Check per Sample, same short name as the Sample
+
+A **Substep** is an optional heading under a Step that is too big to read as one block.
+It is not the sitting-sized unit.
+
+**Samples:** behavior lives in markdown as one command plus its transcript.
+Wire and object samples live in package fixtures.
+A Sample never includes an implementation walkthrough, algorithms, control flow, or an RFC used as a recipe.
+
+**Done:**
+A Step is done when its Samples reproduce on Compose.
+A Stage is done when its Enables line is true on the real machines.
+Do not treat Compose success as stage completion.
 
 When a developer brings you a specific bug, a concept they don't understand, or a decision between two approaches, work through it with them. Ask questions. Offer the minimum helpful information. Let them close the loop.
 

@@ -142,11 +142,17 @@ function escapeHtml(text) {
 
 const fileToPageId = Object.fromEntries(pages.map((p) => [p.file, p.id]))
 
-function resolveHref(href) {
+function resolveHref(href, fromFile = '') {
   if (href.startsWith('http')) return href
   const normalized = href.replace(/^\.\//, '')
   const pageId = fileToPageId[normalized]
   if (pageId) return `#${pageId}`
+  if (fromFile && (href.startsWith('./') || href.startsWith('../'))) {
+    const resolved = join(dirname(fromFile), href).replaceAll('\\', '/')
+    const resolvedId = fileToPageId[resolved]
+    if (resolvedId) return `#${resolvedId}`
+  }
+  if (href.startsWith('../../packages/')) return href
   if (href.startsWith('../packages/')) {
     return href.replace(/^\.\.\//, '../../')
   }
@@ -167,7 +173,7 @@ function inlineMarkdownNoLinks(text) {
   return out
 }
 
-function inlineMarkdown(text) {
+function inlineMarkdown(text, fromFile = '') {
   const links = []
   const withoutLinks = text.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
@@ -182,7 +188,7 @@ function inlineMarkdown(text) {
   for (const [index, { label, href }] of links.entries()) {
     out = out.replace(
       `\x00LINK${index}\x00`,
-      `<a href="${escapeHtml(resolveHref(href))}">${inlineMarkdownNoLinks(label)}</a>`,
+      `<a href="${escapeHtml(resolveHref(href, fromFile))}">${inlineMarkdownNoLinks(label)}</a>`,
     )
   }
   return out
@@ -196,7 +202,29 @@ function slugify(text) {
     .replace(/\s+/g, '-')
 }
 
-function markdownToHtml(markdown, pageId) {
+function parseList(lines, start, indent, fromFile) {
+  const html = ['<ul>']
+  let i = start
+  while (i < lines.length) {
+    const match = lines[i].match(/^( *)[-*] (.*)$/)
+    if (!match) break
+    const depth = match[1].length
+    if (depth !== indent) break
+    html.push(`<li>${inlineMarkdown(match[2], fromFile)}`)
+    i++
+    const nested = lines[i]?.match(/^( *)[-*] /)
+    if (nested && nested[1].length > indent) {
+      const inner = parseList(lines, i, nested[1].length, fromFile)
+      html.push(inner.html)
+      i = inner.i
+    }
+    html.push('</li>')
+  }
+  html.push('</ul>')
+  return { html: html.join('\n'), i }
+}
+
+function markdownToHtml(markdown, pageId, fromFile = '') {
   const lines = markdown.replace(/\r\n/g, '\n').split('\n')
   const html = []
   const toc = []
@@ -224,13 +252,13 @@ function markdownToHtml(markdown, pageId) {
       html.push('<div class="table-wrap"><table>')
       html.push('<thead><tr>')
       for (const cell of headerCells) {
-        html.push(`<th>${inlineMarkdown(cell)}</th>`)
+        html.push(`<th>${inlineMarkdown(cell, fromFile)}</th>`)
       }
       html.push('</tr></thead><tbody>')
       for (const row of bodyRows) {
         html.push('<tr>')
         for (const cell of row) {
-          html.push(`<td>${inlineMarkdown(cell)}</td>`)
+          html.push(`<td>${inlineMarkdown(cell, fromFile)}</td>`)
         }
         html.push('</tr>')
       }
@@ -238,7 +266,21 @@ function markdownToHtml(markdown, pageId) {
       continue
     }
 
-    if (/^#{1,4} /.test(line)) {
+    if (line.startsWith('```')) {
+      i++
+      const body = []
+      while (i < lines.length && !lines[i].startsWith('```')) {
+        body.push(lines[i])
+        i++
+      }
+      if (i < lines.length) i++
+      html.push(
+        `<pre><code>${escapeHtml(body.join('\n'))}\n</code></pre>`,
+      )
+      continue
+    }
+
+    if (/^#{1,6} /.test(line)) {
       const level = line.match(/^#+/)[0].length
       const text = line.replace(/^#+\s*/, '')
       // A heading may be a link (e.g. "### [Stage 1 · Naming](./spec.md)"). The
@@ -247,10 +289,10 @@ function markdownToHtml(markdown, pageId) {
       const localId = slugify(plainText)
       const id = `${pageId}-${localId}`
       const tag = `h${level}`
-      if (level >= 3) {
+      if (level === 3 || level === 4) {
         toc.push({ id, text: plainText, level })
       }
-      html.push(`<${tag} id="${id}">${inlineMarkdown(text)}</${tag}>`)
+      html.push(`<${tag} id="${id}">${inlineMarkdown(text, fromFile)}</${tag}>`)
       i++
       continue
     }
@@ -262,7 +304,7 @@ function markdownToHtml(markdown, pageId) {
         i++
       }
       html.push(
-        `<blockquote><p>${inlineMarkdown(quoteLines.join(' '))}</p></blockquote>`,
+        `<blockquote><p>${inlineMarkdown(quoteLines.join(' '), fromFile)}</p></blockquote>`,
       )
       continue
     }
@@ -274,12 +316,9 @@ function markdownToHtml(markdown, pageId) {
     }
 
     if (/^[-*] /.test(line)) {
-      html.push('<ul>')
-      while (i < lines.length && /^[-*] /.test(lines[i])) {
-        html.push(`<li>${inlineMarkdown(lines[i].slice(2))}</li>`)
-        i++
-      }
-      html.push('</ul>')
+      const list = parseList(lines, i, 0, fromFile)
+      html.push(list.html)
+      i = list.i
       continue
     }
 
@@ -288,7 +327,7 @@ function markdownToHtml(markdown, pageId) {
       continue
     }
 
-    html.push(`<p>${inlineMarkdown(line)}</p>`)
+    html.push(`<p>${inlineMarkdown(line, fromFile)}</p>`)
     i++
   }
 
@@ -307,7 +346,7 @@ function markdownToHtml(markdown, pageId) {
 
 const renderedPages = pages.map((page) => {
   const markdown = readFileSync(join(docsDir, page.file), 'utf8')
-  const { body, toc } = markdownToHtml(markdown, page.id)
+  const { body, toc } = markdownToHtml(markdown, page.id, page.file)
   return { ...page, body, toc }
 })
 
@@ -520,6 +559,18 @@ const html = `<!DOCTYPE html>
       font-weight: 600;
     }
 
+    .nav-progress {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.68rem;
+      color: var(--sidebar-muted);
+      margin-top: 0.15rem;
+    }
+
+    .nav-progress[data-complete="true"] {
+      color: #86efac;
+    }
+
     .main {
       padding: 2rem clamp(1.25rem, 4vw, 3rem) 4rem;
     }
@@ -600,8 +651,9 @@ const html = `<!DOCTYPE html>
 
     .page-toc a:hover { color: var(--accent); }
     .page-toc .depth-4 a { padding-left: 1.35rem; font-size: 0.78rem; }
+    .page-toc a.progress-done { color: var(--accent); }
 
-    .prose h3, .prose h4 {
+    .prose h3, .prose h4, .prose h5 {
       font-family: var(--font-sans);
       scroll-margin-top: 1.5rem;
     }
@@ -616,6 +668,101 @@ const html = `<!DOCTYPE html>
       font-size: 1rem;
       margin: 1.75rem 0 0.65rem;
       color: var(--text);
+    }
+
+    .prose h5 {
+      font-size: 0.92rem;
+      margin: 1.25rem 0 0.5rem;
+      color: var(--text);
+    }
+
+    .prose pre {
+      overflow-x: auto;
+      margin: 0 0 1rem;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-elevated);
+    }
+
+    .prose pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .progress-heading {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+
+    .progress-heading .progress-title { flex: 1; min-width: 0; }
+
+    .progress-check {
+      appearance: none;
+      width: 1.05rem;
+      height: 1.05rem;
+      margin: 0.2rem 0 0;
+      flex-shrink: 0;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-check:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .progress-check:checked::after {
+      content: "";
+      position: absolute;
+      left: 0.28rem;
+      top: 0.05rem;
+      width: 0.28rem;
+      height: 0.52rem;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .progress-check:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .progress-checklist {
+      list-style: none;
+      padding-left: 0.15rem;
+    }
+
+    .progress-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+    }
+
+    .progress-checklist .progress-check {
+      margin-top: 0.35rem;
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+
+    .progress-checklist .progress-check:checked::after {
+      left: 0.24rem;
+      top: 0.02rem;
+      width: 0.24rem;
+      height: 0.46rem;
+    }
+
+    .progress-item-done > .progress-title,
+    .progress-item-done > .progress-text {
+      color: var(--text-muted);
     }
 
     .prose p { margin: 0 0 1rem; }
@@ -754,6 +901,7 @@ const html = `<!DOCTYPE html>
     const sidebar = document.getElementById("sidebar");
     const menuToggle = document.getElementById("menu-toggle");
     const themeToggle = document.getElementById("theme-toggle");
+    const PROGRESS_KEY = "curriculum-progress";
 
     function setTheme(theme) {
       document.documentElement.dataset.theme = theme;
@@ -773,6 +921,152 @@ const html = `<!DOCTYPE html>
     });
 
     menuToggle.addEventListener("click", () => sidebar.classList.toggle("open"));
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(PROGRESS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveProgress(progress) {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    }
+
+    function isDoneWhenParagraph(node) {
+      if (!node || node.tagName !== "P") return false;
+      const strong = node.querySelector("strong");
+      return Boolean(strong && /^Done when:?$/i.test(strong.textContent.trim()));
+    }
+
+    function wrapStepHeading(heading) {
+      if (heading.dataset.progressReady) return;
+      heading.dataset.progressReady = "1";
+      heading.classList.add("progress-heading");
+
+      const title = document.createElement("span");
+      title.className = "progress-title";
+      while (heading.firstChild) title.appendChild(heading.firstChild);
+
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.className = "progress-check";
+      check.dataset.progressKey = heading.id;
+      check.setAttribute("aria-label", "Mark step complete: " + title.textContent.trim());
+
+      heading.append(check, title);
+    }
+
+    function wrapDoneWhenList(list, stepId) {
+      if (list.dataset.progressReady) return;
+      list.dataset.progressReady = "1";
+      list.classList.add("progress-checklist");
+
+      Array.from(list.children).forEach((li, index) => {
+        if (li.tagName !== "LI") return;
+        const text = document.createElement("span");
+        text.className = "progress-text";
+        while (li.firstChild) text.appendChild(li.firstChild);
+
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.className = "progress-check";
+        check.dataset.progressKey = stepId + "/done/" + index;
+        check.setAttribute(
+          "aria-label",
+          "Mark done-when item complete: " + text.textContent.trim(),
+        );
+
+        li.append(check, text);
+      });
+    }
+
+    function initProgressMarkup() {
+      document.querySelectorAll(".page").forEach((page) => {
+        const content = page.querySelector(".page-content");
+        if (!content) return;
+
+        content.querySelectorAll("h4").forEach((heading) => {
+          if (!/^Step\\s+\\d+/i.test(heading.textContent.trim())) return;
+          wrapStepHeading(heading);
+
+          let node = heading.nextElementSibling;
+          while (node && !/^H[34]$/.test(node.tagName) && node.tagName !== "HR") {
+            if (isDoneWhenParagraph(node) && node.nextElementSibling?.tagName === "UL") {
+              wrapDoneWhenList(node.nextElementSibling, heading.id);
+              break;
+            }
+            node = node.nextElementSibling;
+          }
+        });
+      });
+    }
+
+    function applyProgressState() {
+      const progress = loadProgress();
+
+      document.querySelectorAll("[data-progress-key]").forEach((check) => {
+        const key = check.dataset.progressKey;
+        const done = Boolean(progress[key]);
+        check.checked = done;
+
+        const item = check.closest("li, h4");
+        if (item) item.classList.toggle("progress-item-done", done);
+      });
+
+      document.querySelectorAll(".page-toc a").forEach((link) => {
+        const href = link.getAttribute("href") || "";
+        const slash = href.indexOf("/");
+        if (slash === -1) return;
+        const stepId = href.slice(slash + 1);
+        link.classList.toggle("progress-done", Boolean(progress[stepId]));
+      });
+
+      document.querySelectorAll(".nav-section a[data-page]").forEach((link) => {
+        const pageId = link.dataset.page;
+        if (!pageId || pageId === "curriculum") return;
+
+        const page = document.getElementById("page-" + pageId);
+        if (!page) return;
+
+        const stepChecks = page.querySelectorAll("h4.progress-heading [data-progress-key]");
+        if (stepChecks.length === 0) return;
+
+        let doneCount = 0;
+        stepChecks.forEach((check) => {
+          if (progress[check.dataset.progressKey]) doneCount += 1;
+        });
+
+        let badge = link.querySelector(".nav-progress");
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "nav-progress";
+          link.appendChild(badge);
+        }
+        badge.textContent = doneCount + "/" + stepChecks.length + " steps";
+        badge.dataset.complete = doneCount === stepChecks.length ? "true" : "false";
+      });
+    }
+
+    function initProgressTracking() {
+      initProgressMarkup();
+      applyProgressState();
+
+      document.addEventListener("change", (event) => {
+        const check = event.target;
+        if (!(check instanceof HTMLInputElement)) return;
+        if (!check.dataset.progressKey) return;
+
+        const progress = loadProgress();
+        if (check.checked) progress[check.dataset.progressKey] = true;
+        else delete progress[check.dataset.progressKey];
+        saveProgress(progress);
+        applyProgressState();
+      });
+    }
 
     function showPage(pageId, anchor) {
       if (!pages.includes(pageId)) pageId = "curriculum";
@@ -826,6 +1120,8 @@ const html = `<!DOCTYPE html>
         location.hash = link.getAttribute("href").slice(1);
       });
     });
+
+    initProgressTracking();
 
     const initial = parseHash();
     if (!location.hash) location.hash = "curriculum";

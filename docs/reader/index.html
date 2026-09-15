@@ -174,6 +174,18 @@
       font-weight: 600;
     }
 
+    .nav-progress {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.68rem;
+      color: var(--sidebar-muted);
+      margin-top: 0.15rem;
+    }
+
+    .nav-progress[data-complete="true"] {
+      color: #86efac;
+    }
+
     .main {
       padding: 2rem clamp(1.25rem, 4vw, 3rem) 4rem;
     }
@@ -254,8 +266,9 @@
 
     .page-toc a:hover { color: var(--accent); }
     .page-toc .depth-4 a { padding-left: 1.35rem; font-size: 0.78rem; }
+    .page-toc a.progress-done { color: var(--accent); }
 
-    .prose h3, .prose h4 {
+    .prose h3, .prose h4, .prose h5 {
       font-family: var(--font-sans);
       scroll-margin-top: 1.5rem;
     }
@@ -270,6 +283,101 @@
       font-size: 1rem;
       margin: 1.75rem 0 0.65rem;
       color: var(--text);
+    }
+
+    .prose h5 {
+      font-size: 0.92rem;
+      margin: 1.25rem 0 0.5rem;
+      color: var(--text);
+    }
+
+    .prose pre {
+      overflow-x: auto;
+      margin: 0 0 1rem;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-elevated);
+    }
+
+    .prose pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .progress-heading {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+
+    .progress-heading .progress-title { flex: 1; min-width: 0; }
+
+    .progress-check {
+      appearance: none;
+      width: 1.05rem;
+      height: 1.05rem;
+      margin: 0.2rem 0 0;
+      flex-shrink: 0;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-check:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .progress-check:checked::after {
+      content: "";
+      position: absolute;
+      left: 0.28rem;
+      top: 0.05rem;
+      width: 0.28rem;
+      height: 0.52rem;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .progress-check:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .progress-checklist {
+      list-style: none;
+      padding-left: 0.15rem;
+    }
+
+    .progress-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.55rem;
+    }
+
+    .progress-checklist .progress-check {
+      margin-top: 0.35rem;
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+
+    .progress-checklist .progress-check:checked::after {
+      left: 0.24rem;
+      top: 0.02rem;
+      width: 0.24rem;
+      height: 0.46rem;
+    }
+
+    .progress-item-done > .progress-title,
+    .progress-item-done > .progress-text {
+      color: var(--text-muted);
     }
 
     .prose p { margin: 0 0 1rem; }
@@ -529,11 +637,16 @@
 <p>For each stage, you receive a <strong>guided spec</strong> rather than implementation code: enough detail to know what to build and how to verify it, but the design and implementation decisions belong to you.</p>
 <p>Each build step includes:</p>
 <ul>
-<li><strong>Goal</strong> - what this step accomplishes in one sentence</li>
-<li><strong>Inputs &amp; outputs</strong> - data shapes, not code</li>
-<li><strong>Key questions</strong> - things to answer before writing a line</li>
-<li><strong>Done when</strong> - a checklist verifiable with a real tool or console output</li>
-<li><strong>Watch out</strong> - the one thing that most commonly trips people up</li>
+<li><strong>Goal</strong> - what this step accomplishes in one sentence
+</li>
+<li><strong>Inputs &amp; outputs</strong> - data shapes, not code
+</li>
+<li><strong>Key questions</strong> - things to answer before writing a line
+</li>
+<li><strong>Done when</strong> - a checklist verifiable with a real tool or console output
+</li>
+<li><strong>Watch out</strong> - the one thing that most commonly trips people up
+</li>
 </ul>
 <p>Each stage also answers one question: <strong>what does this component enable in the platform?</strong></p>
 <p>If a component does not enable anything, it does not belong in the build path yet.</p>
@@ -628,138 +741,257 @@
         <h1>Naming</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#dns-resolver/dns-resolver-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-1---parse-a-response">Step 1 - Parse a response</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-2---send-a-raw-udp-dns-query">Step 2 - Send a raw UDP DNS query</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-3---walk-the-hierarchy-iterative-resolution">Step 3 - Walk the hierarchy (iterative resolution)</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-4---add-a-ttl-aware-cache">Step 4 - Add a TTL-aware cache</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-5---answer-authoritatively-for-piworld">Step 5 - Answer authoritatively for `pi.world`</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-6---make-it-the-platforms-resolver">Step 6 - Make it the platform's resolver</a></li></ul></nav>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#dns-resolver/dns-resolver-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-1---decode-a-query">Step 1 - Decode a query</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-2---encode-an-aa-response">Step 2 - Encode an AA response</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-3---answer-on-the-wire">Step 3 - Answer on the wire</a></li></ul></nav>
         <div class="page-content prose"><h3 id="dns-resolver-stage-1-naming">Stage 1 · Naming</h3>
-<blockquote><p>Build the naming system for your tiny internet.</p></blockquote>
-<p><strong>In the platform:</strong> Nothing in the platform should hardcode an IP address. This stage gives you <code>pi.world</code>, <code>alpha.pi.world</code>, <code>bravo.pi.world</code>, and <code>charlie.pi.world</code>, so every later layer can refer to a node by name and keep working when that node's address changes.</p>
-<p><strong>Scope:</strong> enough DNS to authoritatively answer for your own zone and to resolve names outside it. Not a production resolver.</p>
+<blockquote><p>Build an authoritative nameserver for <code>pi.world</code>.</p></blockquote>
+<p><strong>Enables:</strong> <code>dig pi.world</code> against ALPHA returns the cluster addresses. Later stages do not hardcode IPs.</p>
+<p><strong>Scope:</strong> Authoritative answers for <code>pi.world</code> and the node names under it. No walk, no cache, no forwarder.</p>
 <p>*Formerly: DNS Resolver.*</p>
-<p><strong>Recommended stack:</strong> Node.js (built-in <code>dgram</code> for UDP)</p>
-<h4 id="dns-resolver-step-1---parse-a-response">Step 1 - Parse a response</h4>
-<p><strong>Goal:</strong> Decode a raw response buffer into a structured JavaScript object.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="dns-resolver-step-1---decode-a-query">Step 1 - Decode a query</h4>
+<p><strong>Goal:</strong> Decode an inbound A query for <code>pi.world</code> into a message object.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: raw response Buffer</li>
-<li>Output: <code>{ id, flags, questions: [...], answers: [{ name, type, class, ttl, rdata }], ... }</code></li>
+<li>Input: UDP payload bytes
+</li>
+<li>Output:
+<ul>
+<li>header
+<ul>
+<li>transactionId: 16-bit integer
+</li>
+<li>flags
+<ul>
+<li>qr: integer
+</li>
+<li>opcode: integer
+</li>
+<li>aa: integer
+</li>
+<li>tc: integer
+</li>
+<li>rd: integer
+</li>
+<li>ra: integer
+</li>
+<li>rcode: integer
+</li>
+</ul>
+</li>
+<li>qdcount: integer
+</li>
+<li>ancount: integer
+</li>
+<li>nscount: integer
+</li>
+<li>arcount: integer
+</li>
+</ul>
+</li>
+<li>questions: list of
+<ul>
+<li>name: string
+</li>
+<li>type: integer
+</li>
+<li>class: integer
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you read a 16-bit big-endian integer from a Buffer at a given offset?</li>
-<li>What is DNS message compression, and how does a pointer (0xC0 prefix) work?</li>
-<li>How many answer records does the ANCOUNT field tell you to expect?</li>
+<li>Where does the 12-byte header end and the question start?
+</li>
+<li>How is a name stored on the wire if it is not a dotted string? (RFC 1035 §3.1)
+</li>
+<li>Which header fields are counts, and which of them must be 1 for this Sample?
+</li>
 </ul>
+<p><strong>Watch out:</strong> Names on the wire are length-prefixed labels, not dots. A linear read that treats <code>.</code> as a separator will not match the oracle.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="dns-resolver-sample-1---piworld-a-query">Sample 1 - pi.world A query</h5>
+<p>The oracle is the bytes in <a href="../../packages/dns/src/fixtures/pi-world-a/01-query.bin"><code>01-query.bin</code></a> and the decoded object in <a href="../../packages/dns/src/fixtures/pi-world-a/01-query.ts"><code>01-query.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Querying <code>example.com</code> returns at least one answer with <code>type: &quot;A&quot;</code> and a valid IPv4 address string</li>
-<li>You can also parse the TTL as a number (seconds)</li>
+<li>pi.world A query
+</li>
 </ul>
-<p><strong>Watch out:</strong> DNS name compression uses 2-byte pointers that jump to an earlier offset in the *same packet*. If you parse names linearly without following pointers, you'll get garbage for most real-world responses.</p>
 <hr />
-<h4 id="dns-resolver-step-2---send-a-raw-udp-dns-query">Step 2 - Send a raw UDP DNS query</h4>
-<p><strong>Goal:</strong> Construct a valid DNS query packet by hand and send it to a public resolver.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="dns-resolver-step-2---encode-an-aa-response">Step 2 - Encode an AA response</h4>
+<p><strong>Goal:</strong> Encode an authoritative A response for <code>pi.world</code>.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: a domain name string (e.g. <code>&quot;example.com&quot;</code>) and a record type (<code>A</code>)</li>
-<li>Output: a raw UDP response buffer from <code>8.8.8.8:53</code></li>
+<li>Input:
+<ul>
+<li>header (same fields as Step 1)
+</li>
+<li>questions (same fields as Step 1)
+</li>
+<li>answers: list of
+<ul>
+<li>name: string
+</li>
+<li>type: integer
+</li>
+<li>class: integer
+</li>
+<li>ttl: integer (seconds)
+</li>
+<li>rdlength: integer
+</li>
+<li>rdata: bytes
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Output: UDP payload bytes
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the wire format of a DNS message? (RFC 1035 §4)</li>
-<li>What fields live in the header, and what are their sizes in bits?</li>
-<li>How is a domain name encoded as a sequence of labels?</li>
+<li>Which flag bits change from the query to a response that claims authority?
+</li>
+<li>What is in <code>rdata</code> for an A record, and how long is it?
+</li>
+<li>The apex name <code>pi.world</code> already appeared in the question. How can an answer name reuse those bytes? (RFC 1035 §4.1.4)
+</li>
 </ul>
+<p><strong>Watch out:</strong> If you write the apex name out in full in every answer, your bytes will not match the oracle. Most answers point back at the question name.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="dns-resolver-sample-1---piworld-aa-answer">Sample 1 - pi.world AA answer</h5>
+<p>The oracle is the bytes in <a href="../../packages/dns/src/fixtures/pi-world-a/02-aa-answer.bin"><code>02-aa-answer.bin</code></a> and the decoded object in <a href="../../packages/dns/src/fixtures/pi-world-a/02-aa-answer.ts"><code>02-aa-answer.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>You can send a query and <code>console.log</code> a non-empty Buffer back</li>
-<li>The first two bytes of the response match the ID you sent</li>
+<li>pi.world AA answer
+</li>
 </ul>
-<p><strong>Watch out:</strong> DNS labels are length-prefixed, not dot-separated on the wire. <code>example.com</code> becomes <code>\x07example\x03com\x00</code> - the trailing null byte is required.</p>
 <hr />
-<h4 id="dns-resolver-step-3---walk-the-hierarchy-iterative-resolution">Step 3 - Walk the hierarchy (iterative resolution)</h4>
-<p><strong>Goal:</strong> Resolve a domain from the root servers down without relying on a forwarder.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="dns-resolver-step-3---answer-on-the-wire">Step 3 - Answer on the wire</h4>
+<p><strong>Goal:</strong> Listen on ALPHA and answer zone queries so Compose <code>dig</code> matches these transcripts.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: domain name string</li>
-<li>Output: resolved IP address(es), reached via root → TLD → authoritative nameserver</li>
+<li>Input: a DNS query datagram on ALPHA
+</li>
+<li>Output: a DNS response datagram
+<ul>
+<li><code>pi.world</code> A: AA, NOERROR, A records for ALPHA, BRAVO, and CHARLIE
+</li>
+<li><code>bravo.pi.world</code> A: AA, NOERROR, BRAVO's A
+</li>
+<li>a name under <code>pi.world</code> that is not in the zone: AA, NXDOMAIN
+</li>
+<li>a name outside <code>pi.world</code>: REFUSED
+</li>
+</ul>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What are the root server IP addresses, and where do you hardcode them?</li>
-<li>What response code and section tell you to follow a referral vs. accept a final answer?</li>
-<li>What is the difference between a REFERRAL (no answer, authority section populated) and a NOERROR with answers?</li>
+<li>From the laptop, which address and port reach ALPHA's port 53? From inside the Compose network, which?
+</li>
+<li>What is the difference between NXDOMAIN and REFUSED for these four names?
+</li>
+<li>Which header bit is set on every in-zone answer, including NXDOMAIN?
+</li>
 </ul>
+<p><strong>Watch out:</strong> Compose Checks use <code>127.0.0.1</code> port <code>5354</code> (host publish). Inside a node, the same service is port <code>53</code>. <code>dig</code>'s id, WHEN, Query time, and MSG SIZE change every run. Match status, flags, and record sets. The stage Enables line is still the Pis: nodes use ALPHA by name, with no hardcoded IPs and no <code>/etc/hosts</code> crutch.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="dns-resolver-sample-1---dig-piworld">Sample 1 - dig pi.world</h5>
+<pre><code>dig @127.0.0.1 -p 5354 pi.world
+</code></pre>
+<pre><code>; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; @127.0.0.1 -p 5354 pi.world
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 1
+;; flags: qr aa rd; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;pi.world.			IN	A
+
+;; ANSWER SECTION:
+pi.world.		300	IN	A	10.53.0.10
+pi.world.		300	IN	A	10.53.0.11
+pi.world.		300	IN	A	10.53.0.12
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#5354(127.0.0.1)
+;; WHEN: Tue Sep 15 13:00:00 PDT 2026
+;; MSG SIZE  rcvd: 74
+</code></pre>
+<h5 id="dns-resolver-sample-2---dig-bravopiworld">Sample 2 - dig bravo.pi.world</h5>
+<pre><code>dig @127.0.0.1 -p 5354 bravo.pi.world
+</code></pre>
+<pre><code>; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; @127.0.0.1 -p 5354 bravo.pi.world
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 1
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;bravo.pi.world.		IN	A
+
+;; ANSWER SECTION:
+bravo.pi.world.		300	IN	A	10.53.0.11
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#5354(127.0.0.1)
+;; WHEN: Tue Sep 15 13:00:00 PDT 2026
+;; MSG SIZE  rcvd: 48
+</code></pre>
+<h5 id="dns-resolver-sample-3---dig-nopepiworld">Sample 3 - dig nope.pi.world</h5>
+<pre><code>dig @127.0.0.1 -p 5354 nope.pi.world
+</code></pre>
+<pre><code>; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; @127.0.0.1 -p 5354 nope.pi.world
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NXDOMAIN, id: 1
+;; flags: qr aa rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;nope.pi.world.			IN	A
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#5354(127.0.0.1)
+;; WHEN: Tue Sep 15 13:00:00 PDT 2026
+;; MSG SIZE  rcvd: 31
+</code></pre>
+<h5 id="dns-resolver-sample-4---dig-googlecom">Sample 4 - dig google.com</h5>
+<pre><code>dig @127.0.0.1 -p 5354 google.com
+</code></pre>
+<pre><code>; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; @127.0.0.1 -p 5354 google.com
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: REFUSED, id: 1
+;; flags: qr rd; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
+;; WARNING: recursion requested but not available
+
+;; QUESTION SECTION:
+;google.com.			IN	A
+
+;; Query time: 1 msec
+;; SERVER: 127.0.0.1#5354(127.0.0.1)
+;; WHEN: Tue Sep 15 13:00:00 PDT 2026
+;; MSG SIZE  rcvd: 28
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Running your resolver against <code>dig</code> output for the same domain produces identical A records</li>
-<li>The console shows each hop: root → TLD nameserver → authoritative nameserver → answer</li>
+<li>dig pi.world
+</li>
+<li>dig bravo.pi.world
+</li>
+<li>dig nope.pi.world
+</li>
+<li>dig google.com
+</li>
 </ul>
-<p><strong>Watch out:</strong> Authoritative servers often return glue records (A records for the nameservers themselves) in the Additional section. If you ignore those, you'll have to do an extra lookup just to contact the nameserver - follow the glue when it's present.</p>
 <hr />
-<h4 id="dns-resolver-step-4---add-a-ttl-aware-cache">Step 4 - Add a TTL-aware cache</h4>
-<p><strong>Goal:</strong> Cache resolved records and serve them from cache until TTL expires.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: a query for a domain you've already resolved</li>
-<li>Output: cached answer with remaining TTL (not the original TTL)</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>Should you store the absolute expiry timestamp or the original TTL? Which makes remaining-TTL calculation easier?</li>
-<li>What is your cache key? Just the domain, or domain + record type?</li>
-<li>What should happen on a cache miss after the TTL expires?</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>A second query for the same domain returns instantly and logs <code>[cache hit]</code></li>
-<li>After waiting for the TTL to expire (test with a low-TTL domain), the next query triggers a fresh lookup</li>
-<li>The returned TTL decrements correctly across repeated queries</li>
-</ul>
-<p><strong>Watch out:</strong> Store the expiry time (<code>Date.now() + ttl * 1000</code>), not the original TTL. Returning a stale TTL value on cache hits is a common off-by-one that violates RFC 1035 §3.2.1.</p>
-<hr />
-<h4 id="dns-resolver-step-5---answer-authoritatively-for-piworld">Step 5 - Answer authoritatively for <code>pi.world</code></h4>
-<p><strong>Goal:</strong> Stop being only a client. Listen on port 53 and answer queries for your own zone.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: an inbound query packet for <code>pi.world</code>, <code>alpha.pi.world</code>, <code>bravo.pi.world</code>, or <code>charlie.pi.world</code></li>
-<li>Output: a response packet carrying the A records for your nodes, with AA set</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>Which header bits change between a query and a response, and which one claims authority?</li>
-<li>Where does the zone data live - hardcoded, a file, or something a node can update when its address changes?</li>
-<li>What do you return for a name in your zone that does not exist, versus a name outside your zone entirely?</li>
-<li>Port 53 is privileged. How will you run this on the Pi - root, <code>CAP_NET_BIND_SERVICE</code>, or a high port plus a redirect?</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li><code>dig @alpha.local bravo.pi.world</code> returns the right A record with the <code>aa</code> flag set</li>
-<li><code>dig @alpha.local nope.pi.world</code> returns NXDOMAIN, not an empty NOERROR</li>
-<li>Pointing your laptop's resolver at ALPHA lets you <code>ping charlie.pi.world</code> with no <code>/etc/hosts</code> entry</li>
-</ul>
-<p><strong>Watch out:</strong> A name that does not exist is NXDOMAIN. A name that exists with no record of the requested type is NOERROR with zero answers. Getting these backwards makes clients retry in ways that are confusing to debug later.</p>
-<hr />
-<h4 id="dns-resolver-step-6---make-it-the-platforms-resolver">Step 6 - Make it the platform's resolver</h4>
-<p><strong>Goal:</strong> Run it as a real service on ALPHA, and let the rest of the network use it.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: every DNS query from your laptop and from the other two nodes</li>
-<li>Output: authoritative answers for <code>pi.world</code>, resolved answers for everything else</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What happens to the rest of the platform when ALPHA's DNS process dies? Is that acceptable yet?</li>
-<li>Should nodes query you over UDP only? What makes a response too large for UDP, and what does a client do about it?</li>
-<li>How do you keep the service running across a reboot, and how do you see its logs?</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Your laptop is configured to use ALPHA as its resolver and normal web browsing still works</li>
-<li>BRAVO and CHARLIE resolve each other by name through your server</li>
-<li>You reboot ALPHA and DNS comes back without you starting it by hand</li>
-</ul>
-<p><strong>Watch out:</strong> The moment your laptop depends on this for all DNS, a bug in it takes your internet down, not just your project. Keep a second resolver configured, and know how to switch back.</p>
-<hr />
-<p><strong>Next:</strong> the names resolve, but nothing answers on the other end yet. <a href="#">Stage 2 · Transport</a>.</p></div>
+<p><strong>Next:</strong> the names resolve, but nothing answers on the other end yet. <a href="#tcp-server">Stage 2 · Transport</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-tcp-server" data-page="tcp-server" hidden>
@@ -779,19 +1011,26 @@
 <p><strong>Goal:</strong> Open a TCP socket, accept client connections, and echo back whatever bytes arrive.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: raw bytes from a <code>telnet</code> or <code>nc</code> client</li>
-<li>Output: the same bytes written back to the same socket</li>
+<li>Input: raw bytes from a <code>telnet</code> or <code>nc</code> client
+</li>
+<li>Output: the same bytes written back to the same socket
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the difference between a listening socket and a connection socket?</li>
-<li>What events does a <code>net.Server</code> and a <code>net.Socket</code> emit in Node.js?</li>
-<li>What does it mean for TCP to be a *stream* protocol - why can't you assume each <code>data</code> event is one &quot;message&quot;?</li>
+<li>What is the difference between a listening socket and a connection socket?
+</li>
+<li>What events does a <code>net.Server</code> and a <code>net.Socket</code> emit in Node.js?
+</li>
+<li>What does it mean for TCP to be a *stream* protocol - why can't you assume each <code>data</code> event is one &quot;message&quot;?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>echo &quot;hello&quot; | nc localhost 3000</code> prints <code>hello</code> back</li>
-<li>Multiple simultaneous <code>nc</code> sessions each get their own echo (connections are isolated)</li>
+<li><code>echo &quot;hello&quot; | nc localhost 3000</code> prints <code>hello</code> back
+</li>
+<li>Multiple simultaneous <code>nc</code> sessions each get their own echo (connections are isolated)
+</li>
 </ul>
 <p><strong>Watch out:</strong> TCP is a byte stream. A single <code>write(&quot;hello world&quot;)</code> from the client may arrive as two separate <code>data</code> events: <code>&quot;hello &quot;</code> and <code>&quot;world&quot;</code>. Never treat one event as one message.</p>
 <hr />
@@ -799,19 +1038,26 @@
 <p><strong>Goal:</strong> Define an application-level message boundary so you can send and receive complete messages reliably.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a message string from the client, prefixed with a 4-byte big-endian length header</li>
-<li>Output: the parsed message string (no length prefix) logged on the server; echoed back with a new length prefix</li>
+<li>Input: a message string from the client, prefixed with a 4-byte big-endian length header
+</li>
+<li>Output: the parsed message string (no length prefix) logged on the server; echoed back with a new length prefix
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you handle the case where a <code>data</code> event delivers only part of a length header?</li>
-<li>Where do you store the incomplete buffer across events?</li>
-<li>How many bytes should you wait for before attempting to parse a message?</li>
+<li>How do you handle the case where a <code>data</code> event delivers only part of a length header?
+</li>
+<li>Where do you store the incomplete buffer across events?
+</li>
+<li>How many bytes should you wait for before attempting to parse a message?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Sending a 1 MB message arrives as exactly one complete parsed message, regardless of how TCP fragments it</li>
-<li>Your test client can send 1000 messages sequentially and the server processes all 1000 in order</li>
+<li>Sending a 1 MB message arrives as exactly one complete parsed message, regardless of how TCP fragments it
+</li>
+<li>Your test client can send 1000 messages sequentially and the server processes all 1000 in order
+</li>
 </ul>
 <p><strong>Watch out:</strong> Buffer the incoming bytes in a per-connection accumulator. A common mistake is using a module-level buffer that gets mixed between connections.</p>
 <hr />
@@ -819,20 +1065,28 @@
 <p><strong>Goal:</strong> Gracefully handle slow clients, half-closes, and connection errors without crashing.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a client that connects, sends some data, then closes - or drops without closing</li>
-<li>Output: clean resource cleanup; no lingering connections; no memory leaks</li>
+<li>Input: a client that connects, sends some data, then closes - or drops without closing
+</li>
+<li>Output: clean resource cleanup; no lingering connections; no memory leaks
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the difference between <code>end</code> (half-close) and <code>destroy</code> (hard close)?</li>
-<li>How does <code>socket.write()</code> signal backpressure, and what should you do if it returns <code>false</code>?</li>
-<li>How do you detect a connection that has gone silent without sending a FIN?</li>
+<li>What is the difference between <code>end</code> (half-close) and <code>destroy</code> (hard close)?
+</li>
+<li>How does <code>socket.write()</code> signal backpressure, and what should you do if it returns <code>false</code>?
+</li>
+<li>How do you detect a connection that has gone silent without sending a FIN?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>After 100 connect/disconnect cycles, your server's open connection count returns to 0</li>
-<li>A client that stops reading (blocked consumer) causes the server to pause sending, not crash</li>
-<li>A <code>socket.setTimeout()</code> correctly closes an idle connection after N seconds</li>
+<li>After 100 connect/disconnect cycles, your server's open connection count returns to 0
+</li>
+<li>A client that stops reading (blocked consumer) causes the server to pause sending, not crash
+</li>
+<li>A <code>socket.setTimeout()</code> correctly closes an idle connection after N seconds
+</li>
 </ul>
 <p><strong>Watch out:</strong> Forgetting to handle the <code>error</code> event on a socket will crash the process with an unhandled exception when a client resets the connection (RST packet).</p></div>
       </div>
@@ -854,19 +1108,26 @@
 <p><strong>Goal:</strong> Read the bytes off a TCP connection and parse them into a structured request object.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: raw HTTP/1.1 request bytes (e.g. from <code>curl --http1.1</code>)</li>
-<li>Output: <code>{ method, path, httpVersion, headers: Map, body: Buffer }</code></li>
+<li>Input: raw HTTP/1.1 request bytes (e.g. from <code>curl --http1.1</code>)
+</li>
+<li>Output: <code>{ method, path, httpVersion, headers: Map, body: Buffer }</code>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Where does the request line end and the headers begin?</li>
-<li>How do you know when the headers are complete? (Hint: <code>\r\n\r\n</code>)</li>
-<li>How do you know how many body bytes to read? Which headers tell you?</li>
+<li>Where does the request line end and the headers begin?
+</li>
+<li>How do you know when the headers are complete? (Hint: <code>\r\n\r\n</code>)
+</li>
+<li>How do you know how many body bytes to read? Which headers tell you?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -v http://localhost:3000/hello</code> shows your parsed method (<code>GET</code>), path (<code>/hello</code>), and all headers logged on the server</li>
-<li>A POST with a body is parsed with the correct body content</li>
+<li><code>curl -v http://localhost:3000/hello</code> shows your parsed method (<code>GET</code>), path (<code>/hello</code>), and all headers logged on the server
+</li>
+<li>A POST with a body is parsed with the correct body content
+</li>
 </ul>
 <p><strong>Watch out:</strong> HTTP headers are terminated by <code>\r\n\r\n</code>, but TCP may deliver that sequence across multiple <code>data</code> events. Buffer until you see the terminator before parsing.</p>
 <hr />
@@ -874,19 +1135,26 @@
 <p><strong>Goal:</strong> Write properly formatted HTTP/1.1 responses that browsers and <code>curl</code> accept.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a parsed request object and a desired response <code>{ statusCode, headers, body }</code></li>
-<li>Output: a raw HTTP response written to the socket</li>
+<li>Input: a parsed request object and a desired response <code>{ statusCode, headers, body }</code>
+</li>
+<li>Output: a raw HTTP response written to the socket
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the mandatory format of the status line?</li>
-<li>Which response headers are required for the client to correctly determine message length?</li>
-<li>When is <code>Content-Length</code> required, and when is <code>Transfer-Encoding: chunked</code> preferred?</li>
+<li>What is the mandatory format of the status line?
+</li>
+<li>Which response headers are required for the client to correctly determine message length?
+</li>
+<li>When is <code>Content-Length</code> required, and when is <code>Transfer-Encoding: chunked</code> preferred?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -i http://localhost:3000/</code> shows <code>HTTP/1.1 200 OK</code>, correct headers, and your body</li>
-<li>A browser can load a simple HTML page served by your server</li>
+<li><code>curl -i http://localhost:3000/</code> shows <code>HTTP/1.1 200 OK</code>, correct headers, and your body
+</li>
+<li>A browser can load a simple HTML page served by your server
+</li>
 </ul>
 <p><strong>Watch out:</strong> If you omit <code>Content-Length</code> and don't use chunked encoding, most clients will hang waiting for more data. Always signal message end.</p>
 <hr />
@@ -894,19 +1162,26 @@
 <p><strong>Goal:</strong> Serve multiple requests over a single TCP connection instead of closing after each one.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>Connection: keep-alive</code> header in the request</li>
-<li>Output: the connection stays open after the response; subsequent requests on the same socket are handled</li>
+<li>Input: <code>Connection: keep-alive</code> header in the request
+</li>
+<li>Output: the connection stays open after the response; subsequent requests on the same socket are handled
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you know where one request ends and the next begins on the same socket?</li>
-<li>What should you do when a request includes <code>Connection: close</code>?</li>
-<li>How do you prevent a keep-alive connection from living forever?</li>
+<li>How do you know where one request ends and the next begins on the same socket?
+</li>
+<li>What should you do when a request includes <code>Connection: close</code>?
+</li>
+<li>How do you prevent a keep-alive connection from living forever?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl --http1.1 -v http://localhost:3000/ http://localhost:3000/about</code> shows both responses on a *single* TCP connection (look for &quot;Re-using existing connection&quot; in curl output)</li>
-<li>After an idle timeout, the server closes the connection and a new request opens a fresh one</li>
+<li><code>curl --http1.1 -v http://localhost:3000/ http://localhost:3000/about</code> shows both responses on a *single* TCP connection (look for &quot;Re-using existing connection&quot; in curl output)
+</li>
+<li>After an idle timeout, the server closes the connection and a new request opens a fresh one
+</li>
 </ul>
 <p><strong>Watch out:</strong> After sending a response, don't destroy the socket - return to the &quot;waiting for request&quot; state on the same socket. Destroying it is correct only for <code>Connection: close</code> or after the idle timeout fires.</p></div>
       </div>
@@ -928,20 +1203,28 @@
 <p><strong>Goal:</strong> Accept a request, rewrite necessary headers, forward to an upstream, and return the upstream's response.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: client HTTP request with original <code>Host</code>, <code>Connection</code>, and other headers</li>
-<li>Output: forwarded request with <code>X-Forwarded-For</code>, <code>X-Forwarded-Proto</code>, and <code>Via</code> added; upstream response returned verbatim</li>
+<li>Input: client HTTP request with original <code>Host</code>, <code>Connection</code>, and other headers
+</li>
+<li>Output: forwarded request with <code>X-Forwarded-For</code>, <code>X-Forwarded-Proto</code>, and <code>Via</code> added; upstream response returned verbatim
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Which hop-by-hop headers (e.g. <code>Connection</code>, <code>Transfer-Encoding</code>) must be stripped before forwarding?</li>
-<li>How do you handle streaming response bodies without buffering them entirely in memory?</li>
-<li>What is the <code>Via</code> header and what format does it use?</li>
+<li>Which hop-by-hop headers (e.g. <code>Connection</code>, <code>Transfer-Encoding</code>) must be stripped before forwarding?
+</li>
+<li>How do you handle streaming response bodies without buffering them entirely in memory?
+</li>
+<li>What is the <code>Via</code> header and what format does it use?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -H &quot;Host: myapp.local&quot; http://localhost:8080/</code> is forwarded to the correct upstream</li>
-<li>The upstream's access log shows the correct client IP in <code>X-Forwarded-For</code></li>
-<li>Large file downloads stream through without memory usage growing</li>
+<li><code>curl -H &quot;Host: myapp.local&quot; http://localhost:8080/</code> is forwarded to the correct upstream
+</li>
+<li>The upstream's access log shows the correct client IP in <code>X-Forwarded-For</code>
+</li>
+<li>Large file downloads stream through without memory usage growing
+</li>
 </ul>
 <p><strong>Watch out:</strong> Don't forget to strip <code>Connection</code> and its nominated headers before forwarding. Passing <code>Connection: keep-alive</code> to some upstreams causes protocol errors.</p>
 <hr />
@@ -949,20 +1232,28 @@
 <p><strong>Goal:</strong> Accept HTTPS connections from clients, terminate TLS, and forward plain HTTP to upstream backends.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: HTTPS request (TLS) on port 443</li>
-<li>Output: decrypted HTTP request forwarded to upstream on port 80; upstream's HTTP response re-encrypted back to client</li>
+<li>Input: HTTPS request (TLS) on port 443
+</li>
+<li>Output: decrypted HTTP request forwarded to upstream on port 80; upstream's HTTP response re-encrypted back to client
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you create a self-signed certificate for local testing?</li>
-<li>What Node.js APIs are used to create an HTTPS server vs. an HTTP server?</li>
-<li>What header should you set so the upstream knows the original protocol was HTTPS?</li>
+<li>How do you create a self-signed certificate for local testing?
+</li>
+<li>What Node.js APIs are used to create an HTTPS server vs. an HTTP server?
+</li>
+<li>What header should you set so the upstream knows the original protocol was HTTPS?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -k https://localhost:8443/</code> returns the upstream's response</li>
-<li>The upstream receives <code>X-Forwarded-Proto: https</code></li>
-<li><code>openssl s_client -connect localhost:8443</code> shows your certificate in the handshake</li>
+<li><code>curl -k https://localhost:8443/</code> returns the upstream's response
+</li>
+<li>The upstream receives <code>X-Forwarded-Proto: https</code>
+</li>
+<li><code>openssl s_client -connect localhost:8443</code> shows your certificate in the handshake
+</li>
 </ul>
 <p><strong>Watch out:</strong> <code>https.createServer</code> needs <code>key</code> and <code>cert</code> options - the raw PEM strings, not file paths. Read the files and pass their contents.</p>
 <hr />
@@ -970,19 +1261,26 @@
 <p><strong>Goal:</strong> Route requests to different upstreams based on the <code>Host</code> header.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a routing table mapping hostnames to upstream URLs: <code>{ &quot;api.local&quot;: &quot;http://localhost:3001&quot;, &quot;app.local&quot;: &quot;http://localhost:3002&quot; }</code></li>
-<li>Output: requests routed to the correct upstream; unrecognized hosts receive <code>502 Bad Gateway</code></li>
+<li>Input: a routing table mapping hostnames to upstream URLs: <code>{ &quot;api.local&quot;: &quot;http://localhost:3001&quot;, &quot;app.local&quot;: &quot;http://localhost:3002&quot; }</code>
+</li>
+<li>Output: requests routed to the correct upstream; unrecognized hosts receive <code>502 Bad Gateway</code>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Where do you strip the port from the <code>Host</code> header before matching?</li>
-<li>How do you handle wildcard or prefix matching (e.g. <code>*.example.com</code>)?</li>
-<li>What response should an unrecognized host receive, and what body?</li>
+<li>Where do you strip the port from the <code>Host</code> header before matching?
+</li>
+<li>How do you handle wildcard or prefix matching (e.g. <code>*.example.com</code>)?
+</li>
+<li>What response should an unrecognized host receive, and what body?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Requests with <code>Host: api.local</code> consistently reach the API upstream, and <code>Host: app.local</code> consistently reach the app upstream</li>
-<li>An unknown host returns <code>502</code> with a meaningful error body (not a silent connection close)</li>
+<li>Requests with <code>Host: api.local</code> consistently reach the API upstream, and <code>Host: app.local</code> consistently reach the app upstream
+</li>
+<li>An unknown host returns <code>502</code> with a meaningful error body (not a silent connection close)
+</li>
 </ul>
 <p><strong>Watch out:</strong> <code>Host</code> headers include the port when it's non-standard (e.g. <code>api.local:8080</code>). Split on <code>:</code> and match on the hostname portion only.</p></div>
       </div>
@@ -1004,19 +1302,26 @@
 <p><strong>Goal:</strong> Accept incoming HTTP requests and forward them to a rotating pool of backend servers.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: HTTP request from a client</li>
-<li>Output: the request proxied to one backend; the backend's response returned to the client</li>
+<li>Input: HTTP request from a client
+</li>
+<li>Output: the request proxied to one backend; the backend's response returned to the client
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you forward a request - do you open a new connection to the backend per request, or reuse connections?</li>
-<li>Which request headers must you pass through unchanged, and which should you add (e.g. <code>X-Forwarded-For</code>)?</li>
-<li>How do you pass the response status, headers, and body back to the original client?</li>
+<li>How do you forward a request - do you open a new connection to the backend per request, or reuse connections?
+</li>
+<li>Which request headers must you pass through unchanged, and which should you add (e.g. <code>X-Forwarded-For</code>)?
+</li>
+<li>How do you pass the response status, headers, and body back to the original client?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Three backend servers started on ports 3001–3003 each respond with their own port number</li>
-<li>300 sequential requests distribute ~100 each to all three (verify with access logs)</li>
+<li>Three backend servers started on ports 3001–3003 each respond with their own port number
+</li>
+<li>300 sequential requests distribute ~100 each to all three (verify with access logs)
+</li>
 </ul>
 <p><strong>Watch out:</strong> HTTP/1.1 <code>Host</code> header on the forwarded request must match what the backend expects. Forgetting to rewrite it breaks backends that do virtual hosting.</p>
 <hr />
@@ -1024,19 +1329,26 @@
 <p><strong>Goal:</strong> Route each new request to the backend with the fewest in-flight requests.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: incoming request + current in-flight count per backend</li>
-<li>Output: the chosen backend; count incremented on dispatch, decremented on response end</li>
+<li>Input: incoming request + current in-flight count per backend
+</li>
+<li>Output: the chosen backend; count incremented on dispatch, decremented on response end
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Where do you track the in-flight count - in a module-level map, or on a backend object?</li>
-<li>When exactly do you decrement? On response <code>end</code>? On socket <code>close</code>? What about errors?</li>
-<li>What happens when all backends are tied? (Any tiebreak is valid - pick one and stick with it.)</li>
+<li>Where do you track the in-flight count - in a module-level map, or on a backend object?
+</li>
+<li>When exactly do you decrement? On response <code>end</code>? On socket <code>close</code>? What about errors?
+</li>
+<li>What happens when all backends are tied? (Any tiebreak is valid - pick one and stick with it.)
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>With one slow backend (simulated with <code>setTimeout</code>), new requests avoid it and pile onto the faster backends</li>
-<li>After all in-flight requests complete, counts return to 0 for all backends</li>
+<li>With one slow backend (simulated with <code>setTimeout</code>), new requests avoid it and pile onto the faster backends
+</li>
+<li>After all in-flight requests complete, counts return to 0 for all backends
+</li>
 </ul>
 <p><strong>Watch out:</strong> Decrement the counter in a <code>finally</code>-equivalent handler that fires on *both* success and error. Missing the error path leaks the counter upward until that backend is never chosen again.</p>
 <hr />
@@ -1044,20 +1356,28 @@
 <p><strong>Goal:</strong> Periodically probe each backend and remove unhealthy ones from rotation until they recover.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a configurable probe interval and endpoint (e.g. <code>GET /health</code>)</li>
-<li>Output: backends marked healthy/unhealthy; unhealthy backends skipped during routing; re-added after N consecutive successes</li>
+<li>Input: a configurable probe interval and endpoint (e.g. <code>GET /health</code>)
+</li>
+<li>Output: backends marked healthy/unhealthy; unhealthy backends skipped during routing; re-added after N consecutive successes
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What constitutes &quot;unhealthy&quot;? HTTP 5xx? Connection refused? Timeout?</li>
-<li>How many consecutive failures before marking unhealthy, and how many successes to recover?</li>
-<li>What should happen to in-flight requests on a backend that just became unhealthy?</li>
+<li>What constitutes &quot;unhealthy&quot;? HTTP 5xx? Connection refused? Timeout?
+</li>
+<li>How many consecutive failures before marking unhealthy, and how many successes to recover?
+</li>
+<li>What should happen to in-flight requests on a backend that just became unhealthy?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Killing a backend process causes it to drop from rotation within one probe interval</li>
-<li>Restarting the backend causes it to rejoin after N successful probes</li>
-<li>A client making continuous requests never sees an error response due to a downed backend (after the first probe cycle)</li>
+<li>Killing a backend process causes it to drop from rotation within one probe interval
+</li>
+<li>Restarting the backend causes it to rejoin after N successful probes
+</li>
+<li>A client making continuous requests never sees an error response due to a downed backend (after the first probe cycle)
+</li>
 </ul>
 <p><strong>Watch out:</strong> Don't remove a backend from the pool mid-request. Mark it unhealthy so *new* requests skip it, but let in-flight requests complete (or fail naturally).</p></div>
       </div>
@@ -1079,20 +1399,28 @@
 <p><strong>Goal:</strong> Match incoming request paths to backend services using a configurable routing table.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: incoming request + routing config like <code>[{ prefix: &quot;/users&quot;, upstream: &quot;http://localhost:3001&quot; }, ...]</code></li>
-<li>Output: request forwarded to the matching upstream; path prefix stripped or preserved per config</li>
+<li>Input: incoming request + routing config like <code>[{ prefix: &quot;/users&quot;, upstream: &quot;http://localhost:3001&quot; }, ...]</code>
+</li>
+<li>Output: request forwarded to the matching upstream; path prefix stripped or preserved per config
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Should prefix matching be first-match or longest-match wins? Why does it matter?</li>
-<li>Do you strip the matched prefix before forwarding (e.g. <code>/users/123</code> → <code>/123</code>) or pass it through?</li>
-<li>What happens when no route matches?</li>
+<li>Should prefix matching be first-match or longest-match wins? Why does it matter?
+</li>
+<li>Do you strip the matched prefix before forwarding (e.g. <code>/users/123</code> → <code>/123</code>) or pass it through?
+</li>
+<li>What happens when no route matches?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>GET /users/42</code> reaches the users service at <code>/42</code> (if stripping) or <code>/users/42</code> (if not)</li>
-<li><code>GET /orders/7</code> reaches the orders service</li>
-<li><code>GET /unknown</code> returns <code>404</code> from the gateway, not from any upstream</li>
+<li><code>GET /users/42</code> reaches the users service at <code>/42</code> (if stripping) or <code>/users/42</code> (if not)
+</li>
+<li><code>GET /orders/7</code> reaches the orders service
+</li>
+<li><code>GET /unknown</code> returns <code>404</code> from the gateway, not from any upstream
+</li>
 </ul>
 <p><strong>Watch out:</strong> A prefix <code>/api</code> will also match <code>/api-docs</code>. Match on <code>/api/</code> or check for exact segment boundaries to avoid this.</p>
 <hr />
@@ -1100,20 +1428,28 @@
 <p><strong>Goal:</strong> Validate a bearer token on every request before forwarding, and reject unauthorized requests.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>Authorization: Bearer &lt;token&gt;</code> header</li>
-<li>Output: validated identity object attached to the request context (forwarded as a header to the upstream); <code>401</code> on missing/invalid token</li>
+<li>Input: <code>Authorization: Bearer &lt;token&gt;</code> header
+</li>
+<li>Output: validated identity object attached to the request context (forwarded as a header to the upstream); <code>401</code> on missing/invalid token
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Are you validating a JWT (verify signature + claims) or doing a lookup against a token store?</li>
-<li>What information should you forward to the upstream so it doesn't need to re-authenticate?</li>
-<li>What is the difference between 401 (unauthenticated) and 403 (unauthorized)?</li>
+<li>Are you validating a JWT (verify signature + claims) or doing a lookup against a token store?
+</li>
+<li>What information should you forward to the upstream so it doesn't need to re-authenticate?
+</li>
+<li>What is the difference between 401 (unauthenticated) and 403 (unauthorized)?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>A request with a valid token reaches the upstream and includes an <code>X-User-Id</code> (or similar) header</li>
-<li>A request with no token or an expired token returns <code>401</code> and never reaches the upstream</li>
-<li>Rotating the signing secret immediately invalidates all existing tokens</li>
+<li>A request with a valid token reaches the upstream and includes an <code>X-User-Id</code> (or similar) header
+</li>
+<li>A request with no token or an expired token returns <code>401</code> and never reaches the upstream
+</li>
+<li>Rotating the signing secret immediately invalidates all existing tokens
+</li>
 </ul>
 <p><strong>Watch out:</strong> If using JWTs, validate the <code>exp</code> claim - an expired but well-signed token must be rejected. Checking only the signature is not enough.</p>
 <hr />
@@ -1121,20 +1457,28 @@
 <p><strong>Goal:</strong> Limit each client to N requests per time window using a sliding window or token bucket algorithm.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: incoming request + client identifier (IP, API key, or user ID)</li>
-<li>Output: request forwarded if within limit; <code>429 Too Many Requests</code> with <code>Retry-After</code> header if exceeded</li>
+<li>Input: incoming request + client identifier (IP, API key, or user ID)
+</li>
+<li>Output: request forwarded if within limit; <code>429 Too Many Requests</code> with <code>Retry-After</code> header if exceeded
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is your rate limit key? Per-IP, per-token, or per-user-ID?</li>
-<li>Fixed window vs. sliding window vs. token bucket - what are the trade-offs?</li>
-<li>Where do you store the counters? In-memory is fine for a single instance; what breaks at scale?</li>
+<li>What is your rate limit key? Per-IP, per-token, or per-user-ID?
+</li>
+<li>Fixed window vs. sliding window vs. token bucket - what are the trade-offs?
+</li>
+<li>Where do you store the counters? In-memory is fine for a single instance; what breaks at scale?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Sending 11 requests/second with a limit of 10/s causes the 11th to return <code>429</code></li>
-<li>The <code>Retry-After</code> header reflects the correct number of seconds until the window resets</li>
-<li>After the window resets, the client can make requests again without restarting the server</li>
+<li>Sending 11 requests/second with a limit of 10/s causes the 11th to return <code>429</code>
+</li>
+<li>The <code>Retry-After</code> header reflects the correct number of seconds until the window resets
+</li>
+<li>After the window resets, the client can make requests again without restarting the server
+</li>
 </ul>
 <p><strong>Watch out:</strong> Fixed windows have a burst problem at window boundaries - a client can fire 10 requests just before midnight and 10 more just after, effectively getting 20 in 2 seconds. Know this trade-off before defending your design.</p></div>
       </div>
@@ -1156,20 +1500,28 @@
 <p><strong>Goal:</strong> Compute a fingerprint for each response body and use it to avoid re-sending unchanged content.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: response body bytes</li>
-<li>Output: <code>ETag</code> header on the response; <code>304 Not Modified</code> (with no body) when a conditional GET matches</li>
+<li>Input: response body bytes
+</li>
+<li>Output: <code>ETag</code> header on the response; <code>304 Not Modified</code> (with no body) when a conditional GET matches
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you generate an ETag? (MD5, SHA-1, content length + mtime - pick one and know its trade-offs)</li>
-<li>What is the <code>If-None-Match</code> request header, and how do you validate it?</li>
-<li>What headers must you still include in a <code>304</code> response even though there's no body?</li>
+<li>How do you generate an ETag? (MD5, SHA-1, content length + mtime - pick one and know its trade-offs)
+</li>
+<li>What is the <code>If-None-Match</code> request header, and how do you validate it?
+</li>
+<li>What headers must you still include in a <code>304</code> response even though there's no body?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -I http://localhost:3000/file.js</code> returns an <code>ETag</code> header</li>
-<li><code>curl -H 'If-None-Match: &lt;etag&gt;'</code> returns <code>304</code> with no body and the same <code>ETag</code></li>
-<li>Modifying the resource changes the <code>ETag</code> and the next conditional request returns <code>200</code></li>
+<li><code>curl -I http://localhost:3000/file.js</code> returns an <code>ETag</code> header
+</li>
+<li><code>curl -H 'If-None-Match: &lt;etag&gt;'</code> returns <code>304</code> with no body and the same <code>ETag</code>
+</li>
+<li>Modifying the resource changes the <code>ETag</code> and the next conditional request returns <code>200</code>
+</li>
 </ul>
 <p><strong>Watch out:</strong> A <code>304</code> response must still include <code>Cache-Control</code>, <code>ETag</code>, <code>Expires</code>, and <code>Vary</code> - the same headers you'd send on a <code>200</code>. Omitting them prevents the client from updating its cache metadata.</p>
 <hr />
@@ -1177,19 +1529,26 @@
 <p><strong>Goal:</strong> Support time-based conditional requests using <code>Last-Modified</code> / <code>If-Modified-Since</code>.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>If-Modified-Since</code> header in a GET request</li>
-<li>Output: <code>304</code> if resource hasn't changed since that date; <code>200</code> with full body if it has</li>
+<li>Input: <code>If-Modified-Since</code> header in a GET request
+</li>
+<li>Output: <code>304</code> if resource hasn't changed since that date; <code>200</code> with full body if it has
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What HTTP date format does <code>Last-Modified</code> use? (RFC 7231)</li>
-<li>What is the precedence rule when both <code>If-None-Match</code> and <code>If-Modified-Since</code> are present?</li>
-<li>How do you get the mtime of a file in Node.js, and how do you format it correctly?</li>
+<li>What HTTP date format does <code>Last-Modified</code> use? (RFC 7231)
+</li>
+<li>What is the precedence rule when both <code>If-None-Match</code> and <code>If-Modified-Since</code> are present?
+</li>
+<li>How do you get the mtime of a file in Node.js, and how do you format it correctly?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -z &quot;Thu, 01 Jan 2099 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>304</code></li>
-<li><code>curl -z &quot;Thu, 01 Jan 2000 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>200</code> with the full file</li>
+<li><code>curl -z &quot;Thu, 01 Jan 2099 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>304</code>
+</li>
+<li><code>curl -z &quot;Thu, 01 Jan 2000 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>200</code> with the full file
+</li>
 </ul>
 <p><strong>Watch out:</strong> HTTP dates use a specific format (<code>Mon, 02 Jan 2006 15:04:05 GMT</code>). JavaScript's <code>new Date().toUTCString()</code> is close but not always RFC 7231-compliant across environments. Use <code>toUTCString()</code> and verify the output format manually.</p>
 <hr />
@@ -1197,19 +1556,26 @@
 <p><strong>Goal:</strong> Store and serve different cached variants of the same URL based on client capabilities.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: same URL requested by clients with different <code>Accept-Encoding</code> (gzip vs. identity)</li>
-<li>Output: <code>Vary: Accept-Encoding</code> on response; separate cache entries per encoding; correct variant served to each client</li>
+<li>Input: same URL requested by clients with different <code>Accept-Encoding</code> (gzip vs. identity)
+</li>
+<li>Output: <code>Vary: Accept-Encoding</code> on response; separate cache entries per encoding; correct variant served to each client
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you incorporate <code>Vary</code> fields into your cache key?</li>
-<li>What happens if you cache a gzip-encoded response and serve it to a client that doesn't accept gzip?</li>
-<li>Should you normalize <code>Accept-Encoding</code> values before using them as cache keys? Why?</li>
+<li>How do you incorporate <code>Vary</code> fields into your cache key?
+</li>
+<li>What happens if you cache a gzip-encoded response and serve it to a client that doesn't accept gzip?
+</li>
+<li>Should you normalize <code>Accept-Encoding</code> values before using them as cache keys? Why?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>A gzip-capable client receives the compressed variant; a non-gzip client receives the uncompressed variant, from the same cache</li>
-<li>Both variants are stored and retrieved independently without one overwriting the other</li>
+<li>A gzip-capable client receives the compressed variant; a non-gzip client receives the uncompressed variant, from the same cache
+</li>
+<li>Both variants are stored and retrieved independently without one overwriting the other
+</li>
 </ul>
 <p><strong>Watch out:</strong> <code>Accept-Encoding</code> values can be <code>gzip, deflate, br</code> in any order with varying quality values (<code>;q=0.9</code>). Normalize to a canonical form (e.g. sorted, lowercased, quality stripped) before hashing into your cache key.</p></div>
       </div>
@@ -1231,19 +1597,26 @@
 <p><strong>Goal:</strong> Forward a request to the origin server and store the response; serve subsequent requests from cache.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: HTTP request for a cacheable resource</li>
-<li>Output: on miss, fetch from origin and store; on hit, return stored response with <code>X-Cache: HIT</code></li>
+<li>Input: HTTP request for a cacheable resource
+</li>
+<li>Output: on miss, fetch from origin and store; on hit, return stored response with <code>X-Cache: HIT</code>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What makes a response cacheable? Which HTTP methods and status codes qualify?</li>
-<li>What is your cache key? Just the path, or path + query string + <code>Vary</code> headers?</li>
-<li>Where do you store the cached response - in memory, on disk, or both?</li>
+<li>What makes a response cacheable? Which HTTP methods and status codes qualify?
+</li>
+<li>What is your cache key? Just the path, or path + query string + <code>Vary</code> headers?
+</li>
+<li>Where do you store the cached response - in memory, on disk, or both?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>First request logs <code>[MISS]</code> and takes ≥50ms (simulate origin latency); second request logs <code>[HIT]</code> and takes &lt;5ms</li>
-<li><code>X-Cache: HIT</code> and <code>X-Cache: MISS</code> headers are set correctly on all responses</li>
+<li>First request logs <code>[MISS]</code> and takes ≥50ms (simulate origin latency); second request logs <code>[HIT]</code> and takes &lt;5ms
+</li>
+<li><code>X-Cache: HIT</code> and <code>X-Cache: MISS</code> headers are set correctly on all responses
+</li>
 </ul>
 <p><strong>Watch out:</strong> The <code>Vary</code> header from the origin tells you which request headers affect the response (e.g. <code>Vary: Accept-Encoding</code>). Ignoring it means serving a gzipped response to a client that didn't ask for compression.</p>
 <hr />
@@ -1251,20 +1624,28 @@
 <p><strong>Goal:</strong> Honor <code>Cache-Control</code> headers from both the origin (response) and the client (request).</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: responses with <code>Cache-Control: max-age=N</code>, <code>no-store</code>, <code>private</code>, <code>no-cache</code>; requests with <code>Cache-Control: no-cache</code></li>
-<li>Output: correct caching behavior for each directive</li>
+<li>Input: responses with <code>Cache-Control: max-age=N</code>, <code>no-store</code>, <code>private</code>, <code>no-cache</code>; requests with <code>Cache-Control: no-cache</code>
+</li>
+<li>Output: correct caching behavior for each directive
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the difference between <code>no-cache</code> and <code>no-store</code>?</li>
-<li>What does <code>private</code> mean for a shared cache like a CDN?</li>
-<li>When a client sends <code>Cache-Control: no-cache</code>, what should your edge node do?</li>
+<li>What is the difference between <code>no-cache</code> and <code>no-store</code>?
+</li>
+<li>What does <code>private</code> mean for a shared cache like a CDN?
+</li>
+<li>When a client sends <code>Cache-Control: no-cache</code>, what should your edge node do?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>A response with <code>Cache-Control: no-store</code> is never stored</li>
-<li>A response with <code>Cache-Control: private</code> is served to the original client but not cached for others</li>
-<li>A client <code>no-cache</code> request causes revalidation with the origin even if a fresh cached copy exists</li>
+<li>A response with <code>Cache-Control: no-store</code> is never stored
+</li>
+<li>A response with <code>Cache-Control: private</code> is served to the original client but not cached for others
+</li>
+<li>A client <code>no-cache</code> request causes revalidation with the origin even if a fresh cached copy exists
+</li>
 </ul>
 <p><strong>Watch out:</strong> <code>no-cache</code> does <strong>not</strong> mean &quot;don't cache&quot; - it means &quot;revalidate before serving from cache.&quot; Only <code>no-store</code> means don't cache at all. Swapping these is the most common CDN misconfiguration.</p>
 <hr />
@@ -1272,19 +1653,26 @@
 <p><strong>Goal:</strong> Expire stale cache entries using <code>max-age</code> and re-fetch from origin; serve stale content if origin is unreachable.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a cached entry whose <code>max-age</code> has elapsed; optionally an unavailable origin</li>
-<li>Output: on expiry with reachable origin, fetch fresh copy; on expiry with unreachable origin, serve stale with <code>Warning: 110</code> header</li>
+<li>Input: a cached entry whose <code>max-age</code> has elapsed; optionally an unavailable origin
+</li>
+<li>Output: on expiry with reachable origin, fetch fresh copy; on expiry with unreachable origin, serve stale with <code>Warning: 110</code> header
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you calculate when a cached entry expires? (Creation time + <code>max-age</code>)</li>
-<li>What is <code>stale-while-revalidate</code>, and how would you implement it?</li>
-<li>What is the correct HTTP warning code for &quot;response is stale&quot;?</li>
+<li>How do you calculate when a cached entry expires? (Creation time + <code>max-age</code>)
+</li>
+<li>What is <code>stale-while-revalidate</code>, and how would you implement it?
+</li>
+<li>What is the correct HTTP warning code for &quot;response is stale&quot;?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Waiting for <code>max-age</code> to expire causes the next request to fetch from origin (<code>[MISS]</code>)</li>
-<li>Stopping the origin server causes stale content to be served with the correct <code>Warning</code> header, rather than a <code>502</code></li>
+<li>Waiting for <code>max-age</code> to expire causes the next request to fetch from origin (<code>[MISS]</code>)
+</li>
+<li>Stopping the origin server causes stale content to be served with the correct <code>Warning</code> header, rather than a <code>502</code>
+</li>
 </ul>
 <p><strong>Watch out:</strong> Clock skew between your server and the client can cause entries to expire too early or too late. Use the origin's <code>Date</code> response header as the reference point for age calculations, not your local clock at store time.</p></div>
       </div>
@@ -1306,20 +1694,28 @@
 <p><strong>Goal:</strong> Implement a simple in-memory key-value store with string keys and arbitrary value types.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>set(key, value)</code>, <code>get(key)</code>, <code>delete(key)</code> calls</li>
-<li>Output: stored/retrieved values; <code>null</code> for missing keys; <code>true</code>/<code>false</code> for delete</li>
+<li>Input: <code>set(key, value)</code>, <code>get(key)</code>, <code>delete(key)</code> calls
+</li>
+<li>Output: stored/retrieved values; <code>null</code> for missing keys; <code>true</code>/<code>false</code> for delete
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What data structure backs the store? Plain object, <code>Map</code>, or something else?</li>
-<li>What value types will you support - strings only, or arbitrary serializable values?</li>
-<li>What is the return value of <code>get</code> on a missing key vs. a key explicitly set to <code>null</code>?</li>
+<li>What data structure backs the store? Plain object, <code>Map</code>, or something else?
+</li>
+<li>What value types will you support - strings only, or arbitrary serializable values?
+</li>
+<li>What is the return value of <code>get</code> on a missing key vs. a key explicitly set to <code>null</code>?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>10,000 sequential set/get/delete operations complete without errors</li>
-<li><code>get</code> on a deleted key returns <code>null</code>, not the previous value</li>
-<li>Keys with identical content but different types (e.g. <code>1</code> vs <code>&quot;1&quot;</code>) are handled predictably</li>
+<li>10,000 sequential set/get/delete operations complete without errors
+</li>
+<li><code>get</code> on a deleted key returns <code>null</code>, not the previous value
+</li>
+<li>Keys with identical content but different types (e.g. <code>1</code> vs <code>&quot;1&quot;</code>) are handled predictably
+</li>
 </ul>
 <p><strong>Watch out:</strong> JavaScript object keys are always strings. If you use a plain object as your backing store, the integer key <code>1</code> and the string key <code>&quot;1&quot;</code> collide. Use <code>Map</code> to avoid this.</p>
 <hr />
@@ -1327,20 +1723,28 @@
 <p><strong>Goal:</strong> Allow keys to be set with an expiry time; return <code>null</code> for expired keys and clean them up.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>set(key, value, ttlSeconds)</code></li>
-<li>Output: <code>get</code> returns the value until TTL expires; returns <code>null</code> afterward</li>
+<li>Input: <code>set(key, value, ttlSeconds)</code>
+</li>
+<li>Output: <code>get</code> returns the value until TTL expires; returns <code>null</code> afterward
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Do you use <code>setTimeout</code> per key, a periodic sweep, or lazy expiry on <code>get</code>?</li>
-<li>What are the memory trade-offs of each approach?</li>
-<li>What happens to a key's TTL if you <code>set</code> it again without a TTL argument?</li>
+<li>Do you use <code>setTimeout</code> per key, a periodic sweep, or lazy expiry on <code>get</code>?
+</li>
+<li>What are the memory trade-offs of each approach?
+</li>
+<li>What happens to a key's TTL if you <code>set</code> it again without a TTL argument?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>set(&quot;x&quot;, 1, 1)</code> followed by a 1.1-second wait causes <code>get(&quot;x&quot;)</code> to return <code>null</code></li>
-<li><code>set(&quot;x&quot;, 2)</code> after expiry correctly stores the new value without TTL</li>
-<li>10,000 expired keys are eventually cleaned from memory (verify with <code>process.memoryUsage()</code>)</li>
+<li><code>set(&quot;x&quot;, 1, 1)</code> followed by a 1.1-second wait causes <code>get(&quot;x&quot;)</code> to return <code>null</code>
+</li>
+<li><code>set(&quot;x&quot;, 2)</code> after expiry correctly stores the new value without TTL
+</li>
+<li>10,000 expired keys are eventually cleaned from memory (verify with <code>process.memoryUsage()</code>)
+</li>
 </ul>
 <p><strong>Watch out:</strong> One <code>setTimeout</code> per key sounds simple but creates memory pressure under high write volume. A lazy expiry check on <code>get</code> + periodic sweep is typically more efficient. Know the trade-off.</p>
 <hr />
@@ -1348,20 +1752,28 @@
 <p><strong>Goal:</strong> Enforce a maximum capacity; when full, evict the least recently used key.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>new KVStore({ maxSize: N })</code>; <code>set</code> calls beyond capacity</li>
-<li>Output: the LRU key is evicted automatically; recently accessed keys survive eviction</li>
+<li>Input: <code>new KVStore({ maxSize: N })</code>; <code>set</code> calls beyond capacity
+</li>
+<li>Output: the LRU key is evicted automatically; recently accessed keys survive eviction
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What data structure gives O(1) get/set/evict? (Hint: doubly linked list + hash map)</li>
-<li>Does a <code>get</code> access count as &quot;recently used&quot;?</li>
-<li>What happens when you <code>set</code> an existing key - does it move to the front?</li>
+<li>What data structure gives O(1) get/set/evict? (Hint: doubly linked list + hash map)
+</li>
+<li>Does a <code>get</code> access count as &quot;recently used&quot;?
+</li>
+<li>What happens when you <code>set</code> an existing key - does it move to the front?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>With <code>maxSize: 3</code>, setting a 4th key evicts the least-recently-used (not the least-recently-set) key</li>
-<li>A <code>get</code> access promotes a key so it is not the next to be evicted</li>
-<li>All operations remain O(1) - verified by timing 100,000 operations against 1000 operations and confirming linear (not quadratic) scaling</li>
+<li>With <code>maxSize: 3</code>, setting a 4th key evicts the least-recently-used (not the least-recently-set) key
+</li>
+<li>A <code>get</code> access promotes a key so it is not the next to be evicted
+</li>
+<li>All operations remain O(1) - verified by timing 100,000 operations against 1000 operations and confirming linear (not quadratic) scaling
+</li>
 </ul>
 <p><strong>Watch out:</strong> JavaScript's <code>Map</code> preserves insertion order, which you can exploit to fake an LRU - but only if you delete and re-insert on every access. That's a valid approach, but understand its cost vs. a true doubly linked list implementation.</p></div>
       </div>
@@ -1383,20 +1795,28 @@
 <p><strong>Goal:</strong> Implement counter (monotonically increasing) and gauge (current value) metric types with label support.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>counter.increment({ method: &quot;GET&quot;, status: &quot;200&quot; })</code>, <code>gauge.set(42, { service: &quot;api&quot; })</code></li>
-<li>Output: current values accessible via <code>counter.get(labels)</code> and <code>gauge.get(labels)</code></li>
+<li>Input: <code>counter.increment({ method: &quot;GET&quot;, status: &quot;200&quot; })</code>, <code>gauge.set(42, { service: &quot;api&quot; })</code>
+</li>
+<li>Output: current values accessible via <code>counter.get(labels)</code> and <code>gauge.get(labels)</code>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you store metrics with multi-dimensional labels? (A nested map keyed on label hashes?)</li>
-<li>What is the difference between a counter and a gauge? Can a counter decrease?</li>
-<li>How do you serialize a label set to a stable string key?</li>
+<li>How do you store metrics with multi-dimensional labels? (A nested map keyed on label hashes?)
+</li>
+<li>What is the difference between a counter and a gauge? Can a counter decrease?
+</li>
+<li>How do you serialize a label set to a stable string key?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Two counters with different label sets are tracked independently</li>
-<li>Incrementing <code>{ method: &quot;GET&quot; }</code> does not affect <code>{ method: &quot;POST&quot; }</code></li>
-<li><code>counter.get({ method: &quot;GET&quot;, status: &quot;200&quot; })</code> returns the exact increment count</li>
+<li>Two counters with different label sets are tracked independently
+</li>
+<li>Incrementing <code>{ method: &quot;GET&quot; }</code> does not affect <code>{ method: &quot;POST&quot; }</code>
+</li>
+<li><code>counter.get({ method: &quot;GET&quot;, status: &quot;200&quot; })</code> returns the exact increment count
+</li>
 </ul>
 <p><strong>Watch out:</strong> Label key order matters for your cache key - <code>{a: 1, b: 2}</code> and <code>{b: 2, a: 1}</code> should map to the same metric. Sort label keys before serializing.</p>
 <hr />
@@ -1404,20 +1824,28 @@
 <p><strong>Goal:</strong> Record observations into configurable buckets; expose count, sum, and per-bucket totals.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>histogram.observe(durationMs, labels)</code> with predefined buckets e.g. <code>[10, 50, 100, 500, 1000]</code></li>
-<li>Output: <code>{ buckets: { &quot;10&quot;: N, &quot;50&quot;: N, ... }, sum, count }</code> per label set</li>
+<li>Input: <code>histogram.observe(durationMs, labels)</code> with predefined buckets e.g. <code>[10, 50, 100, 500, 1000]</code>
+</li>
+<li>Output: <code>{ buckets: { &quot;10&quot;: N, &quot;50&quot;: N, ... }, sum, count }</code> per label set
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Are histogram buckets inclusive (<code>≤</code>) or exclusive (<code>&lt;</code>)? What does Prometheus use?</li>
-<li>How do you calculate the p95 from a histogram? (You can't exactly - explain why.)</li>
-<li>What is a cumulative histogram vs. a non-cumulative one?</li>
+<li>Are histogram buckets inclusive (<code>≤</code>) or exclusive (<code>&lt;</code>)? What does Prometheus use?
+</li>
+<li>How do you calculate the p95 from a histogram? (You can't exactly - explain why.)
+</li>
+<li>What is a cumulative histogram vs. a non-cumulative one?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>1000 observations distributed across buckets are counted correctly (verify by summing all observations)</li>
-<li>The <code>+Inf</code> bucket count equals the total observation count</li>
-<li><code>sum / count</code> gives the correct mean</li>
+<li>1000 observations distributed across buckets are counted correctly (verify by summing all observations)
+</li>
+<li>The <code>+Inf</code> bucket count equals the total observation count
+</li>
+<li><code>sum / count</code> gives the correct mean
+</li>
 </ul>
 <p><strong>Watch out:</strong> Prometheus histograms are *cumulative* - the <code>100ms</code> bucket counts all observations ≤100ms, not just those between 50ms and 100ms. If you implement non-cumulative buckets, your data will not be compatible with standard tooling.</p>
 <hr />
@@ -1425,20 +1853,28 @@
 <p><strong>Goal:</strong> Expose all metrics in Prometheus text format at <code>GET /metrics</code>.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: HTTP GET <code>/metrics</code></li>
-<li>Output: Prometheus exposition format text: <code># HELP</code>, <code># TYPE</code>, and metric lines</li>
+<li>Input: HTTP GET <code>/metrics</code>
+</li>
+<li>Output: Prometheus exposition format text: <code># HELP</code>, <code># TYPE</code>, and metric lines
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the Prometheus text format specification for counters, gauges, and histograms?</li>
-<li>What Content-Type header does Prometheus expect?</li>
-<li>How do you format label sets in the <code>{key=&quot;value&quot;}</code> syntax, including escaping?</li>
+<li>What is the Prometheus text format specification for counters, gauges, and histograms?
+</li>
+<li>What Content-Type header does Prometheus expect?
+</li>
+<li>How do you format label sets in the <code>{key=&quot;value&quot;}</code> syntax, including escaping?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl http://localhost:9090/metrics</code> returns parseable Prometheus text</li>
-<li>Pointing a real Prometheus instance (or <code>promtool check metrics</code>) at your endpoint reports no parse errors</li>
-<li>All three metric types render correctly with their <code># TYPE</code> annotations</li>
+<li><code>curl http://localhost:9090/metrics</code> returns parseable Prometheus text
+</li>
+<li>Pointing a real Prometheus instance (or <code>promtool check metrics</code>) at your endpoint reports no parse errors
+</li>
+<li>All three metric types render correctly with their <code># TYPE</code> annotations
+</li>
 </ul>
 <p><strong>Watch out:</strong> Label values containing <code>\</code>, <code>&quot;</code>, or <code>\n</code> must be escaped in the exposition format. Forgetting this causes parse failures that are difficult to diagnose.</p></div>
       </div>
@@ -1460,19 +1896,26 @@
 <p><strong>Goal:</strong> Implement a span - a named, timed unit of work - with start/end timestamps and key-value attributes.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>tracer.startSpan(name, attributes?)</code>, followed by <code>span.end()</code></li>
-<li>Output: a completed span object: <code>{ traceId, spanId, name, startTime, endTime, duration, attributes }</code></li>
+<li>Input: <code>tracer.startSpan(name, attributes?)</code>, followed by <code>span.end()</code>
+</li>
+<li>Output: a completed span object: <code>{ traceId, spanId, name, startTime, endTime, duration, attributes }</code>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you generate a random 128-bit trace ID and 64-bit span ID? (hex strings are conventional)</li>
-<li>What timestamp resolution do you use - milliseconds or microseconds?</li>
-<li>What is the difference between a trace ID and a span ID?</li>
+<li>How do you generate a random 128-bit trace ID and 64-bit span ID? (hex strings are conventional)
+</li>
+<li>What timestamp resolution do you use - milliseconds or microseconds?
+</li>
+<li>What is the difference between a trace ID and a span ID?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Starting and ending a span produces a complete span object with non-zero duration</li>
-<li>Two spans started in the same &quot;request&quot; share the same <code>traceId</code> but have different <code>spanId</code>s</li>
+<li>Starting and ending a span produces a complete span object with non-zero duration
+</li>
+<li>Two spans started in the same &quot;request&quot; share the same <code>traceId</code> but have different <code>spanId</code>s
+</li>
 </ul>
 <p><strong>Watch out:</strong> Use <code>process.hrtime.bigint()</code> for nanosecond precision, not <code>Date.now()</code> which has millisecond resolution. High-frequency operations will otherwise show 0ms duration.</p>
 <hr />
@@ -1480,19 +1923,26 @@
 <p><strong>Goal:</strong> Pass the active trace context through async call chains so child spans are linked to their parent.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a parent span; async child operations that should appear nested under it</li>
-<li>Output: each child span has a <code>parentSpanId</code> pointing to the parent; the complete tree is reconstructable</li>
+<li>Input: a parent span; async child operations that should appear nested under it
+</li>
+<li>Output: each child span has a <code>parentSpanId</code> pointing to the parent; the complete tree is reconstructable
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you make the current span available inside async callbacks without passing it explicitly? (Hint: Node.js <code>AsyncLocalStorage</code>)</li>
-<li>What is <code>parentSpanId</code> and how does it link spans into a tree?</li>
-<li>How do you propagate context across an HTTP boundary? (W3C TraceContext: <code>traceparent</code> header)</li>
+<li>How do you make the current span available inside async callbacks without passing it explicitly? (Hint: Node.js <code>AsyncLocalStorage</code>)
+</li>
+<li>What is <code>parentSpanId</code> and how does it link spans into a tree?
+</li>
+<li>How do you propagate context across an HTTP boundary? (W3C TraceContext: <code>traceparent</code> header)
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Three nested async operations produce three spans with correct <code>parentSpanId</code> linkages</li>
-<li>Reconstructing the tree from flat span data produces the correct hierarchy</li>
+<li>Three nested async operations produce three spans with correct <code>parentSpanId</code> linkages
+</li>
+<li>Reconstructing the tree from flat span data produces the correct hierarchy
+</li>
 </ul>
 <p><strong>Watch out:</strong> <code>AsyncLocalStorage</code> context does not automatically propagate into <code>EventEmitter</code> callbacks in all Node.js versions. Use <code>AsyncResource.bind()</code> for event listeners that need context.</p>
 <hr />
@@ -1500,19 +1950,26 @@
 <p><strong>Goal:</strong> Batch completed spans and export them to a trace collector in a standard format.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: completed spans collected in memory</li>
-<li>Output: HTTP POST to a collector endpoint with OTLP-JSON payload; spans visible in Jaeger UI (or logged to stdout as valid OTLP JSON)</li>
+<li>Input: completed spans collected in memory
+</li>
+<li>Output: HTTP POST to a collector endpoint with OTLP-JSON payload; spans visible in Jaeger UI (or logged to stdout as valid OTLP JSON)
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the OTLP JSON schema for a <code>ResourceSpans</code> envelope?</li>
-<li>How do you batch spans - by count, by time interval, or both?</li>
-<li>What should happen to spans collected while the export is in-flight?</li>
+<li>What is the OTLP JSON schema for a <code>ResourceSpans</code> envelope?
+</li>
+<li>How do you batch spans - by count, by time interval, or both?
+</li>
+<li>What should happen to spans collected while the export is in-flight?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Spans exported to Jaeger (via its OTLP HTTP endpoint) are visible in the Jaeger UI with correct parent-child relationships</li>
-<li>If Jaeger is unavailable, spans are dropped gracefully (no crash, no retry storm)</li>
+<li>Spans exported to Jaeger (via its OTLP HTTP endpoint) are visible in the Jaeger UI with correct parent-child relationships
+</li>
+<li>If Jaeger is unavailable, spans are dropped gracefully (no crash, no retry storm)
+</li>
 </ul>
 <p><strong>Watch out:</strong> OTLP timestamps are in nanoseconds since Unix epoch as <code>fixed64</code> (or string in JSON mode). Sending milliseconds produces traces that appear to have occurred in 1970 in the Jaeger UI.</p></div>
       </div>
@@ -1534,19 +1991,26 @@
 <p><strong>Goal:</strong> Track failures against a threshold; trip to OPEN state and reject calls immediately when exceeded.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: wrapped function calls; some succeed, some throw errors</li>
-<li>Output: calls pass through in CLOSED state; <code>CircuitOpenError</code> thrown immediately in OPEN state without calling the wrapped function</li>
+<li>Input: wrapped function calls; some succeed, some throw errors
+</li>
+<li>Output: calls pass through in CLOSED state; <code>CircuitOpenError</code> thrown immediately in OPEN state without calling the wrapped function
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What counts as a failure? Any thrown error? Specific error types? Timeouts?</li>
-<li>What is your failure threshold - count, or percentage of recent calls?</li>
-<li>When the breaker trips OPEN, how long should it stay open before attempting recovery?</li>
+<li>What counts as a failure? Any thrown error? Specific error types? Timeouts?
+</li>
+<li>What is your failure threshold - count, or percentage of recent calls?
+</li>
+<li>When the breaker trips OPEN, how long should it stay open before attempting recovery?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>After 5 consecutive failures, all subsequent calls throw <code>CircuitOpenError</code> without hitting the wrapped function</li>
-<li>A manual call count confirms zero calls to the wrapped function while OPEN</li>
+<li>After 5 consecutive failures, all subsequent calls throw <code>CircuitOpenError</code> without hitting the wrapped function
+</li>
+<li>A manual call count confirms zero calls to the wrapped function while OPEN
+</li>
 </ul>
 <p><strong>Watch out:</strong> Count *consecutive* failures, not total failures, unless you're implementing a sliding-window approach. A single success resetting a 4-failure count is typically the right behavior.</p>
 <hr />
@@ -1554,20 +2018,28 @@
 <p><strong>Goal:</strong> After a timeout, allow a single test call through; recover to CLOSED on success, re-trip on failure.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: OPEN circuit after timeout elapses</li>
-<li>Output: exactly one call passes through in HALF-OPEN; success → CLOSED (counters reset); failure → back to OPEN</li>
+<li>Input: OPEN circuit after timeout elapses
+</li>
+<li>Output: exactly one call passes through in HALF-OPEN; success → CLOSED (counters reset); failure → back to OPEN
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you prevent multiple concurrent callers from all passing through in HALF-OPEN?</li>
-<li>What is the correct sequence of state transitions: CLOSED → OPEN → HALF-OPEN → CLOSED?</li>
-<li>Should you reset the failure counter on transition to HALF-OPEN, or only on transition to CLOSED?</li>
+<li>How do you prevent multiple concurrent callers from all passing through in HALF-OPEN?
+</li>
+<li>What is the correct sequence of state transitions: CLOSED → OPEN → HALF-OPEN → CLOSED?
+</li>
+<li>Should you reset the failure counter on transition to HALF-OPEN, or only on transition to CLOSED?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>After the open timeout, exactly one call reaches the wrapped function</li>
-<li>A second concurrent call during HALF-OPEN receives <code>CircuitOpenError</code></li>
-<li>A successful probe transitions to CLOSED and subsequent calls all pass through</li>
+<li>After the open timeout, exactly one call reaches the wrapped function
+</li>
+<li>A second concurrent call during HALF-OPEN receives <code>CircuitOpenError</code>
+</li>
+<li>A successful probe transitions to CLOSED and subsequent calls all pass through
+</li>
 </ul>
 <p><strong>Watch out:</strong> Without a guard, 20 concurrent requests arriving during HALF-OPEN will all be let through at once, defeating the purpose. Use a flag (e.g. <code>probeSent</code>) to allow only the first.</p>
 <hr />
@@ -1575,20 +2047,28 @@
 <p><strong>Goal:</strong> Track state transitions and call outcomes; expose them for external monitoring.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: any call passing through the breaker</li>
-<li>Output: <code>{ state, totalCalls, successCount, failureCount, rejectedCount, lastStateChange }</code> from a <code>stats()</code> method</li>
+<li>Input: any call passing through the breaker
+</li>
+<li>Output: <code>{ state, totalCalls, successCount, failureCount, rejectedCount, lastStateChange }</code> from a <code>stats()</code> method
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Should stats be per-instance or global?</li>
-<li>How do you emit state change events so external systems can react (e.g. alert on trip)?</li>
-<li>What is a rolling window for counting failures, and why is it more useful than a total count?</li>
+<li>Should stats be per-instance or global?
+</li>
+<li>How do you emit state change events so external systems can react (e.g. alert on trip)?
+</li>
+<li>What is a rolling window for counting failures, and why is it more useful than a total count?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>stats()</code> returns accurate counts after 100 mixed success/failure calls</li>
-<li>An <code>EventEmitter</code>-style <code>on('stateChange', handler)</code> fires on every CLOSED↔OPEN transition</li>
-<li>Stats reset correctly when the circuit recovers to CLOSED</li>
+<li><code>stats()</code> returns accurate counts after 100 mixed success/failure calls
+</li>
+<li>An <code>EventEmitter</code>-style <code>on('stateChange', handler)</code> fires on every CLOSED↔OPEN transition
+</li>
+<li>Stats reset correctly when the circuit recovers to CLOSED
+</li>
 </ul>
 <p><strong>Watch out:</strong> <code>rejectedCount</code> (calls blocked by an OPEN circuit) is a separate metric from <code>failureCount</code> (calls that reached the wrapped function and threw). Mixing them makes dashboards misleading.</p></div>
       </div>
@@ -1610,18 +2090,24 @@
 <p><strong>Goal:</strong> Write structured log entries to disk in a format that survives process crashes.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: arbitrary operation record <code>{ type, key, value }</code></li>
-<li>Output: entry written to log file with a length prefix and checksum; <code>fsync</code> called before returning</li>
+<li>Input: arbitrary operation record <code>{ type, key, value }</code>
+</li>
+<li>Output: entry written to log file with a length prefix and checksum; <code>fsync</code> called before returning
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What is the on-disk format of an entry? (Length prefix + payload + checksum is conventional)</li>
-<li>Why is <code>fsync</code> necessary, and what does it guarantee vs. what does <code>write</code> guarantee?</li>
-<li>How do you detect a partially written entry at recovery time?</li>
+<li>What is the on-disk format of an entry? (Length prefix + payload + checksum is conventional)
+</li>
+<li>Why is <code>fsync</code> necessary, and what does it guarantee vs. what does <code>write</code> guarantee?
+</li>
+<li>How do you detect a partially written entry at recovery time?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Writing 1000 entries and killing the process mid-write produces a log where all complete entries are intact and the partial entry (if any) is detectable via checksum mismatch</li>
+<li>Writing 1000 entries and killing the process mid-write produces a log where all complete entries are intact and the partial entry (if any) is detectable via checksum mismatch
+</li>
 </ul>
 <p><strong>Watch out:</strong> Node.js <code>fs.writeFile</code> does not call <code>fsync</code> by default - data may sit in the OS page cache and be lost on crash. Use <code>fs.open</code> with <code>O_SYNC</code> flag, or call <code>fs.fsync</code> explicitly after each write.</p>
 <hr />
@@ -1629,19 +2115,26 @@
 <p><strong>Goal:</strong> On startup, read the log file sequentially and reconstruct in-memory state by replaying entries.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: existing log file on disk</li>
-<li>Output: in-memory key-value state identical to what it would be if the process had never crashed</li>
+<li>Input: existing log file on disk
+</li>
+<li>Output: in-memory key-value state identical to what it would be if the process had never crashed
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you handle a corrupted or truncated entry at the end of the log?</li>
-<li>In what order do you replay entries? Is replay idempotent?</li>
-<li>How do you know when you've reached the end of valid entries?</li>
+<li>How do you handle a corrupted or truncated entry at the end of the log?
+</li>
+<li>In what order do you replay entries? Is replay idempotent?
+</li>
+<li>How do you know when you've reached the end of valid entries?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Write 500 entries, kill with <code>kill -9</code>, restart - in-memory state matches all successfully flushed entries</li>
-<li>A truncated final entry (simulate by truncating the file) is skipped without error</li>
+<li>Write 500 entries, kill with <code>kill -9</code>, restart - in-memory state matches all successfully flushed entries
+</li>
+<li>A truncated final entry (simulate by truncating the file) is skipped without error
+</li>
 </ul>
 <p><strong>Watch out:</strong> Replay must apply entries in strict log order. If your in-memory state is not deterministic given the same log, recovery will produce inconsistent results.</p>
 <hr />
@@ -1649,20 +2142,28 @@
 <p><strong>Goal:</strong> Collapse the full log history into a snapshot, discarding entries superseded by later writes.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: log file with 10,000 entries, many overwriting the same keys</li>
-<li>Output: compacted log (or snapshot file) containing only the latest value per key; old log truncated or replaced</li>
+<li>Input: log file with 10,000 entries, many overwriting the same keys
+</li>
+<li>Output: compacted log (or snapshot file) containing only the latest value per key; old log truncated or replaced
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>When is it safe to compact? (Not mid-write - you need a quiescent point.)</li>
-<li>Do you compact in place or write a new file and atomically replace?</li>
-<li>How do you ensure the snapshot is complete before deleting the old log? (What if the process crashes mid-compaction?)</li>
+<li>When is it safe to compact? (Not mid-write - you need a quiescent point.)
+</li>
+<li>Do you compact in place or write a new file and atomically replace?
+</li>
+<li>How do you ensure the snapshot is complete before deleting the old log? (What if the process crashes mid-compaction?)
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>After 10,000 writes to 100 unique keys, compaction produces a file with exactly 100 entries</li>
-<li>Crash-recovery from the compacted log produces identical state to recovery from the full log</li>
-<li>A crash during compaction does not corrupt either the old or new log</li>
+<li>After 10,000 writes to 100 unique keys, compaction produces a file with exactly 100 entries
+</li>
+<li>Crash-recovery from the compacted log produces identical state to recovery from the full log
+</li>
+<li>A crash during compaction does not corrupt either the old or new log
+</li>
 </ul>
 <p><strong>Watch out:</strong> Write the new compacted file, fsync it, then atomically rename it over the old file. Never truncate the existing log in place - a crash mid-truncation leaves you with no log and no snapshot.</p></div>
       </div>
@@ -1684,19 +2185,26 @@
 <p><strong>Goal:</strong> Implement a queue where producers enqueue messages and consumers dequeue them in FIFO order.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>queue.publish({ topic, payload })</code>; <code>queue.consume(topic, handler)</code></li>
-<li>Output: messages delivered to the handler in publish order; each message delivered to at most one consumer</li>
+<li>Input: <code>queue.publish({ topic, payload })</code>; <code>queue.consume(topic, handler)</code>
+</li>
+<li>Output: messages delivered to the handler in publish order; each message delivered to at most one consumer
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What data structure backs the queue? Array, linked list, or something else?</li>
-<li>With multiple consumers on the same topic, how do you ensure each message goes to exactly one?</li>
-<li>What happens if no consumer is registered when a message is published?</li>
+<li>What data structure backs the queue? Array, linked list, or something else?
+</li>
+<li>With multiple consumers on the same topic, how do you ensure each message goes to exactly one?
+</li>
+<li>What happens if no consumer is registered when a message is published?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>1000 messages published to 3 competing consumers are each delivered exactly once (verified by summing consumer counts)</li>
-<li>Messages arrive at consumers in the order they were published</li>
+<li>1000 messages published to 3 competing consumers are each delivered exactly once (verified by summing consumer counts)
+</li>
+<li>Messages arrive at consumers in the order they were published
+</li>
 </ul>
 <p><strong>Watch out:</strong> If you call handlers synchronously within <code>publish</code>, a slow handler blocks the publisher. Deliver messages asynchronously (e.g. <code>setImmediate</code>) to decouple producer and consumer timing.</p>
 <hr />
@@ -1704,20 +2212,28 @@
 <p><strong>Goal:</strong> Hold messages in an &quot;in-flight&quot; state until the consumer explicitly acknowledges them; redeliver if no ack arrives within a timeout.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>ack(messageId)</code> or <code>nack(messageId)</code> from consumer</li>
-<li>Output: acked messages removed from the queue; nacked messages returned to the head of the queue for redelivery</li>
+<li>Input: <code>ack(messageId)</code> or <code>nack(messageId)</code> from consumer
+</li>
+<li>Output: acked messages removed from the queue; nacked messages returned to the head of the queue for redelivery
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you track which messages are in-flight and their delivery timestamps?</li>
-<li>What is your redelivery timeout, and how do you implement it without polling too frequently?</li>
-<li>What happens if a consumer dies without acking? How does the message get back?</li>
+<li>How do you track which messages are in-flight and their delivery timestamps?
+</li>
+<li>What is your redelivery timeout, and how do you implement it without polling too frequently?
+</li>
+<li>What happens if a consumer dies without acking? How does the message get back?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>A consumer that receives a message but never acks causes the message to be redelivered after the timeout</li>
-<li><code>nack</code> immediately returns the message to the queue for the next available consumer</li>
-<li><code>ack</code> removes the message permanently - no redelivery</li>
+<li>A consumer that receives a message but never acks causes the message to be redelivered after the timeout
+</li>
+<li><code>nack</code> immediately returns the message to the queue for the next available consumer
+</li>
+<li><code>ack</code> removes the message permanently - no redelivery
+</li>
 </ul>
 <p><strong>Watch out:</strong> Redelivered messages must be marked with an <code>attempt</code> count. Without it, you can't distinguish a first delivery from a 50th, and you'll never know when to give up.</p>
 <hr />
@@ -1725,20 +2241,28 @@
 <p><strong>Goal:</strong> After N failed delivery attempts, route a message to a dead-letter queue instead of retrying indefinitely.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: a message that has been nacked (or not acked) more than <code>maxAttempts</code> times</li>
-<li>Output: message moved to <code>&lt;topic&gt;.dlq</code> with metadata: <code>{ originalTopic, attemptCount, lastFailureReason, firstPublishedAt }</code></li>
+<li>Input: a message that has been nacked (or not acked) more than <code>maxAttempts</code> times
+</li>
+<li>Output: message moved to <code>&lt;topic&gt;.dlq</code> with metadata: <code>{ originalTopic, attemptCount, lastFailureReason, firstPublishedAt }</code>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What triggers DLQ routing - exceeding max attempts, or explicit <code>nack</code> with a <code>reason</code>?</li>
-<li>Who consumes the DLQ, and what can they do with messages there?</li>
-<li>Should DLQ messages themselves be acked/nacked, or are they terminal?</li>
+<li>What triggers DLQ routing - exceeding max attempts, or explicit <code>nack</code> with a <code>reason</code>?
+</li>
+<li>Who consumes the DLQ, and what can they do with messages there?
+</li>
+<li>Should DLQ messages themselves be acked/nacked, or are they terminal?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>A message nacked 3 times (with <code>maxAttempts: 3</code>) appears in the DLQ with correct metadata</li>
-<li>The original topic's queue is empty after DLQ routing</li>
-<li>A DLQ consumer can inspect and optionally replay messages to the original topic</li>
+<li>A message nacked 3 times (with <code>maxAttempts: 3</code>) appears in the DLQ with correct metadata
+</li>
+<li>The original topic's queue is empty after DLQ routing
+</li>
+<li>A DLQ consumer can inspect and optionally replay messages to the original topic
+</li>
 </ul>
 <p><strong>Watch out:</strong> Don't route to the DLQ on the first nack. Give messages a fair number of attempts before giving up - set <code>maxAttempts</code> to at least 3 in your default config and make it configurable.</p></div>
       </div>
@@ -1760,20 +2284,28 @@
 <p><strong>Goal:</strong> Implement <code>PUT /{bucket}/{key}</code> and <code>GET /{bucket}/{key}</code> over HTTP, storing objects on the local filesystem.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: HTTP PUT with object bytes in the body; HTTP GET for an existing key</li>
-<li>Output: stored file on disk with an MD5 ETag; GET returns file bytes with correct Content-Type and Content-Length</li>
+<li>Input: HTTP PUT with object bytes in the body; HTTP GET for an existing key
+</li>
+<li>Output: stored file on disk with an MD5 ETag; GET returns file bytes with correct Content-Type and Content-Length
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you map <code>bucket/key</code> to a filesystem path safely? (Prevent path traversal attacks)</li>
-<li>How do you compute and return the ETag? (MD5 of the object bytes, hex-encoded, quoted)</li>
-<li>What HTTP status codes do S3 use for PUT (201? 200?), GET-hit, and GET-miss?</li>
+<li>How do you map <code>bucket/key</code> to a filesystem path safely? (Prevent path traversal attacks)
+</li>
+<li>How do you compute and return the ETag? (MD5 of the object bytes, hex-encoded, quoted)
+</li>
+<li>What HTTP status codes do S3 use for PUT (201? 200?), GET-hit, and GET-miss?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -T file.txt http://localhost:3000/mybucket/myfile.txt</code> stores the file and returns an ETag</li>
-<li><code>curl http://localhost:3000/mybucket/myfile.txt</code> retrieves the original bytes exactly</li>
-<li><code>curl http://localhost:3000/mybucket/missing.txt</code> returns <code>404</code> with an XML error body</li>
+<li><code>curl -T file.txt http://localhost:3000/mybucket/myfile.txt</code> stores the file and returns an ETag
+</li>
+<li><code>curl http://localhost:3000/mybucket/myfile.txt</code> retrieves the original bytes exactly
+</li>
+<li><code>curl http://localhost:3000/mybucket/missing.txt</code> returns <code>404</code> with an XML error body
+</li>
 </ul>
 <p><strong>Watch out:</strong> S3 returns <code>200 OK</code> for PUT, not <code>201 Created</code>, and the ETag is the MD5 wrapped in double quotes (<code>&quot;d41d8cd98f00b204e9800998ecf8427e&quot;</code>). Matching this exactly matters for AWS SDK compatibility.</p>
 <hr />
@@ -1781,20 +2313,28 @@
 <p><strong>Goal:</strong> Allow large objects to be uploaded in parts, then assembled atomically.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>POST /{bucket}/{key}?uploads</code> → uploadId; <code>PUT /{bucket}/{key}?partNumber=N&amp;uploadId=X</code> for each part; <code>POST /{bucket}/{key}?uploadId=X</code> with part manifest to complete</li>
-<li>Output: parts stored temporarily; completed object assembled and stored as a single file</li>
+<li>Input: <code>POST /{bucket}/{key}?uploads</code> → uploadId; <code>PUT /{bucket}/{key}?partNumber=N&amp;uploadId=X</code> for each part; <code>POST /{bucket}/{key}?uploadId=X</code> with part manifest to complete
+</li>
+<li>Output: parts stored temporarily; completed object assembled and stored as a single file
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Where do you store incomplete parts? In a temp directory keyed by <code>uploadId</code>?</li>
-<li>What is the minimum part size for all but the last part? (S3 enforces 5MB - do you?)</li>
-<li>How do you validate the part manifest? (Part numbers, ETags)</li>
+<li>Where do you store incomplete parts? In a temp directory keyed by <code>uploadId</code>?
+</li>
+<li>What is the minimum part size for all but the last part? (S3 enforces 5MB - do you?)
+</li>
+<li>How do you validate the part manifest? (Part numbers, ETags)
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Uploading a 20MB file in 5MB parts (4 parts) produces an assembled object identical to uploading it in one PUT (verify with SHA-256 hash)</li>
-<li>Incomplete uploads (missing parts) return a descriptive error on complete</li>
-<li>A <code>DELETE /{bucket}/{key}?uploadId=X</code> cleans up partial parts</li>
+<li>Uploading a 20MB file in 5MB parts (4 parts) produces an assembled object identical to uploading it in one PUT (verify with SHA-256 hash)
+</li>
+<li>Incomplete uploads (missing parts) return a descriptive error on complete
+</li>
+<li>A <code>DELETE /{bucket}/{key}?uploadId=X</code> cleans up partial parts
+</li>
 </ul>
 <p><strong>Watch out:</strong> Assemble parts by concatenating them in part-number order, not upload order. Clients may upload parts out of order.</p>
 <hr />
@@ -1802,20 +2342,28 @@
 <p><strong>Goal:</strong> Generate time-limited, pre-authenticated URLs that allow third parties to GET or PUT objects without credentials.</p>
 <p><strong>Inputs &amp; outputs:</strong></p>
 <ul>
-<li>Input: <code>generatePresignedUrl({ bucket, key, method, expiresIn })</code> → URL with embedded signature and expiry</li>
-<li>Output: the URL, when requested within the expiry window, is served without any <code>Authorization</code> header; expired or tampered URLs return <code>403</code></li>
+<li>Input: <code>generatePresignedUrl({ bucket, key, method, expiresIn })</code> → URL with embedded signature and expiry
+</li>
+<li>Output: the URL, when requested within the expiry window, is served without any <code>Authorization</code> header; expired or tampered URLs return <code>403</code>
+</li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What parameters must be signed? (Method, bucket, key, expiry timestamp, and your &quot;secret key&quot;)</li>
-<li>How do you embed and verify the expiry without trusting the client to send it unspoofed?</li>
-<li>What is the canonical string-to-sign, and why does order matter?</li>
+<li>What parameters must be signed? (Method, bucket, key, expiry timestamp, and your &quot;secret key&quot;)
+</li>
+<li>How do you embed and verify the expiry without trusting the client to send it unspoofed?
+</li>
+<li>What is the canonical string-to-sign, and why does order matter?
+</li>
 </ul>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>A presigned GET URL works in a browser (no auth headers required)</li>
-<li>The same URL after <code>expiresIn</code> seconds returns <code>403 Forbidden</code></li>
-<li>Modifying any URL parameter (key, expiry, bucket) causes a <code>403</code> due to signature mismatch</li>
+<li>A presigned GET URL works in a browser (no auth headers required)
+</li>
+<li>The same URL after <code>expiresIn</code> seconds returns <code>403 Forbidden</code>
+</li>
+<li>Modifying any URL parameter (key, expiry, bucket) causes a <code>403</code> due to signature mismatch
+</li>
 </ul>
 <p><strong>Watch out:</strong> Include the expiry timestamp in the signed string - don't just check it separately. If the expiry is not part of the signature, a client can extend it by modifying the URL parameter without breaking the signature.</p></div>
       </div>
@@ -1827,6 +2375,7 @@
     const sidebar = document.getElementById("sidebar");
     const menuToggle = document.getElementById("menu-toggle");
     const themeToggle = document.getElementById("theme-toggle");
+    const PROGRESS_KEY = "curriculum-progress";
 
     function setTheme(theme) {
       document.documentElement.dataset.theme = theme;
@@ -1846,6 +2395,152 @@
     });
 
     menuToggle.addEventListener("click", () => sidebar.classList.toggle("open"));
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(PROGRESS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveProgress(progress) {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    }
+
+    function isDoneWhenParagraph(node) {
+      if (!node || node.tagName !== "P") return false;
+      const strong = node.querySelector("strong");
+      return Boolean(strong && /^Done when:?$/i.test(strong.textContent.trim()));
+    }
+
+    function wrapStepHeading(heading) {
+      if (heading.dataset.progressReady) return;
+      heading.dataset.progressReady = "1";
+      heading.classList.add("progress-heading");
+
+      const title = document.createElement("span");
+      title.className = "progress-title";
+      while (heading.firstChild) title.appendChild(heading.firstChild);
+
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.className = "progress-check";
+      check.dataset.progressKey = heading.id;
+      check.setAttribute("aria-label", "Mark step complete: " + title.textContent.trim());
+
+      heading.append(check, title);
+    }
+
+    function wrapDoneWhenList(list, stepId) {
+      if (list.dataset.progressReady) return;
+      list.dataset.progressReady = "1";
+      list.classList.add("progress-checklist");
+
+      Array.from(list.children).forEach((li, index) => {
+        if (li.tagName !== "LI") return;
+        const text = document.createElement("span");
+        text.className = "progress-text";
+        while (li.firstChild) text.appendChild(li.firstChild);
+
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.className = "progress-check";
+        check.dataset.progressKey = stepId + "/done/" + index;
+        check.setAttribute(
+          "aria-label",
+          "Mark done-when item complete: " + text.textContent.trim(),
+        );
+
+        li.append(check, text);
+      });
+    }
+
+    function initProgressMarkup() {
+      document.querySelectorAll(".page").forEach((page) => {
+        const content = page.querySelector(".page-content");
+        if (!content) return;
+
+        content.querySelectorAll("h4").forEach((heading) => {
+          if (!/^Step\s+\d+/i.test(heading.textContent.trim())) return;
+          wrapStepHeading(heading);
+
+          let node = heading.nextElementSibling;
+          while (node && !/^H[34]$/.test(node.tagName) && node.tagName !== "HR") {
+            if (isDoneWhenParagraph(node) && node.nextElementSibling?.tagName === "UL") {
+              wrapDoneWhenList(node.nextElementSibling, heading.id);
+              break;
+            }
+            node = node.nextElementSibling;
+          }
+        });
+      });
+    }
+
+    function applyProgressState() {
+      const progress = loadProgress();
+
+      document.querySelectorAll("[data-progress-key]").forEach((check) => {
+        const key = check.dataset.progressKey;
+        const done = Boolean(progress[key]);
+        check.checked = done;
+
+        const item = check.closest("li, h4");
+        if (item) item.classList.toggle("progress-item-done", done);
+      });
+
+      document.querySelectorAll(".page-toc a").forEach((link) => {
+        const href = link.getAttribute("href") || "";
+        const slash = href.indexOf("/");
+        if (slash === -1) return;
+        const stepId = href.slice(slash + 1);
+        link.classList.toggle("progress-done", Boolean(progress[stepId]));
+      });
+
+      document.querySelectorAll(".nav-section a[data-page]").forEach((link) => {
+        const pageId = link.dataset.page;
+        if (!pageId || pageId === "curriculum") return;
+
+        const page = document.getElementById("page-" + pageId);
+        if (!page) return;
+
+        const stepChecks = page.querySelectorAll("h4.progress-heading [data-progress-key]");
+        if (stepChecks.length === 0) return;
+
+        let doneCount = 0;
+        stepChecks.forEach((check) => {
+          if (progress[check.dataset.progressKey]) doneCount += 1;
+        });
+
+        let badge = link.querySelector(".nav-progress");
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "nav-progress";
+          link.appendChild(badge);
+        }
+        badge.textContent = doneCount + "/" + stepChecks.length + " steps";
+        badge.dataset.complete = doneCount === stepChecks.length ? "true" : "false";
+      });
+    }
+
+    function initProgressTracking() {
+      initProgressMarkup();
+      applyProgressState();
+
+      document.addEventListener("change", (event) => {
+        const check = event.target;
+        if (!(check instanceof HTMLInputElement)) return;
+        if (!check.dataset.progressKey) return;
+
+        const progress = loadProgress();
+        if (check.checked) progress[check.dataset.progressKey] = true;
+        else delete progress[check.dataset.progressKey];
+        saveProgress(progress);
+        applyProgressState();
+      });
+    }
 
     function showPage(pageId, anchor) {
       if (!pages.includes(pageId)) pageId = "curriculum";
@@ -1899,6 +2594,8 @@
         location.hash = link.getAttribute("href").slice(1);
       });
     });
+
+    initProgressTracking();
 
     const initial = parseHash();
     if (!location.hash) location.hash = "curriculum";

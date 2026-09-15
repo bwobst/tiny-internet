@@ -5,6 +5,10 @@ Captured packets and expected decoded objects for `@dns` encoder/decoder tests.
 ## Layout
 
 ```text
+pi-world-a/
+  01-query.*               # inbound A query for the zone apex
+  02-aa-answer.*           # AA response: three cluster A records
+
 google-com-a/
   query.ts                 # shared query; only RD differs
   recursive/01-answer.*    # RD=1 → forwarder final answer
@@ -14,8 +18,11 @@ google-com-a/
     03-authoritative-answer.*  # hop 3: final A
 ```
 
-Domain first (`google-com-a`), then mode (`recursive` / `iterative`).
-Recursive vs iterative is how you got the packet, not two decoder code paths.
+Stage 1 · Naming uses `pi-world-a` only.
+
+`google-com-a` stays on disk. It is not a Sample for this stage.
+
+Domain first (`pi-world-a`, `google-com-a`). Under `google-com-a`, mode (`recursive` / `iterative`) is how you got the packet, not two decoder code paths.
 
 ## File roles
 
