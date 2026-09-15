@@ -2482,97 +2482,80 @@ green
         <h1>Message Queue</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#message-queue/message-queue-stage-14-message-queue">Stage 14 · Message queue</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-1---basic-publish-and-consume">Step 1 - Basic publish and consume</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-2---acknowledgement-and-redelivery">Step 2 - Acknowledgement and redelivery</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-3---dead-letter-queue">Step 3 - Dead-letter queue</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="message-queue-stage-14-message-queue">Stage 14 · Message queue</h3>
-<blockquote><p>Decouple request handling from request processing.</p></blockquote>
-<p><strong>In the platform:</strong> <code>/events</code> is backed by this. An HTTP request drops an event on a queue, a consumer drains it, the store records it - and none of that work happens while the visitor is waiting for the page.</p>
-<p><strong>Scope:</strong> a broker your own producers and consumers use. Not Kafka, and do not build it on a real broker.</p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#message-queue/message-queue-stage-10-message-queue">Stage 10 · Message queue</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-1---publish-without-waiting-for-the-consumer">Step 1 - Publish without waiting for the consumer</a></li><li class="depth-4"><a href="#message-queue/message-queue-step-2---consumer-drains-in-order-and-the-record-shows-up-later">Step 2 - Consumer drains in order and the record shows up later</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="message-queue-stage-10-message-queue">Stage 10 · Message queue</h3>
+<blockquote><p>Decouple a request from the work it triggers.</p></blockquote>
+<p><strong>Enables:</strong> <code>/events</code> updates without the page waiting for the consumer.</p>
+<p><strong>Scope:</strong> a broker your own producer and consumer use. Not Kafka, and do not build it on a real broker.</p>
 <p>*Formerly: Message Queue.*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="message-queue-step-1---basic-publish-and-consume">Step 1 - Basic publish and consume</h4>
-<p><strong>Goal:</strong> Implement a queue where producers enqueue messages and consumers dequeue them in FIFO order.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="message-queue-step-1---publish-without-waiting-for-the-consumer">Step 1 - Publish without waiting for the consumer</h4>
+<p><strong>Goal:</strong> <code>POST /events</code> enqueues the event and responds before the consumer has processed it.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>queue.publish({ topic, payload })</code>; <code>queue.consume(topic, handler)</code>
+<li>Input: HTTP POST to <code>/events</code> with an event body
 </li>
-<li>Output: messages delivered to the handler in publish order; each message delivered to at most one consumer
+<li>Output: HTTP response sent back before the consumer's handler for that event has finished running; the event queued in the order it was received
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What data structure backs the queue? Array, linked list, or something else?
+<li>What does the handler for <code>POST /events</code> have to do, and in what order, so the response goes out before the consumer runs?
 </li>
-<li>With multiple consumers on the same topic, how do you ensure each message goes to exactly one?
+<li>If the consumer's work takes an artificially long time, what would make the response slow anyway? What would keep it fast regardless?
 </li>
-<li>What happens if no consumer is registered when a message is published?
+<li>How do you prove &quot;before the consumer finished&quot; from outside the process, using only what <code>curl</code> can measure?
 </li>
 </ul>
+<p><strong>Watch out:</strong> A handler that calls the consumer directly, even wrapped in something that looks asynchronous, can still finish the consumer's work before the response is written if nothing actually decouples the two. Time the response, not the code path.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="message-queue-sample-1---fast-response-despite-a-slow-consumer">Sample 1 - fast response despite a slow consumer</h5>
+<pre><code>docker compose exec alpha sh -c &quot;curl -s -o /dev/null -w '%{http_code} %{time_total}s\n' -X POST http://bravo:7070/events -d 'type=click'&quot;
+</code></pre>
+<pre><code>202 0.009s
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>1000 messages published to 3 competing consumers are each delivered exactly once (verified by summing consumer counts)
-</li>
-<li>Messages arrive at consumers in the order they were published
+<li>fast response despite a slow consumer
 </li>
 </ul>
-<p><strong>Watch out:</strong> If you call handlers synchronously within <code>publish</code>, a slow handler blocks the publisher. Deliver messages asynchronously (e.g. <code>setImmediate</code>) to decouple producer and consumer timing.</p>
 <hr />
-<h4 id="message-queue-step-2---acknowledgement-and-redelivery">Step 2 - Acknowledgement and redelivery</h4>
-<p><strong>Goal:</strong> Hold messages in an &quot;in-flight&quot; state until the consumer explicitly acknowledges them; redeliver if no ack arrives within a timeout.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="message-queue-step-2---consumer-drains-in-order-and-the-record-shows-up-later">Step 2 - Consumer drains in order and the record shows up later</h4>
+<p><strong>Goal:</strong> The consumer dequeues events in the order they were published and records each one to the store; <code>GET /events</code> reflects only the events the consumer has finished with.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>ack(messageId)</code> or <code>nack(messageId)</code> from consumer
+<li>Input: several <code>POST /events</code> calls in sequence, followed by <code>GET /events</code> at two different times
 </li>
-<li>Output: acked messages removed from the queue; nacked messages returned to the head of the queue for redelivery
+<li>Output: a <code>GET /events</code> immediately after publishing may omit an event still in flight; a <code>GET /events</code> after the consumer has had time to run lists every published event, in publish order
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you track which messages are in-flight and their delivery timestamps?
+<li>What does the consumer write to, and does that write need to survive a restart? (Stage 9's log applies to whatever the consumer records into.)
 </li>
-<li>What is your redelivery timeout, and how do you implement it without polling too frequently?
+<li>Two events are published back to back. What guarantees the consumer processes them in that order rather than whichever finishes first?
 </li>
-<li>What happens if a consumer dies without acking? How does the message get back?
+<li>Is an event missing from an immediate <code>GET /events</code> a bug, or the behavior this stage is testing for?
 </li>
 </ul>
+<p><strong>Watch out:</strong> Don't &quot;fix&quot; a <code>GET /events</code> that briefly omits a just-published event by making the GET wait for the queue to drain. That wait is the exact coupling this stage removes.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="message-queue-sample-2---immediate-read-may-lag-later-read-catches-up">Sample 2 - immediate read may lag, later read catches up</h5>
+<pre><code>docker compose exec alpha curl -s -X POST http://bravo:7070/events -d 'type=click'
+docker compose exec alpha curl -s http://bravo:7070/events
+sleep 1
+docker compose exec alpha curl -s http://bravo:7070/events
+</code></pre>
+<pre><code>202
+
+click
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>A consumer that receives a message but never acks causes the message to be redelivered after the timeout
-</li>
-<li><code>nack</code> immediately returns the message to the queue for the next available consumer
-</li>
-<li><code>ack</code> removes the message permanently - no redelivery
+<li>immediate read may lag, later read catches up
 </li>
 </ul>
-<p><strong>Watch out:</strong> Redelivered messages must be marked with an <code>attempt</code> count. Without it, you can't distinguish a first delivery from a 50th, and you'll never know when to give up.</p>
 <hr />
-<h4 id="message-queue-step-3---dead-letter-queue">Step 3 - Dead-letter queue</h4>
-<p><strong>Goal:</strong> After N failed delivery attempts, route a message to a dead-letter queue instead of retrying indefinitely.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: a message that has been nacked (or not acked) more than <code>maxAttempts</code> times
-</li>
-<li>Output: message moved to <code>&lt;topic&gt;.dlq</code> with metadata: <code>{ originalTopic, attemptCount, lastFailureReason, firstPublishedAt }</code>
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What triggers DLQ routing - exceeding max attempts, or explicit <code>nack</code> with a <code>reason</code>?
-</li>
-<li>Who consumes the DLQ, and what can they do with messages there?
-</li>
-<li>Should DLQ messages themselves be acked/nacked, or are they terminal?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>A message nacked 3 times (with <code>maxAttempts: 3</code>) appears in the DLQ with correct metadata
-</li>
-<li>The original topic's queue is empty after DLQ routing
-</li>
-<li>A DLQ consumer can inspect and optionally replay messages to the original topic
-</li>
-</ul>
-<p><strong>Watch out:</strong> Don't route to the DLQ on the first nack. Give messages a fair number of attempts before giving up - set <code>maxAttempts</code> to at least 3 in your default config and make it configurable.</p></div>
+<p><strong>Next:</strong> requests no longer wait on the work they trigger, but a blob still lives on whichever node's disk first received it. <a href="#object-storage">Stage 11 · Object storage</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-object-storage" data-page="object-storage" hidden>
@@ -2581,99 +2564,98 @@ green
         <h1>Object Storage</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#object-storage/object-storage-stage-15-object-storage">Stage 15 · Object storage</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-1---put-and-get-objects">Step 1 - Put and Get objects</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-2---multipart-upload">Step 2 - Multipart upload</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-3---presigned-urls">Step 3 - Presigned URLs</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="object-storage-stage-15-object-storage">Stage 15 · Object storage</h3>
-<blockquote><p>Store the blobs the site serves.</p></blockquote>
-<p><strong>In the platform:</strong> Static assets and uploads stop living on one node's disk and start living in the cluster, which means they survive losing the node that received them.</p>
-<p><strong>Scope:</strong> storing and retrieving objects across your nodes. S3 compatibility is optional and only worth it if it teaches you something.</p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#object-storage/object-storage-stage-11-object-storage">Stage 11 · Object storage</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-1---put-and-get-an-object">Step 1 - Put and Get an object</a></li><li class="depth-4"><a href="#object-storage/object-storage-step-2---the-blob-survives-the-nodes-reboot">Step 2 - The blob survives the Node's reboot</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="object-storage-stage-11-object-storage">Stage 11 · Object storage</h3>
+<blockquote><p>Store the blobs the site serves, on disk, so one outlives the process that first wrote it.</p></blockquote>
+<p><strong>Enables:</strong> A blob is still served after the Node that first stored it reboots.</p>
+<p><strong>Scope:</strong> storing and retrieving an object on one Node's filesystem, durably enough to survive that Node restarting. No replication across Nodes, no S3 compatibility, no multipart upload, no presigned URLs.</p>
 <p>*Formerly: Object Storage.*</p>
-<p><strong>Recommended stack:</strong> Node.js (<code>http</code>, <code>crypto</code>, <code>fs</code>)</p>
-<h4 id="object-storage-step-1---put-and-get-objects">Step 1 - Put and Get objects</h4>
-<p><strong>Goal:</strong> Implement <code>PUT /{bucket}/{key}</code> and <code>GET /{bucket}/{key}</code> over HTTP, storing objects on the local filesystem.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="object-storage-step-1---put-and-get-an-object">Step 1 - Put and Get an object</h4>
+<p><strong>Goal:</strong> Implement <code>PUT /{bucket}/{key}</code> and <code>GET /{bucket}/{key}</code>, storing the object's bytes on the local filesystem before the PUT is acknowledged.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: HTTP PUT with object bytes in the body; HTTP GET for an existing key
+<li>Input: HTTP PUT to <code>/{bucket}/{key}</code> with the object bytes as the body; HTTP GET to the same path
 </li>
-<li>Output: stored file on disk with an MD5 ETag; GET returns file bytes with correct Content-Type and Content-Length
+<li>Output: on PUT, the bytes durably on disk before the response is sent, and an ETag in the response; on GET, the exact bytes back with a matching ETag, or <code>404</code> if the key was never stored
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you map <code>bucket/key</code> to a filesystem path safely? (Prevent path traversal attacks)
+<li>How do you turn <code>bucket</code> and <code>key</code> into a path on disk without letting a crafted <code>key</code> write outside the bucket's directory?
 </li>
-<li>How do you compute and return the ETag? (MD5 of the object bytes, hex-encoded, quoted)
+<li><code>fs.writeFile</code> returning does not mean the bytes are on disk (Stage 9 already forced you to answer this once). What has to happen before you send the PUT response, so that a GET immediately after - or a crash immediately after - never sees a half-written file at the path it reads from?
 </li>
-<li>What HTTP status codes do S3 use for PUT (201? 200?), GET-hit, and GET-miss?
+<li>What is the ETag over, and does it have to match on every future GET of the same bytes?
 </li>
 </ul>
+<p><strong>Watch out:</strong> Writing bytes straight into the final path means a reader (or a crash) can land mid-write and see a partial file at exactly the path GET trusts. Write to a temporary path first, force it to disk, then move it into place - the move is what makes &quot;the file exists at this path&quot; a single atomic fact instead of a window of corruption.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="object-storage-sample-1---put-and-get-a-blob">Sample 1 - put and get a blob</h5>
+<pre><code>docker compose exec alpha curl -s -i -X PUT http://bravo:7070/photos/logo.txt -d 'tiny internet'
+docker compose exec alpha curl -s -i http://bravo:7070/photos/logo.txt
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+ETag: &quot;b18d65500adc0811c3a4a37067cd1f43&quot;
+Content-Length: 0
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: application/octet-stream
+Content-Length: 13
+ETag: &quot;b18d65500adc0811c3a4a37067cd1f43&quot;
+Connection: close
+
+tiny internet
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -T file.txt http://localhost:3000/mybucket/myfile.txt</code> stores the file and returns an ETag
-</li>
-<li><code>curl http://localhost:3000/mybucket/myfile.txt</code> retrieves the original bytes exactly
-</li>
-<li><code>curl http://localhost:3000/mybucket/missing.txt</code> returns <code>404</code> with an XML error body
+<li>put and get a blob
 </li>
 </ul>
-<p><strong>Watch out:</strong> S3 returns <code>200 OK</code> for PUT, not <code>201 Created</code>, and the ETag is the MD5 wrapped in double quotes (<code>&quot;d41d8cd98f00b204e9800998ecf8427e&quot;</code>). Matching this exactly matters for AWS SDK compatibility.</p>
 <hr />
-<h4 id="object-storage-step-2---multipart-upload">Step 2 - Multipart upload</h4>
-<p><strong>Goal:</strong> Allow large objects to be uploaded in parts, then assembled atomically.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="object-storage-step-2---the-blob-survives-the-nodes-reboot">Step 2 - The blob survives the Node's reboot</h4>
+<p><strong>Goal:</strong> Confirm a stored blob is still served, with the same bytes and the same ETag, after the Node that first stored it restarts.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>POST /{bucket}/{key}?uploads</code> → uploadId; <code>PUT /{bucket}/{key}?partNumber=N&amp;uploadId=X</code> for each part; <code>POST /{bucket}/{key}?uploadId=X</code> with part manifest to complete
+<li>Input: a Node restarted (or killed with <code>SIGKILL</code> and restarted) after a PUT has already been acknowledged
 </li>
-<li>Output: parts stored temporarily; completed object assembled and stored as a single file
+<li>Output: a GET on the restarted Node returns the same bytes and the same ETag as before the restart
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Where do you store incomplete parts? In a temp directory keyed by <code>uploadId</code>?
+<li>What has to be true about where object bytes live for a Node restart to preserve them, versus a path that gets wiped along with the process?
 </li>
-<li>What is the minimum part size for all but the last part? (S3 enforces 5MB - do you?)
-</li>
-<li>How do you validate the part manifest? (Part numbers, ETags)
+<li>Step 1's temp-file-then-rename protects a write that is in flight when the Node dies. Does it do anything for objects that were already stored and acknowledged earlier? Why or why not?
 </li>
 </ul>
+<p><strong>Watch out:</strong> A <code>docker compose restart</code> proves nothing if the object directory lives somewhere Compose recreates on restart. Confirm where the bytes actually persist before trusting this Sample - the Enables line is about the object surviving, not about the container coming back up.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="object-storage-sample-2---blob-survives-a-reboot">Sample 2 - blob survives a reboot</h5>
+<pre><code>docker compose exec alpha curl -s -i -X PUT http://bravo:7070/photos/logo.txt -d 'tiny internet'
+docker compose restart bravo
+docker compose exec alpha curl -s -i http://bravo:7070/photos/logo.txt
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+ETag: &quot;b18d65500adc0811c3a4a37067cd1f43&quot;
+Content-Length: 0
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: application/octet-stream
+Content-Length: 13
+ETag: &quot;b18d65500adc0811c3a4a37067cd1f43&quot;
+Connection: close
+
+tiny internet
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Uploading a 20MB file in 5MB parts (4 parts) produces an assembled object identical to uploading it in one PUT (verify with SHA-256 hash)
-</li>
-<li>Incomplete uploads (missing parts) return a descriptive error on complete
-</li>
-<li>A <code>DELETE /{bucket}/{key}?uploadId=X</code> cleans up partial parts
+<li>blob survives a reboot
 </li>
 </ul>
-<p><strong>Watch out:</strong> Assemble parts by concatenating them in part-number order, not upload order. Clients may upload parts out of order.</p>
 <hr />
-<h4 id="object-storage-step-3---presigned-urls">Step 3 - Presigned URLs</h4>
-<p><strong>Goal:</strong> Generate time-limited, pre-authenticated URLs that allow third parties to GET or PUT objects without credentials.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: <code>generatePresignedUrl({ bucket, key, method, expiresIn })</code> → URL with embedded signature and expiry
-</li>
-<li>Output: the URL, when requested within the expiry window, is served without any <code>Authorization</code> header; expired or tampered URLs return <code>403</code>
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What parameters must be signed? (Method, bucket, key, expiry timestamp, and your &quot;secret key&quot;)
-</li>
-<li>How do you embed and verify the expiry without trusting the client to send it unspoofed?
-</li>
-<li>What is the canonical string-to-sign, and why does order matter?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>A presigned GET URL works in a browser (no auth headers required)
-</li>
-<li>The same URL after <code>expiresIn</code> seconds returns <code>403 Forbidden</code>
-</li>
-<li>Modifying any URL parameter (key, expiry, bucket) causes a <code>403</code> due to signature mismatch
-</li>
-</ul>
-<p><strong>Watch out:</strong> Include the expiry timestamp in the signed string - don't just check it separately. If the expiry is not part of the signature, a client can extend it by modifying the URL parameter without breaking the signature.</p></div>
+<p><strong>Next:</strong> there is no next stage on the locked path.</p></div>
       </div>
     </article></main>
   </div>
