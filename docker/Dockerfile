@@ -41,9 +41,9 @@ RUN setcap cap_net_bind_service=+ep "$(readlink --canonicalize "$(command -v nod
 RUN setcap cap_net_raw,cap_net_admin=+ep /usr/bin/tcpdump
 
 # Docker seeds an empty named volume from the image path it covers, ownership
-# included. Creating these as `node` first is what makes the node_modules
-# volumes in compose.yaml writable by the unprivileged user.
-RUN mkdir --parents /workspace/node_modules /workspace/packages/dns/node_modules /workspace/.pnpm-store \
+# included. Creating these as `node` first is what makes the node_modules and
+# pnpm-store volumes in compose.yaml writable by the unprivileged user.
+RUN mkdir --parents /workspace/node_modules /workspace/.pnpm-store \
   && chown --recursive node:node /workspace
 
 USER node

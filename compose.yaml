@@ -23,9 +23,9 @@ x-node: &node
     # The repo is live in every node. Edit on the laptop, run in the container.
     - .:/workspace
     # Keep container-built node_modules out of the host tree: the host installs
-    # darwin/arm64 binaries, the containers need linux ones.
+    # darwin/arm64 binaries, the containers need linux ones. Package-level
+    # node_modules are mostly symlinks into this tree, so one volume is enough.
     - node_modules:/workspace/node_modules
-    - dns_node_modules:/workspace/packages/dns/node_modules
     # pnpm keeps its content-addressable store on the same filesystem as the
     # project so it can hardlink. Give that path a volume, otherwise the store
     # lands in the bind-mounted working copy as an untracked .pnpm-store.
@@ -101,5 +101,4 @@ networks:
 
 volumes:
   node_modules:
-  dns_node_modules:
   pnpm_store:
