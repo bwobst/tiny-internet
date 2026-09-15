@@ -1,74 +1,80 @@
-### Stage 14 · Message queue
+### Stage 10 · Message queue
 
-> Decouple request handling from request processing.
+> Decouple a request from the work it triggers.
 
-**In the platform:** `/events` is backed by this. An HTTP request drops an event on a queue, a consumer drains it, the store records it - and none of that work happens while the visitor is waiting for the page.
+**Enables:** `/events` updates without the page waiting for the consumer.
 
-**Scope:** a broker your own producers and consumers use. Not Kafka, and do not build it on a real broker.
+**Scope:** a broker your own producer and consumer use. Not Kafka, and do not build it on a real broker.
 
 *Formerly: Message Queue.*
 
-**Recommended stack:** Node.js
+#### Step 1 - Publish without waiting for the consumer
 
-#### Step 1 - Basic publish and consume
+**Goal:** `POST /events` enqueues the event and responds before the consumer has processed it.
 
-**Goal:** Implement a queue where producers enqueue messages and consumers dequeue them in FIFO order.
-
-**Inputs & outputs:**
-- Input: `queue.publish({ topic, payload })`; `queue.consume(topic, handler)`
-- Output: messages delivered to the handler in publish order; each message delivered to at most one consumer
+**Shape:**
+- Input: HTTP POST to `/events` with an event body
+- Output: HTTP response sent back before the consumer's handler for that event has finished running; the event queued in the order it was received
 
 **Key questions:**
-- What data structure backs the queue? Array, linked list, or something else?
-- With multiple consumers on the same topic, how do you ensure each message goes to exactly one?
-- What happens if no consumer is registered when a message is published?
+- What does the handler for `POST /events` have to do, and in what order, so the response goes out before the consumer runs?
+- If the consumer's work takes an artificially long time, what would make the response slow anyway? What would keep it fast regardless?
+- How do you prove "before the consumer finished" from outside the process, using only what `curl` can measure?
+
+**Watch out:** A handler that calls the consumer directly, even wrapped in something that looks asynchronous, can still finish the consumer's work before the response is written if nothing actually decouples the two. Time the response, not the code path.
+
+**Samples:**
+
+##### Sample 1 - fast response despite a slow consumer
+
+```
+docker compose exec alpha sh -c "curl -s -o /dev/null -w '%{http_code} %{time_total}s\n' -X POST http://bravo:7070/events -d 'type=click'"
+```
+
+```
+202 0.009s
+```
 
 **Done when:**
-- 1000 messages published to 3 competing consumers are each delivered exactly once (verified by summing consumer counts)
-- Messages arrive at consumers in the order they were published
-
-**Watch out:** If you call handlers synchronously within `publish`, a slow handler blocks the publisher. Deliver messages asynchronously (e.g. `setImmediate`) to decouple producer and consumer timing.
+- fast response despite a slow consumer
 
 ---
 
-#### Step 2 - Acknowledgement and redelivery
+#### Step 2 - Consumer drains in order and the record shows up later
 
-**Goal:** Hold messages in an "in-flight" state until the consumer explicitly acknowledges them; redeliver if no ack arrives within a timeout.
+**Goal:** The consumer dequeues events in the order they were published and records each one to the store; `GET /events` reflects only the events the consumer has finished with.
 
-**Inputs & outputs:**
-- Input: `ack(messageId)` or `nack(messageId)` from consumer
-- Output: acked messages removed from the queue; nacked messages returned to the head of the queue for redelivery
+**Shape:**
+- Input: several `POST /events` calls in sequence, followed by `GET /events` at two different times
+- Output: a `GET /events` immediately after publishing may omit an event still in flight; a `GET /events` after the consumer has had time to run lists every published event, in publish order
 
 **Key questions:**
-- How do you track which messages are in-flight and their delivery timestamps?
-- What is your redelivery timeout, and how do you implement it without polling too frequently?
-- What happens if a consumer dies without acking? How does the message get back?
+- What does the consumer write to, and does that write need to survive a restart? (Stage 9's log applies to whatever the consumer records into.)
+- Two events are published back to back. What guarantees the consumer processes them in that order rather than whichever finishes first?
+- Is an event missing from an immediate `GET /events` a bug, or the behavior this stage is testing for?
+
+**Watch out:** Don't "fix" a `GET /events` that briefly omits a just-published event by making the GET wait for the queue to drain. That wait is the exact coupling this stage removes.
+
+**Samples:**
+
+##### Sample 2 - immediate read may lag, later read catches up
+
+```
+docker compose exec alpha curl -s -X POST http://bravo:7070/events -d 'type=click'
+docker compose exec alpha curl -s http://bravo:7070/events
+sleep 1
+docker compose exec alpha curl -s http://bravo:7070/events
+```
+
+```
+202
+
+click
+```
 
 **Done when:**
-- A consumer that receives a message but never acks causes the message to be redelivered after the timeout
-- `nack` immediately returns the message to the queue for the next available consumer
-- `ack` removes the message permanently - no redelivery
-
-**Watch out:** Redelivered messages must be marked with an `attempt` count. Without it, you can't distinguish a first delivery from a 50th, and you'll never know when to give up.
+- immediate read may lag, later read catches up
 
 ---
 
-#### Step 3 - Dead-letter queue
-
-**Goal:** After N failed delivery attempts, route a message to a dead-letter queue instead of retrying indefinitely.
-
-**Inputs & outputs:**
-- Input: a message that has been nacked (or not acked) more than `maxAttempts` times
-- Output: message moved to `<topic>.dlq` with metadata: `{ originalTopic, attemptCount, lastFailureReason, firstPublishedAt }`
-
-**Key questions:**
-- What triggers DLQ routing - exceeding max attempts, or explicit `nack` with a `reason`?
-- Who consumes the DLQ, and what can they do with messages there?
-- Should DLQ messages themselves be acked/nacked, or are they terminal?
-
-**Done when:**
-- A message nacked 3 times (with `maxAttempts: 3`) appears in the DLQ with correct metadata
-- The original topic's queue is empty after DLQ routing
-- A DLQ consumer can inspect and optionally replay messages to the original topic
-
-**Watch out:** Don't route to the DLQ on the first nack. Give messages a fair number of attempts before giving up - set `maxAttempts` to at least 3 in your default config and make it configurable.
+**Next:** requests no longer wait on the work they trigger, but a blob still lives on whichever node's disk first received it. [Stage 11 · Object storage](./15-object-storage.md).
