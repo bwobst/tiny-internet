@@ -204,6 +204,7 @@ bravo
 **Shape:**
 - Listener:
   - port: integer
+  - state: listening or not
   - received: bytes
 - Connector:
   - target: Node name
@@ -217,21 +218,21 @@ bravo
 
 **Watch out:** A connection that hangs instead of being refused is a filter, not a dead process.
 Refused means the Node answered and nothing was listening.
-Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange.
-The source port in the listener transcript changes every run - match the Node name and the bytes.
+A listener in the foreground blocks until something connects, so the Samples below send its output to a log and read that log afterwards.
+Run the Samples in order: the listener has to be up before ALPHA connects.
+The source port in the listener log changes every run - match the Node name and the bytes.
 
 **Samples:**
 
 ##### Sample 1 - listener on charlie
 
 ```
-docker compose exec charlie nc -lv -p 9000
+docker compose exec charlie sh -c 'nc -lv -p 9000 > /tmp/listener.log 2>&1 & sleep 0.5; ss -ltn sport = :9000'
 ```
 
 ```
-Listening on 0.0.0.0 9000
-Connection received on alpha.tiny-internet_tiny-internet 34354
-hello from alpha
+State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+LISTEN 0      1            0.0.0.0:9000      0.0.0.0:*          
 ```
 
 ##### Sample 2 - connect from alpha
@@ -244,7 +245,19 @@ echo "hello from alpha" | docker compose exec -T alpha nc -v -w 2 charlie 9000
 Connection to charlie (10.53.0.12) 9000 port [tcp/*] succeeded!
 ```
 
-##### Sample 3 - connect to a closed port
+##### Sample 3 - bytes arrived on charlie
+
+```
+docker compose exec charlie cat /tmp/listener.log
+```
+
+```
+Listening on 0.0.0.0 9000
+Connection received on alpha.tiny-internet_tiny-internet 45796
+hello from alpha
+```
+
+##### Sample 4 - connect to a closed port
 
 ```
 docker compose exec alpha nc -v -w 2 charlie 9001
@@ -257,6 +270,7 @@ nc: connect to charlie (10.53.0.12) port 9001 (tcp) failed: Connection refused
 **Done when:**
 - listener on charlie
 - connect from alpha
+- bytes arrived on charlie
 - connect to a closed port
 
 ---

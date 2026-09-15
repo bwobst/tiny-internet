@@ -965,6 +965,8 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 <ul>
 <li>port: integer
 </li>
+<li>state: listening or not
+</li>
 <li>received: bytes
 </li>
 </ul>
@@ -991,22 +993,29 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 </ul>
 <p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process.</p>
 <p>Refused means the Node answered and nothing was listening.</p>
-<p>Sample 1 blocks until Sample 2 connects, so run it in its own shell and take both transcripts from the one exchange.</p>
-<p>The source port in the listener transcript changes every run - match the Node name and the bytes.</p>
+<p>A listener in the foreground blocks until something connects, so the Samples below send its output to a log and read that log afterwards.</p>
+<p>Run the Samples in order: the listener has to be up before ALPHA connects.</p>
+<p>The source port in the listener log changes every run - match the Node name and the bytes.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---listener-on-charlie">Sample 1 - listener on charlie</h5>
-<pre><code>docker compose exec charlie nc -lv -p 9000
+<pre><code>docker compose exec charlie sh -c 'nc -lv -p 9000 &gt; /tmp/listener.log 2&gt;&amp;1 &amp; sleep 0.5; ss -ltn sport = :9000'
 </code></pre>
-<pre><code>Listening on 0.0.0.0 9000
-Connection received on alpha.tiny-internet_tiny-internet 34354
-hello from alpha
+<pre><code>State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+LISTEN 0      1            0.0.0.0:9000      0.0.0.0:*          
 </code></pre>
 <h5 id="network-sample-2---connect-from-alpha">Sample 2 - connect from alpha</h5>
 <pre><code>echo &quot;hello from alpha&quot; | docker compose exec -T alpha nc -v -w 2 charlie 9000
 </code></pre>
 <pre><code>Connection to charlie (10.53.0.12) 9000 port [tcp/*] succeeded!
 </code></pre>
-<h5 id="network-sample-3---connect-to-a-closed-port">Sample 3 - connect to a closed port</h5>
+<h5 id="network-sample-3---bytes-arrived-on-charlie">Sample 3 - bytes arrived on charlie</h5>
+<pre><code>docker compose exec charlie cat /tmp/listener.log
+</code></pre>
+<pre><code>Listening on 0.0.0.0 9000
+Connection received on alpha.tiny-internet_tiny-internet 45796
+hello from alpha
+</code></pre>
+<h5 id="network-sample-4---connect-to-a-closed-port">Sample 4 - connect to a closed port</h5>
 <pre><code>docker compose exec alpha nc -v -w 2 charlie 9001
 </code></pre>
 <pre><code>nc: connect to charlie (10.53.0.12) port 9001 (tcp) failed: Connection refused
@@ -1016,6 +1025,8 @@ hello from alpha
 <li>listener on charlie
 </li>
 <li>connect from alpha
+</li>
+<li>bytes arrived on charlie
 </li>
 <li>connect to a closed port
 </li>
