@@ -1733,95 +1733,127 @@ Connection: close
         <h1>HTTP Cache Layer</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-cache-layer/http-cache-layer-stage-7-http-cache-layer">Stage 7 · HTTP cache layer</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-1---generate-and-validate-etags">Step 1 - Generate and validate ETags</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-2---last-modified-and-conditional-range-requests">Step 2 - Last-Modified and conditional range requests</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-3---vary-header-and-content-negotiation-caching">Step 3 - Vary header and content negotiation caching</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="http-cache-layer-stage-7-http-cache-layer">Stage 7 · HTTP cache layer</h3>
-<blockquote><p>Cache expensive responses at the edge.</p></blockquote>
-<p><strong>In the platform:</strong> The site reports its own cache behavior. <code>/api/status</code> returns <code>MISS origin: bravo 42ms</code>, then on refresh <code>HIT age: 1.2s 0.7ms</code>. The optimization is only interesting because you can watch it work.</p>
-<p><strong>Scope:</strong> correct revalidation and expiry for your own responses. Correctness matters more than hit rate here.</p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-cache-layer/http-cache-layer-stage-5-http-cache">Stage 5 · HTTP cache</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-1---serve-a-miss-and-store-it">Step 1 - Serve a MISS and store it</a></li><li class="depth-4"><a href="#http-cache-layer/http-cache-layer-step-2---serve-a-hit-with-age-then-expire-it">Step 2 - Serve a HIT with age, then expire it</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="http-cache-layer-stage-5-http-cache">Stage 5 · HTTP cache</h3>
+<blockquote><p>Stop recomputing the same response for every request.</p></blockquote>
+<p><strong>Enables:</strong> the site reports a MISS from origin, then a HIT with age and a shorter time.</p>
+<p><strong>Scope:</strong> a cache in front of one origin response, correct about freshness and honest about its own state. No CDN, no edge nodes, no per-client variants.</p>
 <p>*Formerly: HTTP Cache Layer.*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="http-cache-layer-step-1---generate-and-validate-etags">Step 1 - Generate and validate ETags</h4>
-<p><strong>Goal:</strong> Compute a fingerprint for each response body and use it to avoid re-sending unchanged content.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="http-cache-layer-step-1---serve-a-miss-and-store-it">Step 1 - Serve a MISS and store it</h4>
+<p><strong>Goal:</strong> On the first request for a path, fetch the response from origin, mark it as a MISS, and store it for reuse.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: response body bytes
+<li>Input: an HTTP request for a path with nothing cached for it yet
 </li>
-<li>Output: <code>ETag</code> header on the response; <code>304 Not Modified</code> (with no body) when a conditional GET matches
+<li>Output:
+<ul>
+<li>the origin's response, returned to the client unchanged except for one added cache-state header
+</li>
+<li>that response, kept somewhere the next request for the same path can find it
+</li>
+<li>a freshness lifetime attached to what was stored
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you generate an ETag? (MD5, SHA-1, content length + mtime - pick one and know its trade-offs)
+<li>What identifies a cache entry - the path alone, or something that also depends on request headers?
 </li>
-<li>What is the <code>If-None-Match</code> request header, and how do you validate it?
+<li>Where does &quot;how long is this still good for&quot; come from? Does the origin have to say so, or can the cache decide on its own? (RFC 7234 §5.2 on <code>Cache-Control</code>)
 </li>
-<li>What headers must you still include in a <code>304</code> response even though there's no body?
+<li>What has to be stored alongside the body to answer a later request without going back to origin - status, headers, timestamp, all three?
 </li>
 </ul>
+<p><strong>Watch out:</strong> A MISS still has to look like a normal response to the client. If the added header is the only difference, a client that doesn't know to look for it should see nothing broken.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="http-cache-layer-sample-1---first-request-is-a-miss">Sample 1 - first request is a MISS</h5>
+<pre><code>curl -s -i http://127.0.0.1:8080/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+X-Cache: MISS
+X-Response-Time: 42ms
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;Served by BRAVO&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -I http://localhost:3000/file.js</code> returns an <code>ETag</code> header
-</li>
-<li><code>curl -H 'If-None-Match: &lt;etag&gt;'</code> returns <code>304</code> with no body and the same <code>ETag</code>
-</li>
-<li>Modifying the resource changes the <code>ETag</code> and the next conditional request returns <code>200</code>
+<li>first request is a MISS
 </li>
 </ul>
-<p><strong>Watch out:</strong> A <code>304</code> response must still include <code>Cache-Control</code>, <code>ETag</code>, <code>Expires</code>, and <code>Vary</code> - the same headers you'd send on a <code>200</code>. Omitting them prevents the client from updating its cache metadata.</p>
 <hr />
-<h4 id="http-cache-layer-step-2---last-modified-and-conditional-range-requests">Step 2 - Last-Modified and conditional range requests</h4>
-<p><strong>Goal:</strong> Support time-based conditional requests using <code>Last-Modified</code> / <code>If-Modified-Since</code>.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="http-cache-layer-step-2---serve-a-hit-with-age-then-expire-it">Step 2 - Serve a HIT with age, then expire it</h4>
+<p><strong>Goal:</strong> Answer a repeat request from the stored copy, report how long it has been sitting there, and stop trusting it once its freshness lifetime is up.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>If-Modified-Since</code> header in a GET request
+<li>Input: a second request for the same path, before and then after the freshness lifetime from Step 1 elapses
 </li>
-<li>Output: <code>304</code> if resource hasn't changed since that date; <code>200</code> with full body if it has
+<li>Output:
+<ul>
+<li>before expiry: the stored response, marked HIT, with its age since it was stored, returned faster than the Step 1 origin round trip
+</li>
+<li>after expiry: origin fetched again, a fresh MISS, a new entry replacing the old one
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What HTTP date format does <code>Last-Modified</code> use? (RFC 7231)
+<li><code>Age</code> is a duration, not a timestamp. What do you measure it from, and at what point do you compute it - store time, or answer time?
 </li>
-<li>What is the precedence rule when both <code>If-None-Match</code> and <code>If-Modified-Since</code> are present?
+<li>What makes a stored response too old to serve as a HIT? Where is that threshold checked?
 </li>
-<li>How do you get the mtime of a file in Node.js, and how do you format it correctly?
+<li>Two requests can arrive close together, before and after the same expiry instant. What should the second one see?
 </li>
 </ul>
+<p><strong>Watch out:</strong> A HIT that is faster only because the test happened to run fast isn't proof of anything. The Sample has to show the same path answered without a new origin round trip, and the origin's own latency has to still be visible in the MISS Sample for the comparison to mean something.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="http-cache-layer-sample-2---second-request-is-a-hit-with-age">Sample 2 - second request is a HIT with age</h5>
+<pre><code>curl -s -i http://127.0.0.1:8080/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+X-Cache: HIT
+Age: 1
+X-Response-Time: 1ms
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;Served by BRAVO&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h5 id="http-cache-layer-sample-3---request-after-expiry-is-a-miss-again">Sample 3 - request after expiry is a MISS again</h5>
+<pre><code>curl -s -i http://127.0.0.1:8080/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+X-Cache: MISS
+X-Response-Time: 39ms
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;Served by BRAVO&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -z &quot;Thu, 01 Jan 2099 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>304</code>
+<li>second request is a HIT with age
 </li>
-<li><code>curl -z &quot;Thu, 01 Jan 2000 00:00:00 GMT&quot; http://localhost:3000/file.js</code> returns <code>200</code> with the full file
+<li>request after expiry is a MISS again
 </li>
 </ul>
-<p><strong>Watch out:</strong> HTTP dates use a specific format (<code>Mon, 02 Jan 2006 15:04:05 GMT</code>). JavaScript's <code>new Date().toUTCString()</code> is close but not always RFC 7231-compliant across environments. Use <code>toUTCString()</code> and verify the output format manually.</p>
 <hr />
-<h4 id="http-cache-layer-step-3---vary-header-and-content-negotiation-caching">Step 3 - Vary header and content negotiation caching</h4>
-<p><strong>Goal:</strong> Store and serve different cached variants of the same URL based on client capabilities.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: same URL requested by clients with different <code>Accept-Encoding</code> (gzip vs. identity)
-</li>
-<li>Output: <code>Vary: Accept-Encoding</code> on response; separate cache entries per encoding; correct variant served to each client
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>How do you incorporate <code>Vary</code> fields into your cache key?
-</li>
-<li>What happens if you cache a gzip-encoded response and serve it to a client that doesn't accept gzip?
-</li>
-<li>Should you normalize <code>Accept-Encoding</code> values before using them as cache keys? Why?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>A gzip-capable client receives the compressed variant; a non-gzip client receives the uncompressed variant, from the same cache
-</li>
-<li>Both variants are stored and retrieved independently without one overwriting the other
-</li>
-</ul>
-<p><strong>Watch out:</strong> <code>Accept-Encoding</code> values can be <code>gzip, deflate, br</code> in any order with varying quality values (<code>;q=0.9</code>). Normalize to a canonical form (e.g. sorted, lowercased, quality stripped) before hashing into your cache key.</p></div>
+<p><strong>Next:</strong> the cache makes one path fast on one node, but BRAVO and CHARLIE still don't agree on anything. <a href="#key-value-store">Stage 6 · Key-value store</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-cdn" data-page="cdn" hidden>

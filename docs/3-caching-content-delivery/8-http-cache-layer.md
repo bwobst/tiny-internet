@@ -1,73 +1,122 @@
-### Stage 7 · HTTP cache layer
+### Stage 5 · HTTP cache
 
-> Cache expensive responses at the edge.
+> Stop recomputing the same response for every request.
 
-**In the platform:** The site reports its own cache behavior. `/api/status` returns `MISS origin: bravo 42ms`, then on refresh `HIT age: 1.2s 0.7ms`. The optimization is only interesting because you can watch it work.
+**Enables:** the site reports a MISS from origin, then a HIT with age and a shorter time.
 
-**Scope:** correct revalidation and expiry for your own responses. Correctness matters more than hit rate here.
+**Scope:** a cache in front of one origin response, correct about freshness and honest about its own state. No CDN, no edge nodes, no per-client variants.
 
 *Formerly: HTTP Cache Layer.*
 
-**Recommended stack:** Node.js
+#### Step 1 - Serve a MISS and store it
 
-#### Step 1 - Generate and validate ETags
+**Goal:** On the first request for a path, fetch the response from origin, mark it as a MISS, and store it for reuse.
 
-**Goal:** Compute a fingerprint for each response body and use it to avoid re-sending unchanged content.
-
-**Inputs & outputs:**
-- Input: response body bytes
-- Output: `ETag` header on the response; `304 Not Modified` (with no body) when a conditional GET matches
+**Shape:**
+- Input: an HTTP request for a path with nothing cached for it yet
+- Output:
+  - the origin's response, returned to the client unchanged except for one added cache-state header
+  - that response, kept somewhere the next request for the same path can find it
+  - a freshness lifetime attached to what was stored
 
 **Key questions:**
-- How do you generate an ETag? (MD5, SHA-1, content length + mtime - pick one and know its trade-offs)
-- What is the `If-None-Match` request header, and how do you validate it?
-- What headers must you still include in a `304` response even though there's no body?
+- What identifies a cache entry - the path alone, or something that also depends on request headers?
+- Where does "how long is this still good for" come from? Does the origin have to say so, or can the cache decide on its own? (RFC 7234 §5.2 on `Cache-Control`)
+- What has to be stored alongside the body to answer a later request without going back to origin - status, headers, timestamp, all three?
+
+**Watch out:** A MISS still has to look like a normal response to the client. If the added header is the only difference, a client that doesn't know to look for it should see nothing broken.
+
+**Samples:**
+
+##### Sample 1 - first request is a MISS
+
+```
+curl -s -i http://127.0.0.1:8080/
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+X-Cache: MISS
+X-Response-Time: 42ms
+Connection: close
+
+<!doctype html>
+<html>
+<body>Served by BRAVO</body>
+</html>
+```
 
 **Done when:**
-- `curl -I http://localhost:3000/file.js` returns an `ETag` header
-- `curl -H 'If-None-Match: <etag>'` returns `304` with no body and the same `ETag`
-- Modifying the resource changes the `ETag` and the next conditional request returns `200`
-
-**Watch out:** A `304` response must still include `Cache-Control`, `ETag`, `Expires`, and `Vary` - the same headers you'd send on a `200`. Omitting them prevents the client from updating its cache metadata.
+- first request is a MISS
 
 ---
 
-#### Step 2 - Last-Modified and conditional range requests
+#### Step 2 - Serve a HIT with age, then expire it
 
-**Goal:** Support time-based conditional requests using `Last-Modified` / `If-Modified-Since`.
+**Goal:** Answer a repeat request from the stored copy, report how long it has been sitting there, and stop trusting it once its freshness lifetime is up.
 
-**Inputs & outputs:**
-- Input: `If-Modified-Since` header in a GET request
-- Output: `304` if resource hasn't changed since that date; `200` with full body if it has
+**Shape:**
+- Input: a second request for the same path, before and then after the freshness lifetime from Step 1 elapses
+- Output:
+  - before expiry: the stored response, marked HIT, with its age since it was stored, returned faster than the Step 1 origin round trip
+  - after expiry: origin fetched again, a fresh MISS, a new entry replacing the old one
 
 **Key questions:**
-- What HTTP date format does `Last-Modified` use? (RFC 7231)
-- What is the precedence rule when both `If-None-Match` and `If-Modified-Since` are present?
-- How do you get the mtime of a file in Node.js, and how do you format it correctly?
+- `Age` is a duration, not a timestamp. What do you measure it from, and at what point do you compute it - store time, or answer time?
+- What makes a stored response too old to serve as a HIT? Where is that threshold checked?
+- Two requests can arrive close together, before and after the same expiry instant. What should the second one see?
+
+**Watch out:** A HIT that is faster only because the test happened to run fast isn't proof of anything. The Sample has to show the same path answered without a new origin round trip, and the origin's own latency has to still be visible in the MISS Sample for the comparison to mean something.
+
+**Samples:**
+
+##### Sample 2 - second request is a HIT with age
+
+```
+curl -s -i http://127.0.0.1:8080/
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+X-Cache: HIT
+Age: 1
+X-Response-Time: 1ms
+Connection: close
+
+<!doctype html>
+<html>
+<body>Served by BRAVO</body>
+</html>
+```
+
+##### Sample 3 - request after expiry is a MISS again
+
+```
+curl -s -i http://127.0.0.1:8080/
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+X-Cache: MISS
+X-Response-Time: 39ms
+Connection: close
+
+<!doctype html>
+<html>
+<body>Served by BRAVO</body>
+</html>
+```
 
 **Done when:**
-- `curl -z "Thu, 01 Jan 2099 00:00:00 GMT" http://localhost:3000/file.js` returns `304`
-- `curl -z "Thu, 01 Jan 2000 00:00:00 GMT" http://localhost:3000/file.js` returns `200` with the full file
-
-**Watch out:** HTTP dates use a specific format (`Mon, 02 Jan 2006 15:04:05 GMT`). JavaScript's `new Date().toUTCString()` is close but not always RFC 7231-compliant across environments. Use `toUTCString()` and verify the output format manually.
+- second request is a HIT with age
+- request after expiry is a MISS again
 
 ---
 
-#### Step 3 - Vary header and content negotiation caching
-
-**Goal:** Store and serve different cached variants of the same URL based on client capabilities.
-
-**Inputs & outputs:**
-- Input: same URL requested by clients with different `Accept-Encoding` (gzip vs. identity)
-- Output: `Vary: Accept-Encoding` on response; separate cache entries per encoding; correct variant served to each client
-
-**Key questions:**
-- How do you incorporate `Vary` fields into your cache key?
-- What happens if you cache a gzip-encoded response and serve it to a client that doesn't accept gzip?
-- Should you normalize `Accept-Encoding` values before using them as cache keys? Why?
-
-**Done when:**
-- A gzip-capable client receives the compressed variant; a non-gzip client receives the uncompressed variant, from the same cache
-- Both variants are stored and retrieved independently without one overwriting the other
-
-**Watch out:** `Accept-Encoding` values can be `gzip, deflate, br` in any order with varying quality values (`;q=0.9`). Normalize to a canonical form (e.g. sorted, lowercased, quality stripped) before hashing into your cache key.
+**Next:** the cache makes one path fast on one node, but BRAVO and CHARLIE still don't agree on anything. [Stage 6 · Key-value store](./9-key-value-store.md).
