@@ -162,12 +162,11 @@ Turn three addressable machines into something that can serve a page.
 
 Make the website a property of the cluster instead of a property of one machine.
 
-### Stage 4 · Front door
+### [Stage 4 · Front door](./2-traffic-routing/4-front-door.md)
 
 **Enables:** `pi.world` has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.
 
-No stage file yet.
-Old reverse-proxy and load-balancer docs stay on disk until a later rewrite.
+Old reverse-proxy and load-balancer docs stay on disk until a later rewrite deletes or recuts them. They are no longer the stage.
 
 ---
 

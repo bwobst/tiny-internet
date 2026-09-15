@@ -524,8 +524,7 @@
 <section class="nav-section" data-layer="2">
       <h2 class="nav-heading">Layer 2 · Traffic</h2>
       <ul>
-        <li><a href="#reverse-proxy" data-page="reverse-proxy"><span class="nav-subtitle">Stage 4</span><span class="nav-title">Reverse Proxy</span></a></li>
-<li><a href="#load-balancer" data-page="load-balancer"><span class="nav-subtitle">Stage 5</span><span class="nav-title">Load Balancing</span></a></li>
+        <li><a href="#front-door" data-page="front-door"><span class="nav-subtitle">Stage 4</span><span class="nav-title">Front door</span></a></li>
 <li><a href="#api-gateway" data-page="api-gateway"><span class="nav-subtitle">Stage 6</span><span class="nav-title">API Gateway</span></a></li>
       </ul>
     </section>
@@ -706,10 +705,9 @@
 <hr />
 <h2 id="curriculum-layer-2-traffic">Layer 2 · Traffic</h2>
 <p>Make the website a property of the cluster instead of a property of one machine.</p>
-<h3 id="curriculum-stage-4-front-door">Stage 4 · Front door</h3>
+<h3 id="curriculum-stage-4-front-door"><a href="#front-door">Stage 4 · Front door</a></h3>
 <p><strong>Enables:</strong> <code>pi.world</code> has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.</p>
-<p>No stage file yet.</p>
-<p>Old reverse-proxy and load-balancer docs stay on disk until a later rewrite.</p>
+<p>Old reverse-proxy and load-balancer docs stay on disk until a later rewrite deletes or recuts them. They are no longer the stage.</p>
 <hr />
 <h2 id="curriculum-layer-3-caching-and-shared-state">Layer 3 · Caching and shared state</h2>
 <p>Make the system fast, and give it shared state.</p>
@@ -1481,203 +1479,151 @@ Connection: close
 </li>
 </ul>
 <hr />
-<p><strong>Next:</strong> BRAVO answers, but only over a connection you opened straight to it. <a href="#curriculum">Stage 4 · Front door</a>.</p></div>
+<p><strong>Next:</strong> BRAVO answers, but only over a connection you opened straight to it. <a href="#front-door">Stage 4 · Front door</a>.</p></div>
       </div>
     </article>
-<article class="page" id="page-reverse-proxy" data-page="reverse-proxy" hidden>
+<article class="page" id="page-front-door" data-page="front-door" hidden>
       <header class="page-header">
         <p class="page-eyebrow">Stage 4</p>
-        <h1>Reverse Proxy</h1>
+        <h1>Front door</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#reverse-proxy/reverse-proxy-stage-4-reverse-proxy">Stage 4 · Reverse proxy</a></li><li class="depth-4"><a href="#reverse-proxy/reverse-proxy-step-1---http-request-forwarding-with-header-rewriting">Step 1 - HTTP request forwarding with header rewriting</a></li><li class="depth-4"><a href="#reverse-proxy/reverse-proxy-step-2---ssltls-termination">Step 2 - SSL/TLS termination</a></li><li class="depth-4"><a href="#reverse-proxy/reverse-proxy-step-3---virtual-host-routing">Step 3 - Virtual host routing</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="reverse-proxy-stage-4-reverse-proxy">Stage 4 · Reverse proxy</h3>
-<blockquote><p>Put something in front of the backends.</p></blockquote>
-<p><strong>In the platform:</strong> ALPHA becomes the single public entry point for <code>pi.world</code>. Backends stop being directly addressable, which is what makes the next stage - moving traffic between them - possible at all.</p>
-<p><strong>Scope:</strong> forwarding, header handling, and connection management for your own site.</p>
-<p>*Formerly: Reverse Proxy.*</p>
-<p><strong>Recommended stack:</strong> Node.js (<code>http</code>, <code>https</code>, <code>tls</code>)</p>
-<h4 id="reverse-proxy-step-1---http-request-forwarding-with-header-rewriting">Step 1 - HTTP request forwarding with header rewriting</h4>
-<p><strong>Goal:</strong> Accept a request, rewrite necessary headers, forward to an upstream, and return the upstream's response.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#front-door/front-door-stage-4-front-door">Stage 4 · Front door</a></li><li class="depth-4"><a href="#front-door/front-door-step-1---forward-across-a-pool-of-backends">Step 1 - Forward across a pool of backends</a></li><li class="depth-4"><a href="#front-door/front-door-step-2---route-around-a-dead-backend">Step 2 - Route around a dead backend</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="front-door-stage-4-front-door">Stage 4 · Front door</h3>
+<blockquote><p>Give <code>pi.world</code> one public entry on ALPHA, and let it survive a dead backend.</p></blockquote>
+<p><strong>Enables:</strong> <code>pi.world</code> has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.</p>
+<p><strong>Scope:</strong> One process on ALPHA forwarding real HTTP/1.1 traffic to BRAVO and CHARLIE, spreading requests across both while they answer, and routing around one that stops answering. No TLS, no virtual hosts, no least-connections, no rate limiting or auth.</p>
+<p>*Formerly: Reverse Proxy and Load Balancer.*</p>
+<h4 id="front-door-step-1---forward-across-a-pool-of-backends">Step 1 - Forward across a pool of backends</h4>
+<p><strong>Goal:</strong> Accept an inbound request on ALPHA, forward it to one backend chosen from a pool of two, return that backend's response to the client unchanged, and send the next request to a different backend.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: client HTTP request with original <code>Host</code>, <code>Connection</code>, and other headers
+<li>Input:
+<ul>
+<li>request: an HTTP request arriving on ALPHA's port 80
 </li>
-<li>Output: forwarded request with <code>X-Forwarded-For</code>, <code>X-Forwarded-Proto</code>, and <code>Via</code> added; upstream response returned verbatim
+<li>pool: list of backend addresses (BRAVO, CHARLIE)
+</li>
+</ul>
+</li>
+<li>Output:
+<ul>
+<li>the request, forwarded to one backend from <code>pool</code>, with <code>X-Forwarded-For</code> added
+</li>
+<li>the chosen backend's response, returned to the client with no other change to status, headers, or body
+</li>
+<li>the following request forwarded to a different backend than this one
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Which hop-by-hop headers (e.g. <code>Connection</code>, <code>Transfer-Encoding</code>) must be stripped before forwarding?
+<li>Which headers are hop-by-hop (RFC 7230 §6.1) and must be regenerated on the new connection to the backend, rather than copied straight off the client's connection?
 </li>
-<li>How do you handle streaming response bodies without buffering them entirely in memory?
+<li>Stage 3's backends answer once per connection and close it. Does the front door open a fresh connection to the backend for every request it forwards, or try to reuse one?
 </li>
-<li>What is the <code>Via</code> header and what format does it use?
+<li>Where does &quot;which backend is next&quot; live so it survives across separate incoming connections, not just inside the function handling one of them?
 </li>
 </ul>
+<p><strong>Watch out:</strong> Compose publishes ALPHA's port 80 to the host as 8080. A curl from the laptop uses <code>127.0.0.1:8080</code>; a request from inside BRAVO's or CHARLIE's container uses <code>alpha</code> on port 80 directly, the same as Stage 3's backends.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="front-door-sample-1---first-request-goes-to-bravo">Sample 1 - first request goes to bravo</h5>
+<pre><code>curl -s -i http://127.0.0.1:8080/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;Served by BRAVO&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h5 id="front-door-sample-2---second-request-goes-to-charlie">Sample 2 - second request goes to charlie</h5>
+<pre><code>curl -s -i http://127.0.0.1:8080/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 62
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;Served by CHARLIE&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -H &quot;Host: myapp.local&quot; http://localhost:8080/</code> is forwarded to the correct upstream
+<li>first request goes to bravo
 </li>
-<li>The upstream's access log shows the correct client IP in <code>X-Forwarded-For</code>
-</li>
-<li>Large file downloads stream through without memory usage growing
+<li>second request goes to charlie
 </li>
 </ul>
-<p><strong>Watch out:</strong> Don't forget to strip <code>Connection</code> and its nominated headers before forwarding. Passing <code>Connection: keep-alive</code> to some upstreams causes protocol errors.</p>
 <hr />
-<h4 id="reverse-proxy-step-2---ssltls-termination">Step 2 - SSL/TLS termination</h4>
-<p><strong>Goal:</strong> Accept HTTPS connections from clients, terminate TLS, and forward plain HTTP to upstream backends.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="front-door-step-2---route-around-a-dead-backend">Step 2 - Route around a dead backend</h4>
+<p><strong>Goal:</strong> Stop sending new requests to a backend that has stopped answering, so a client hitting ALPHA never sees a failed request once another backend is reachable.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: HTTPS request (TLS) on port 443
+<li>Input: a connection attempt or response wait against a backend from the Step 1 pool that errors or times out
 </li>
-<li>Output: decrypted HTTP request forwarded to upstream on port 80; upstream's HTTP response re-encrypted back to client
+<li>Output:
+<ul>
+<li>that backend excluded from the rotation Step 1 uses, until it is judged healthy again
+</li>
+<li>the request that hit the dead backend still answered, from a different backend, without the client seeing an error
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you create a self-signed certificate for local testing?
+<li>What counts as &quot;dead&quot; here - connection refused, connection reset, a timeout, or all three? What timeout is defensible for a backend Docker just stopped, versus one that is merely slow?
 </li>
-<li>What Node.js APIs are used to create an HTTPS server vs. an HTTP server?
+<li>Does the request that hit the dead backend get retried against a different backend inside the front door, or does the client have to issue it again itself? Reread the Enables line before answering.
 </li>
-<li>What header should you set so the upstream knows the original protocol was HTTPS?
+<li>This stage does not ask for automatic recovery. Is a backend, once marked dead, allowed to stay excluded for the rest of the run?
 </li>
 </ul>
+<p><strong>Watch out:</strong> <code>docker compose stop bravo</code> does not always hand you a clean &quot;connection refused&quot; on the very next request - a listener shutting down can also hand you a connection reset partway through. Treat both as dead, not only the refusal case.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="front-door-sample-3---curl-piworld-with-both-backends-up">Sample 3 - curl pi.world with both backends up</h5>
+<pre><code>curl -s -i http://127.0.0.1:8080/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;Served by BRAVO&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h5 id="front-door-sample-4---curl-piworld-after-bravo-dies">Sample 4 - curl pi.world after bravo dies</h5>
+<p>After <code>docker compose stop bravo</code>:</p>
+<pre><code>curl -s -i http://127.0.0.1:8080/
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 62
+Connection: close
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;body&gt;Served by CHARLIE&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>curl -k https://localhost:8443/</code> returns the upstream's response
+<li>curl pi.world with both backends up
 </li>
-<li>The upstream receives <code>X-Forwarded-Proto: https</code>
-</li>
-<li><code>openssl s_client -connect localhost:8443</code> shows your certificate in the handshake
+<li>curl pi.world after bravo dies
 </li>
 </ul>
-<p><strong>Watch out:</strong> <code>https.createServer</code> needs <code>key</code> and <code>cert</code> options - the raw PEM strings, not file paths. Read the files and pass their contents.</p>
 <hr />
-<h4 id="reverse-proxy-step-3---virtual-host-routing">Step 3 - Virtual host routing</h4>
-<p><strong>Goal:</strong> Route requests to different upstreams based on the <code>Host</code> header.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: a routing table mapping hostnames to upstream URLs: <code>{ &quot;api.local&quot;: &quot;http://localhost:3001&quot;, &quot;app.local&quot;: &quot;http://localhost:3002&quot; }</code>
-</li>
-<li>Output: requests routed to the correct upstream; unrecognized hosts receive <code>502 Bad Gateway</code>
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>Where do you strip the port from the <code>Host</code> header before matching?
-</li>
-<li>How do you handle wildcard or prefix matching (e.g. <code>*.example.com</code>)?
-</li>
-<li>What response should an unrecognized host receive, and what body?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Requests with <code>Host: api.local</code> consistently reach the API upstream, and <code>Host: app.local</code> consistently reach the app upstream
-</li>
-<li>An unknown host returns <code>502</code> with a meaningful error body (not a silent connection close)
-</li>
-</ul>
-<p><strong>Watch out:</strong> <code>Host</code> headers include the port when it's non-standard (e.g. <code>api.local:8080</code>). Split on <code>:</code> and match on the hostname portion only.</p></div>
-      </div>
-    </article>
-<article class="page" id="page-load-balancer" data-page="load-balancer" hidden>
-      <header class="page-header">
-        <p class="page-eyebrow">Stage 5</p>
-        <h1>Load Balancing</h1>
-      </header>
-      <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#load-balancer/load-balancer-stage-5-load-balancing">Stage 5 · Load balancing</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-1---round-robin-request-forwarding">Step 1 - Round-robin request forwarding</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-2---least-connections-load-balancing">Step 2 - Least-connections load balancing</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-3---active-health-checks">Step 3 - Active health checks</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="load-balancer-stage-5-load-balancing">Stage 5 · Load balancing</h3>
-<blockquote><p>Spread traffic across BRAVO and CHARLIE, and notice when one stops answering.</p></blockquote>
-<p><strong>In the platform:</strong> This is the defining moment of the project. The page says <code>Served by BRAVO</code>. You <code>ssh bravo; sudo shutdown now</code>. The page says <code>Served by CHARLIE</code>. Health checking exists here because a real machine really went away.</p>
-<p><strong>Scope:</strong> balancing across two real backends with real health checks. Failure is physical, not simulated.</p>
-<p>*Formerly: Load Balancer.*</p>
-<p><strong>Recommended stack:</strong> Node.js (<code>http</code> or <code>net</code>)</p>
-<h4 id="load-balancer-step-1---round-robin-request-forwarding">Step 1 - Round-robin request forwarding</h4>
-<p><strong>Goal:</strong> Accept incoming HTTP requests and forward them to a rotating pool of backend servers.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: HTTP request from a client
-</li>
-<li>Output: the request proxied to one backend; the backend's response returned to the client
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>How do you forward a request - do you open a new connection to the backend per request, or reuse connections?
-</li>
-<li>Which request headers must you pass through unchanged, and which should you add (e.g. <code>X-Forwarded-For</code>)?
-</li>
-<li>How do you pass the response status, headers, and body back to the original client?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Three backend servers started on ports 3001–3003 each respond with their own port number
-</li>
-<li>300 sequential requests distribute ~100 each to all three (verify with access logs)
-</li>
-</ul>
-<p><strong>Watch out:</strong> HTTP/1.1 <code>Host</code> header on the forwarded request must match what the backend expects. Forgetting to rewrite it breaks backends that do virtual hosting.</p>
-<hr />
-<h4 id="load-balancer-step-2---least-connections-load-balancing">Step 2 - Least-connections load balancing</h4>
-<p><strong>Goal:</strong> Route each new request to the backend with the fewest in-flight requests.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: incoming request + current in-flight count per backend
-</li>
-<li>Output: the chosen backend; count incremented on dispatch, decremented on response end
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>Where do you track the in-flight count - in a module-level map, or on a backend object?
-</li>
-<li>When exactly do you decrement? On response <code>end</code>? On socket <code>close</code>? What about errors?
-</li>
-<li>What happens when all backends are tied? (Any tiebreak is valid - pick one and stick with it.)
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>With one slow backend (simulated with <code>setTimeout</code>), new requests avoid it and pile onto the faster backends
-</li>
-<li>After all in-flight requests complete, counts return to 0 for all backends
-</li>
-</ul>
-<p><strong>Watch out:</strong> Decrement the counter in a <code>finally</code>-equivalent handler that fires on *both* success and error. Missing the error path leaks the counter upward until that backend is never chosen again.</p>
-<hr />
-<h4 id="load-balancer-step-3---active-health-checks">Step 3 - Active health checks</h4>
-<p><strong>Goal:</strong> Periodically probe each backend and remove unhealthy ones from rotation until they recover.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: a configurable probe interval and endpoint (e.g. <code>GET /health</code>)
-</li>
-<li>Output: backends marked healthy/unhealthy; unhealthy backends skipped during routing; re-added after N consecutive successes
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What constitutes &quot;unhealthy&quot;? HTTP 5xx? Connection refused? Timeout?
-</li>
-<li>How many consecutive failures before marking unhealthy, and how many successes to recover?
-</li>
-<li>What should happen to in-flight requests on a backend that just became unhealthy?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Killing a backend process causes it to drop from rotation within one probe interval
-</li>
-<li>Restarting the backend causes it to rejoin after N successful probes
-</li>
-<li>A client making continuous requests never sees an error response due to a downed backend (after the first probe cycle)
-</li>
-</ul>
-<p><strong>Watch out:</strong> Don't remove a backend from the pool mid-request. Mark it unhealthy so *new* requests skip it, but let in-flight requests complete (or fail naturally).</p></div>
+<p><strong>Next:</strong> ALPHA survives a dead backend, but every request still recomputes the same response from scratch. <a href="#http-cache-layer">Stage 5 · HTTP cache</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-api-gateway" data-page="api-gateway" hidden>
@@ -2669,7 +2615,7 @@ Connection: close
   </div>
   <button class="mobile-toggle" id="menu-toggle" type="button" aria-label="Open navigation">Menu</button>
   <script>
-    const pages = ["curriculum","network","dns-resolver","tcp-server","http-server","reverse-proxy","load-balancer","api-gateway","http-cache-layer","cdn","key-value-store","metrics-collector","distributed-tracing","circuit-breaker","write-ahead-log","message-queue","object-storage"];
+    const pages = ["curriculum","network","dns-resolver","tcp-server","http-server","front-door","api-gateway","http-cache-layer","cdn","key-value-store","metrics-collector","distributed-tracing","circuit-breaker","write-ahead-log","message-queue","object-storage"];
     const sidebar = document.getElementById("sidebar");
     const menuToggle = document.getElementById("menu-toggle");
     const themeToggle = document.getElementById("theme-toggle");

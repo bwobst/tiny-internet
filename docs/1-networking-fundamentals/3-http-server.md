@@ -113,4 +113,4 @@ Connection: close
 
 ---
 
-**Next:** BRAVO answers, but only over a connection you opened straight to it. [Stage 4 · Front door](../CURRICULUM.md).
+**Next:** BRAVO answers, but only over a connection you opened straight to it. [Stage 4 · Front door](../2-traffic-routing/4-front-door.md).

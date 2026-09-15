@@ -45,18 +45,11 @@ const pages = [
     file: '1-networking-fundamentals/3-http-server.md',
   },
   {
-    id: 'reverse-proxy',
-    title: 'Reverse Proxy',
+    id: 'front-door',
+    title: 'Front door',
     subtitle: 'Stage 4',
     layer: 2,
-    file: '2-traffic-routing/5-reverse-proxy.md',
-  },
-  {
-    id: 'load-balancer',
-    title: 'Load Balancing',
-    subtitle: 'Stage 5',
-    layer: 2,
-    file: '2-traffic-routing/4-load-balancer.md',
+    file: '2-traffic-routing/4-front-door.md',
   },
   {
     id: 'api-gateway',
