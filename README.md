@@ -81,11 +81,14 @@ Every node gets `ALPHA_ADDRESS`, `BRAVO_ADDRESS`, `CHARLIE_ADDRESS`, and `ZONE` 
 Interact with the nodes when run via Docker Compose:
 
 ```bash
+docker compose exec alpha bash           # shell as node@alpha
 docker compose exec alpha pnpm exec tsx packages/dns/src/query.ts
-docker compose exec bravo sh          # a shell on a node
+docker compose exec bravo sh             # a shell on a node
+ssh bravo                                # from a shell on ALPHA
 ```
 
-`dig`, `nc`, `telnet`, `curl`, `tcpdump`, and `ping` are installed on every node for checking the work from inside the network.
+`dig`, `nc`, `telnet`, `curl`, `tcpdump`, `ping`, and `ssh` are installed on every node for checking the work from inside the network.
+From ALPHA: `ssh bravo` and `ssh charlie` (key auth is baked into the image).
 
 ### Port 53
 

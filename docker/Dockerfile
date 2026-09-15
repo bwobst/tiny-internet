@@ -7,6 +7,7 @@
 FROM node:26-bookworm-slim
 
 # Tools the stages need for verification from inside a node:
+#   openssh        - Stage 0, shell access between nodes (and later: kill a node)
 #   dig, nslookup  - Stage 1, checking your own zone answers
 #   nc, telnet     - Stage 2, driving the TCP server by hand
 #   curl           - Stage 3 and up, hitting the site
@@ -20,9 +21,23 @@ RUN apt-get update && apt-get install --yes --no-install-recommends \
       iproute2 \
       iputils-ping \
       netcat-openbsd \
+      openssh-client \
+      openssh-server \
+      sudo \
       tcpdump \
       telnet \
-  && rm --recursive --force /var/lib/apt/lists/*
+  && rm --recursive --force /var/lib/apt/lists/* \
+  && mkdir --parents /var/run/sshd \
+  && printf '%s\n' \
+       'PasswordAuthentication no' \
+       'PermitRootLogin no' \
+       'AllowUsers node' \
+     > /etc/ssh/sshd_config.d/tiny-internet.conf \
+  && printf '%s\n' \
+       'node ALL=(root) NOPASSWD: /usr/sbin/sshd, /usr/bin/ssh-keygen' \
+     > /etc/sudoers.d/tiny-internet-sshd \
+  && chmod 440 /etc/sudoers.d/tiny-internet-sshd \
+  && rm --force /etc/ssh/ssh_host_*
 
 # pnpm, pinned to the version in the root package.json "packageManager" field.
 # Node 26 images no longer bundle corepack, so install it outright.
@@ -46,6 +61,29 @@ RUN setcap cap_net_raw,cap_net_admin=+ep /usr/bin/tcpdump
 RUN mkdir --parents /workspace/node_modules /workspace/.pnpm-store \
   && chown --recursive node:node /workspace
 
+# One shared keypair for the local topology. Every node is the same image, so
+# `ssh bravo` from ALPHA works with no per-container key dance. Host keys are
+# still generated per container at start (see entrypoint), so each node has
+# its own host identity.
+RUN mkdir --parents /home/node/.ssh \
+  && ssh-keygen -t ed25519 -f /home/node/.ssh/id_ed25519 -N "" -C "tiny-internet-node" \
+  && cp /home/node/.ssh/id_ed25519.pub /home/node/.ssh/authorized_keys \
+  && printf '%s\n' \
+       'Host alpha bravo charlie' \
+       '  StrictHostKeyChecking accept-new' \
+       '  User node' \
+       '  IdentityFile ~/.ssh/id_ed25519' \
+     > /home/node/.ssh/config \
+  && chmod 700 /home/node/.ssh \
+  && chmod 600 /home/node/.ssh/id_ed25519 /home/node/.ssh/authorized_keys /home/node/.ssh/config \
+  && chown --recursive node:node /home/node/.ssh
+
+COPY docker/entrypoint.sh /usr/local/bin/tiny-internet-entrypoint
+RUN chmod 755 /usr/local/bin/tiny-internet-entrypoint
+
+# Unprivileged by default - same as a service on the Pi. The entrypoint
+# starts sshd via a narrow sudo rule, then execs the real command as node.
+# Binding port 53 stays a real problem with setcap, not erased by a root shell.
 USER node
 
 # pnpm's global bin. The store is NOT relocated by config: pnpm insists on a
@@ -58,4 +96,5 @@ ENV PATH="${PNPM_HOME}:${PATH}"
 
 ENV NODE_ENV=development
 
+ENTRYPOINT ["/usr/local/bin/tiny-internet-entrypoint"]
 CMD ["sleep", "infinity"]

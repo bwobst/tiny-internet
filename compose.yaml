@@ -43,7 +43,7 @@ x-node: &node
   # service breaks UDP port forwarding under OrbStack, which silently kills
   # `dig` from the laptop against ALPHA - the one check Stage 1 ends on.
 
-  # Containers stay up with no process of their own. Start a service with
+  # Containers stay up with sshd plus sleep. Start a service with
   # `docker compose exec alpha pnpm ...` while you are building it, and give a
   # node a real `command:` once its service is worth running on boot.
   command: ["sleep", "infinity"]
