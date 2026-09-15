@@ -1959,99 +1959,124 @@ Connection: close
         <h1>Key-Value Store</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#key-value-store/key-value-store-stage-9-key-value-store">Stage 9 · Key-value store</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-1---core-getsetdelete-operations">Step 1 - Core get/set/delete operations</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-2---ttl-expiry">Step 2 - TTL expiry</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-3---lru-eviction">Step 3 - LRU eviction</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="key-value-store-stage-9-key-value-store">Stage 9 · Key-value store</h3>
-<blockquote><p>Build the storage engine the cache and the app both need.</p></blockquote>
-<p><strong>In the platform:</strong> Per-node memory stops being enough once BRAVO and CHARLIE need to agree on something - a visitor count, a session, a cached object. This is the platform's first shared state.</p>
-<p><strong>Scope:</strong> a store your own services can depend on. Not Redis. Do not use Redis to build it.</p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#key-value-store/key-value-store-stage-6-key-value-store">Stage 6 · Key-value store</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-1---store-and-retrieve-a-value-on-one-node">Step 1 - Store and retrieve a value on one Node</a></li><li class="depth-4"><a href="#key-value-store/key-value-store-step-2---agree-on-a-value-across-both-nodes">Step 2 - Agree on a value across both Nodes</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="key-value-store-stage-6-key-value-store">Stage 6 · Key-value store</h3>
+<blockquote><p>Give BRAVO and CHARLIE a value they both agree on.</p></blockquote>
+<p><strong>Enables:</strong> BRAVO and CHARLIE agree on one value after a write from either.</p>
+<p><strong>Scope:</strong> Two Nodes sharing one key space, agreeing after a write to either one. No cluster larger than two, no persistence across restarts, no partition handling beyond deciding which write wins when both Nodes have one.</p>
 <p>*Formerly: Key-Value Store.*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="key-value-store-step-1---core-getsetdelete-operations">Step 1 - Core get/set/delete operations</h4>
-<p><strong>Goal:</strong> Implement a simple in-memory key-value store with string keys and arbitrary value types.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="key-value-store-step-1---store-and-retrieve-a-value-on-one-node">Step 1 - Store and retrieve a value on one Node</h4>
+<p><strong>Goal:</strong> Implement an in-memory store on one Node so a value written to a key is readable back from that same Node.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>set(key, value)</code>, <code>get(key)</code>, <code>delete(key)</code> calls
+<li>Input:
+<ul>
+<li>write: key: string, value: string
 </li>
-<li>Output: stored/retrieved values; <code>null</code> for missing keys; <code>true</code>/<code>false</code> for delete
+<li>read: key: string
+</li>
+</ul>
+</li>
+<li>Output:
+<ul>
+<li>write: acknowledgement
+</li>
+<li>read: the value last written for that key, or a marker that the key has never been written
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>What data structure backs the store? Plain object, <code>Map</code>, or something else?
+<li>What backs the store so a <code>write</code> to a key that already has a value replaces it, rather than keeping both?
 </li>
-<li>What value types will you support - strings only, or arbitrary serializable values?
+<li>What does a <code>read</code> return for a key nobody has written yet, and how is that distinguished from a key written with an empty value?
 </li>
-<li>What is the return value of <code>get</code> on a missing key vs. a key explicitly set to <code>null</code>?
+<li>The store lives in memory for this stage. What would you have to add for it to survive a restart - and is that this stage's job?
 </li>
 </ul>
+<p><strong>Watch out:</strong> A plain object used as a map has surprising key behavior - inherited properties can shadow a lookup, and non-string keys get silently coerced to strings. Pick a backing structure where a key you never wrote cannot appear to have a value.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="key-value-store-sample-1---write-color-to-bravo">Sample 1 - write color to bravo</h5>
+<pre><code>docker compose exec alpha curl -s -i -X PUT http://bravo:7070/kv/color -d red
+</code></pre>
+<pre><code>HTTP/1.1 204 No Content
+Connection: close
+
+</code></pre>
+<h5 id="key-value-store-sample-2---read-color-from-bravo">Sample 2 - read color from bravo</h5>
+<pre><code>docker compose exec alpha curl -s -i http://bravo:7070/kv/color
+</code></pre>
+<pre><code>HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 3
+Connection: close
+
+red
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>10,000 sequential set/get/delete operations complete without errors
+<li>write color to bravo
 </li>
-<li><code>get</code> on a deleted key returns <code>null</code>, not the previous value
-</li>
-<li>Keys with identical content but different types (e.g. <code>1</code> vs <code>&quot;1&quot;</code>) are handled predictably
+<li>read color from bravo
 </li>
 </ul>
-<p><strong>Watch out:</strong> JavaScript object keys are always strings. If you use a plain object as your backing store, the integer key <code>1</code> and the string key <code>&quot;1&quot;</code> collide. Use <code>Map</code> to avoid this.</p>
 <hr />
-<h4 id="key-value-store-step-2---ttl-expiry">Step 2 - TTL expiry</h4>
-<p><strong>Goal:</strong> Allow keys to be set with an expiry time; return <code>null</code> for expired keys and clean them up.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="key-value-store-step-2---agree-on-a-value-across-both-nodes">Step 2 - Agree on a value across both Nodes</h4>
+<p><strong>Goal:</strong> After a write lands on either BRAVO or CHARLIE, both Nodes answer a <code>read</code> for that key with the same value.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>set(key, value, ttlSeconds)</code>
+<li>Input: a write on one Node, followed by a read on the other Node
 </li>
-<li>Output: <code>get</code> returns the value until TTL expires; returns <code>null</code> afterward
+<li>Output: the read returns the value from the write, not a stale or missing value
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Do you use <code>setTimeout</code> per key, a periodic sweep, or lazy expiry on <code>get</code>?
+<li>How does a write on BRAVO reach CHARLIE - does BRAVO push it immediately, does CHARLIE pull on an interval, or does CHARLIE ask BRAVO when it doesn't recognize a key?
 </li>
-<li>What are the memory trade-offs of each approach?
+<li>If BRAVO and CHARLIE each get a different write to the same key before either has heard from the other, which value survives once they both know about both writes?
 </li>
-<li>What happens to a key's TTL if you <code>set</code> it again without a TTL argument?
+<li>Does the write's acknowledgement to the client come back before or after the peer Node has the update? What does that decision do to a read on the peer that happens right after?
 </li>
 </ul>
+<p><strong>Watch out:</strong> If a write acknowledges success before the peer actually has it, &quot;write on one Node, read on the other&quot; can flake for a reason that has nothing to do with whether agreement itself works. Decide whether the write blocks until the peer confirms, or whether a read shortly after a write is allowed to retry, and make that decision visible in how the Sample is run.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="key-value-store-sample-3---write-on-bravo-read-on-charlie">Sample 3 - write on bravo, read on charlie</h5>
+<pre><code>docker compose exec alpha curl -s -i -X PUT http://bravo:7070/kv/color -d blue &amp;&amp; docker compose exec alpha curl -s -i http://charlie:7070/kv/color
+</code></pre>
+<pre><code>HTTP/1.1 204 No Content
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 4
+Connection: close
+
+blue
+</code></pre>
+<h5 id="key-value-store-sample-4---write-on-charlie-read-on-bravo">Sample 4 - write on charlie, read on bravo</h5>
+<pre><code>docker compose exec alpha curl -s -i -X PUT http://charlie:7070/kv/color -d green &amp;&amp; docker compose exec alpha curl -s -i http://bravo:7070/kv/color
+</code></pre>
+<pre><code>HTTP/1.1 204 No Content
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 5
+Connection: close
+
+green
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li><code>set(&quot;x&quot;, 1, 1)</code> followed by a 1.1-second wait causes <code>get(&quot;x&quot;)</code> to return <code>null</code>
+<li>write on bravo, read on charlie
 </li>
-<li><code>set(&quot;x&quot;, 2)</code> after expiry correctly stores the new value without TTL
-</li>
-<li>10,000 expired keys are eventually cleaned from memory (verify with <code>process.memoryUsage()</code>)
+<li>write on charlie, read on bravo
 </li>
 </ul>
-<p><strong>Watch out:</strong> One <code>setTimeout</code> per key sounds simple but creates memory pressure under high write volume. A lazy expiry check on <code>get</code> + periodic sweep is typically more efficient. Know the trade-off.</p>
 <hr />
-<h4 id="key-value-store-step-3---lru-eviction">Step 3 - LRU eviction</h4>
-<p><strong>Goal:</strong> Enforce a maximum capacity; when full, evict the least recently used key.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: <code>new KVStore({ maxSize: N })</code>; <code>set</code> calls beyond capacity
-</li>
-<li>Output: the LRU key is evicted automatically; recently accessed keys survive eviction
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What data structure gives O(1) get/set/evict? (Hint: doubly linked list + hash map)
-</li>
-<li>Does a <code>get</code> access count as &quot;recently used&quot;?
-</li>
-<li>What happens when you <code>set</code> an existing key - does it move to the front?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>With <code>maxSize: 3</code>, setting a 4th key evicts the least-recently-used (not the least-recently-set) key
-</li>
-<li>A <code>get</code> access promotes a key so it is not the next to be evicted
-</li>
-<li>All operations remain O(1) - verified by timing 100,000 operations against 1000 operations and confirming linear (not quadratic) scaling
-</li>
-</ul>
-<p><strong>Watch out:</strong> JavaScript's <code>Map</code> preserves insertion order, which you can exploit to fake an LRU - but only if you delete and re-insert on every access. That's a valid approach, but understand its cost vs. a true doubly linked list implementation.</p></div>
+<p><strong>Next:</strong> BRAVO and CHARLIE agree on a value, but nothing tells you how often either one is asked for it. <a href="#metrics-collector">Stage 7 · Metrics</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-metrics-collector" data-page="metrics-collector" hidden>
@@ -2060,99 +2085,100 @@ Connection: close
         <h1>Metrics Collector</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#metrics-collector/metrics-collector-stage-10-metrics-collector">Stage 10 · Metrics collector</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-1---counter-and-gauge-primitives">Step 1 - Counter and gauge primitives</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-2---histogram-for-latency-tracking">Step 2 - Histogram for latency tracking</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-3---prometheus-compatible-scrape-endpoint">Step 3 - Prometheus-compatible scrape endpoint</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="metrics-collector-stage-10-metrics-collector">Stage 10 · Metrics collector</h3>
-<blockquote><p>Count and time everything.</p></blockquote>
-<p><strong>In the platform:</strong> This is what <code>/status</code> and <code>/metrics</code> display: <code>http_requests_total</code>, <code>http_request_duration_ms</code>, <code>http_errors_total</code>, <code>cache_hits_total</code>, <code>cache_misses_total</code>, <code>active_connections</code>. Until this exists, you are guessing about your own system.</p>
-<p><strong>Scope:</strong> collection, storage, and exposition for three nodes. Not Prometheus. Do not use Prometheus to build it.</p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#metrics-collector/metrics-collector-stage-7-metrics">Stage 7 · Metrics</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-1---count-every-request-show-it-at-status">Step 1 - Count every request, show it at /status</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-2---time-every-request-show-it-at-status-and-metrics">Step 2 - Time every request, show it at /status and /metrics</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="metrics-collector-stage-7-metrics">Stage 7 · Metrics</h3>
+<blockquote><p>Stop guessing how busy the cluster is and how long it takes to answer.</p></blockquote>
+<p><strong>Enables:</strong> <code>/metrics</code> and <code>/status</code> show request counts and timings.</p>
+<p><strong>Scope:</strong> cluster-wide request counts and per-path average duration, observed at the front door on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.</p>
 <p>*Formerly: Metrics Collector.*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="metrics-collector-step-1---counter-and-gauge-primitives">Step 1 - Counter and gauge primitives</h4>
-<p><strong>Goal:</strong> Implement counter (monotonically increasing) and gauge (current value) metric types with label support.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="metrics-collector-step-1---count-every-request-show-it-at-status">Step 1 - Count every request, show it at /status</h4>
+<p><strong>Goal:</strong> On ALPHA, count every request the front door forwards, broken down by path, and serve the running counts at <code>/status</code>.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>counter.increment({ method: &quot;GET&quot;, status: &quot;200&quot; })</code>, <code>gauge.set(42, { service: &quot;api&quot; })</code>
+<li>Input: each request ALPHA forwards to a backend
 </li>
-<li>Output: current values accessible via <code>counter.get(labels)</code> and <code>gauge.get(labels)</code>
+<li>Output:
+<ul>
+<li>a running count per path
+</li>
+<li><code>/status</code>: a page listing each path seen so far and its request count
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you store metrics with multi-dimensional labels? (A nested map keyed on label hashes?)
+<li>Does a count belong to the path the client requested, or the backend that answered it? If <code>/</code> is served by BRAVO once and CHARLIE once, is that one count or two?
 </li>
-<li>What is the difference between a counter and a gauge? Can a counter decrease?
+<li>Where does the increment happen relative to forwarding - before the backend answers, after, or only once a response comes back?
 </li>
-<li>How do you serialize a label set to a stable string key?
+<li><code>/status</code> has to report on any path the site gets, not only ones you tested by hand. Does it need to know every path in advance, or can a path's first request be the thing that puts it on the page?
 </li>
 </ul>
+<p><strong>Watch out:</strong> Stage 4's dead-backend handling means a request can fail before any backend answers it. If the counter only increments once a response comes back, that request disappears from <code>/status</code> instead of showing up as a failure. Decide what &quot;a request happened&quot; means before you start incrementing.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="metrics-collector-sample-1---status-after-three-requests-to">Sample 1 - status after three requests to /</h5>
+<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
+curl -s http://127.0.0.1:8080/ &gt; /dev/null
+curl -s http://127.0.0.1:8080/ &gt; /dev/null
+curl -s http://127.0.0.1:8080/status
+</code></pre>
+<pre><code>path	count
+/	3
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Two counters with different label sets are tracked independently
-</li>
-<li>Incrementing <code>{ method: &quot;GET&quot; }</code> does not affect <code>{ method: &quot;POST&quot; }</code>
-</li>
-<li><code>counter.get({ method: &quot;GET&quot;, status: &quot;200&quot; })</code> returns the exact increment count
+<li>status after three requests to /
 </li>
 </ul>
-<p><strong>Watch out:</strong> Label key order matters for your cache key - <code>{a: 1, b: 2}</code> and <code>{b: 2, a: 1}</code> should map to the same metric. Sort label keys before serializing.</p>
 <hr />
-<h4 id="metrics-collector-step-2---histogram-for-latency-tracking">Step 2 - Histogram for latency tracking</h4>
-<p><strong>Goal:</strong> Record observations into configurable buckets; expose count, sum, and per-bucket totals.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="metrics-collector-step-2---time-every-request-show-it-at-status-and-metrics">Step 2 - Time every request, show it at /status and /metrics</h4>
+<p><strong>Goal:</strong> Alongside the count, track how long each forwarded request took, and serve the same numbers at both <code>/status</code> and <code>/metrics</code>.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>histogram.observe(durationMs, labels)</code> with predefined buckets e.g. <code>[10, 50, 100, 500, 1000]</code>
+<li>Input: each forwarded request, plus the elapsed time until its response was returned to the client
 </li>
-<li>Output: <code>{ buckets: { &quot;10&quot;: N, &quot;50&quot;: N, ... }, sum, count }</code> per label set
+<li>Output:
+<ul>
+<li><code>/status</code>: count and average duration per path, human-readable
+</li>
+<li><code>/metrics</code>: the same count and average duration per path, in one machine-parseable line per path
+</li>
+</ul>
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Are histogram buckets inclusive (<code>≤</code>) or exclusive (<code>&lt;</code>)? What does Prometheus use?
+<li>Keeping every duration ever recorded to compute an average is the same unbounded-memory trap as Stage 5's cache. What running values do you keep per path instead so a new duration updates the average without storing the durations themselves?
 </li>
-<li>How do you calculate the p95 from a histogram? (You can't exactly - explain why.)
+<li><code>/status</code> and <code>/metrics</code> show the same counts and durations in different shapes. Where do those numbers live so both pages read one source instead of drifting apart?
 </li>
-<li>What is a cumulative histogram vs. a non-cumulative one?
+<li>What does a path with zero requests so far show on <code>/metrics</code> - is it listed at all?
 </li>
 </ul>
+<p><strong>Watch out:</strong> <code>/status</code> and <code>/metrics</code> are requests too. If they get counted like any other path, checking <code>/status</code> changes the number <code>/status</code> reports next time you check it. Decide up front whether the metrics endpoints exempt themselves, and make sure both pages agree.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="metrics-collector-sample-2---status-shows-counts-and-average-duration">Sample 2 - status shows counts and average duration</h5>
+<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
+curl -s http://127.0.0.1:8080/status
+</code></pre>
+<pre><code>path	count	avg_ms
+/	4	38
+</code></pre>
+<h5 id="metrics-collector-sample-3---metrics-shows-the-same-numbers">Sample 3 - metrics shows the same numbers</h5>
+<pre><code>curl -s http://127.0.0.1:8080/metrics
+</code></pre>
+<pre><code>/ count=4 avg_ms=38
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>1000 observations distributed across buckets are counted correctly (verify by summing all observations)
+<li>status shows counts and average duration
 </li>
-<li>The <code>+Inf</code> bucket count equals the total observation count
-</li>
-<li><code>sum / count</code> gives the correct mean
+<li>metrics shows the same numbers
 </li>
 </ul>
-<p><strong>Watch out:</strong> Prometheus histograms are *cumulative* - the <code>100ms</code> bucket counts all observations ≤100ms, not just those between 50ms and 100ms. If you implement non-cumulative buckets, your data will not be compatible with standard tooling.</p>
 <hr />
-<h4 id="metrics-collector-step-3---prometheus-compatible-scrape-endpoint">Step 3 - Prometheus-compatible scrape endpoint</h4>
-<p><strong>Goal:</strong> Expose all metrics in Prometheus text format at <code>GET /metrics</code>.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: HTTP GET <code>/metrics</code>
-</li>
-<li>Output: Prometheus exposition format text: <code># HELP</code>, <code># TYPE</code>, and metric lines
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What is the Prometheus text format specification for counters, gauges, and histograms?
-</li>
-<li>What Content-Type header does Prometheus expect?
-</li>
-<li>How do you format label sets in the <code>{key=&quot;value&quot;}</code> syntax, including escaping?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li><code>curl http://localhost:9090/metrics</code> returns parseable Prometheus text
-</li>
-<li>Pointing a real Prometheus instance (or <code>promtool check metrics</code>) at your endpoint reports no parse errors
-</li>
-<li>All three metric types render correctly with their <code># TYPE</code> annotations
-</li>
-</ul>
-<p><strong>Watch out:</strong> Label values containing <code>\</code>, <code>&quot;</code>, or <code>\n</code> must be escaped in the exposition format. Forgetting this causes parse failures that are difficult to diagnose.</p></div>
+<p><strong>Next:</strong> you can see how busy the cluster is, but not which hop of a request took the time. <a href="#distributed-tracing">Stage 8 · Tracing</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-distributed-tracing" data-page="distributed-tracing" hidden>
@@ -2161,93 +2187,81 @@ Connection: close
         <h1>Distributed Tracing</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#distributed-tracing/distributed-tracing-stage-11-distributed-tracing">Stage 11 · Distributed tracing</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-1---create-and-manage-spans">Step 1 - Create and manage spans</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-2---propagate-trace-context-across-async-operations">Step 2 - Propagate trace context across async operations</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-3---export-spans-in-otlpjson-format">Step 3 - Export spans in OTLP/JSON format</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="distributed-tracing-stage-11-distributed-tracing">Stage 11 · Distributed tracing</h3>
-<blockquote><p>Follow one request across every machine it touched.</p></blockquote>
-<p><strong>In the platform:</strong> Metrics tell you the platform is slow. Tracing tells you where. <code>/architecture</code> shows one request's real path: DNS, proxy, cache, backend, storage, with a duration on each hop.</p>
-<p><strong>Scope:</strong> context propagation and span collection across your own services.</p>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#distributed-tracing/distributed-tracing-stage-8-tracing">Stage 8 · Tracing</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-1---show-the-path-of-one-request">Step 1 - Show the path of one request</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-2---add-a-duration-to-each-hop">Step 2 - Add a duration to each hop</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="distributed-tracing-stage-8-tracing">Stage 8 · Tracing</h3>
+<blockquote><p>Follow one request across every hop it took through the cluster.</p></blockquote>
+<p><strong>Enables:</strong> <code>/architecture</code> shows a live request path with a duration on each hop.</p>
+<p><strong>Scope:</strong> Trace context carried across your own front door and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.</p>
 <p>*Formerly: Distributed Tracing.*</p>
-<p><strong>Recommended stack:</strong> Node.js</p>
-<h4 id="distributed-tracing-step-1---create-and-manage-spans">Step 1 - Create and manage spans</h4>
-<p><strong>Goal:</strong> Implement a span - a named, timed unit of work - with start/end timestamps and key-value attributes.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="distributed-tracing-step-1---show-the-path-of-one-request">Step 1 - Show the path of one request</h4>
+<p><strong>Goal:</strong> Serve <code>/architecture</code> with the ordered list of hops the most recently completed request passed through.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: <code>tracer.startSpan(name, attributes?)</code>, followed by <code>span.end()</code>
+<li>Input: a request arriving at ALPHA's front door, forwarded to one backend
 </li>
-<li>Output: a completed span object: <code>{ traceId, spanId, name, startTime, endTime, duration, attributes }</code>
+<li>Output: <code>/architecture</code>: a page listing hop names in the order the request visited them
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you generate a random 128-bit trace ID and 64-bit span ID? (hex strings are conventional)
+<li>ALPHA and the backend are separate processes. How does the backend know it's continuing the same request ALPHA is already tracking, rather than starting a path of its own?
 </li>
-<li>What timestamp resolution do you use - milliseconds or microseconds?
+<li>Front door forwards to one backend and returns. What is the shortest possible path, and what does <code>/architecture</code> show if a second request is still in flight when you check it?
 </li>
-<li>What is the difference between a trace ID and a span ID?
+<li>Does every request update what <code>/architecture</code> shows, or only requests to <code>/</code>?
 </li>
 </ul>
+<p><strong>Watch out:</strong> If each hop invents its own identifier for the request instead of carrying forward one it received, two hops of the same request look like two separate, unrelated requests, and <code>/architecture</code> cannot reassemble a path at all.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="distributed-tracing-sample-1---architecture-after-one-request-to">Sample 1 - architecture after one request to /</h5>
+<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
+curl -s http://127.0.0.1:8080/architecture
+</code></pre>
+<pre><code>hop
+alpha
+bravo
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Starting and ending a span produces a complete span object with non-zero duration
-</li>
-<li>Two spans started in the same &quot;request&quot; share the same <code>traceId</code> but have different <code>spanId</code>s
+<li>architecture after one request to /
 </li>
 </ul>
-<p><strong>Watch out:</strong> Use <code>process.hrtime.bigint()</code> for nanosecond precision, not <code>Date.now()</code> which has millisecond resolution. High-frequency operations will otherwise show 0ms duration.</p>
 <hr />
-<h4 id="distributed-tracing-step-2---propagate-trace-context-across-async-operations">Step 2 - Propagate trace context across async operations</h4>
-<p><strong>Goal:</strong> Pass the active trace context through async call chains so child spans are linked to their parent.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
+<h4 id="distributed-tracing-step-2---add-a-duration-to-each-hop">Step 2 - Add a duration to each hop</h4>
+<p><strong>Goal:</strong> Alongside each hop, show how long that hop took, at <code>/architecture</code>.</p>
+<p><strong>Shape:</strong></p>
 <ul>
-<li>Input: a parent span; async child operations that should appear nested under it
+<li>Input: the same forwarded request, plus how long each hop spent handling it
 </li>
-<li>Output: each child span has a <code>parentSpanId</code> pointing to the parent; the complete tree is reconstructable
+<li>Output: <code>/architecture</code>: the same ordered hops, each with a duration
 </li>
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>How do you make the current span available inside async callbacks without passing it explicitly? (Hint: Node.js <code>AsyncLocalStorage</code>)
+<li>Front door's own time and the backend's own time overlap for part of the request. Is a hop's duration &quot;wall time end to end at that hop&quot; or &quot;time until the next hop was called,&quot; and does that choice change what the numbers mean?
 </li>
-<li>What is <code>parentSpanId</code> and how does it link spans into a tree?
+<li>What clock resolution does a duration need, given some hops in this cluster answer in a handful of milliseconds?
 </li>
-<li>How do you propagate context across an HTTP boundary? (W3C TraceContext: <code>traceparent</code> header)
+<li>Stage 7's <code>/metrics</code> keeps a running average across many requests. <code>/architecture</code> shows one request's durations. Do these have to share any code, or are they answering different questions?
 </li>
 </ul>
+<p><strong>Watch out:</strong> Reading the clock after work has already started, or before the response has actually left, makes every hop look faster than it was, and the slow hop this page exists to find stops being visible.</p>
+<p><strong>Samples:</strong></p>
+<h5 id="distributed-tracing-sample-2---architecture-shows-a-duration-per-hop">Sample 2 - architecture shows a duration per hop</h5>
+<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
+curl -s http://127.0.0.1:8080/architecture
+</code></pre>
+<pre><code>hop	duration_ms
+alpha	2
+bravo	36
+</code></pre>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Three nested async operations produce three spans with correct <code>parentSpanId</code> linkages
-</li>
-<li>Reconstructing the tree from flat span data produces the correct hierarchy
+<li>architecture shows a duration per hop
 </li>
 </ul>
-<p><strong>Watch out:</strong> <code>AsyncLocalStorage</code> context does not automatically propagate into <code>EventEmitter</code> callbacks in all Node.js versions. Use <code>AsyncResource.bind()</code> for event listeners that need context.</p>
 <hr />
-<h4 id="distributed-tracing-step-3---export-spans-in-otlpjson-format">Step 3 - Export spans in OTLP/JSON format</h4>
-<p><strong>Goal:</strong> Batch completed spans and export them to a trace collector in a standard format.</p>
-<p><strong>Inputs &amp; outputs:</strong></p>
-<ul>
-<li>Input: completed spans collected in memory
-</li>
-<li>Output: HTTP POST to a collector endpoint with OTLP-JSON payload; spans visible in Jaeger UI (or logged to stdout as valid OTLP JSON)
-</li>
-</ul>
-<p><strong>Key questions:</strong></p>
-<ul>
-<li>What is the OTLP JSON schema for a <code>ResourceSpans</code> envelope?
-</li>
-<li>How do you batch spans - by count, by time interval, or both?
-</li>
-<li>What should happen to spans collected while the export is in-flight?
-</li>
-</ul>
-<p><strong>Done when:</strong></p>
-<ul>
-<li>Spans exported to Jaeger (via its OTLP HTTP endpoint) are visible in the Jaeger UI with correct parent-child relationships
-</li>
-<li>If Jaeger is unavailable, spans are dropped gracefully (no crash, no retry storm)
-</li>
-</ul>
-<p><strong>Watch out:</strong> OTLP timestamps are in nanoseconds since Unix epoch as <code>fixed64</code> (or string in JSON mode). Sending milliseconds produces traces that appear to have occurred in 1970 in the Jaeger UI.</p></div>
+<p><strong>Next:</strong> the platform can see its own request path, but a node killed mid-write still loses data. <a href="#write-ahead-log">Stage 9 · Write-ahead log</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-circuit-breaker" data-page="circuit-breaker" hidden>

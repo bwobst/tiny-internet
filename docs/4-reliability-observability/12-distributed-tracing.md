@@ -1,72 +1,81 @@
-### Stage 11 · Distributed tracing
+### Stage 8 · Tracing
 
-> Follow one request across every machine it touched.
+> Follow one request across every hop it took through the cluster.
 
-**In the platform:** Metrics tell you the platform is slow. Tracing tells you where. `/architecture` shows one request's real path: DNS, proxy, cache, backend, storage, with a duration on each hop.
+**Enables:** `/architecture` shows a live request path with a duration on each hop.
 
-**Scope:** context propagation and span collection across your own services.
+**Scope:** Trace context carried across your own front door and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.
 
 *Formerly: Distributed Tracing.*
 
-**Recommended stack:** Node.js
+#### Step 1 - Show the path of one request
 
-#### Step 1 - Create and manage spans
+**Goal:** Serve `/architecture` with the ordered list of hops the most recently completed request passed through.
 
-**Goal:** Implement a span - a named, timed unit of work - with start/end timestamps and key-value attributes.
-
-**Inputs & outputs:**
-- Input: `tracer.startSpan(name, attributes?)`, followed by `span.end()`
-- Output: a completed span object: `{ traceId, spanId, name, startTime, endTime, duration, attributes }`
+**Shape:**
+- Input: a request arriving at ALPHA's front door, forwarded to one backend
+- Output: `/architecture`: a page listing hop names in the order the request visited them
 
 **Key questions:**
-- How do you generate a random 128-bit trace ID and 64-bit span ID? (hex strings are conventional)
-- What timestamp resolution do you use - milliseconds or microseconds?
-- What is the difference between a trace ID and a span ID?
+- ALPHA and the backend are separate processes. How does the backend know it's continuing the same request ALPHA is already tracking, rather than starting a path of its own?
+- Front door forwards to one backend and returns. What is the shortest possible path, and what does `/architecture` show if a second request is still in flight when you check it?
+- Does every request update what `/architecture` shows, or only requests to `/`?
+
+**Watch out:** If each hop invents its own identifier for the request instead of carrying forward one it received, two hops of the same request look like two separate, unrelated requests, and `/architecture` cannot reassemble a path at all.
+
+**Samples:**
+
+##### Sample 1 - architecture after one request to /
+
+```
+curl -s http://127.0.0.1:8080/ > /dev/null
+curl -s http://127.0.0.1:8080/architecture
+```
+
+```
+hop
+alpha
+bravo
+```
 
 **Done when:**
-- Starting and ending a span produces a complete span object with non-zero duration
-- Two spans started in the same "request" share the same `traceId` but have different `spanId`s
-
-**Watch out:** Use `process.hrtime.bigint()` for nanosecond precision, not `Date.now()` which has millisecond resolution. High-frequency operations will otherwise show 0ms duration.
+- architecture after one request to /
 
 ---
 
-#### Step 2 - Propagate trace context across async operations
+#### Step 2 - Add a duration to each hop
 
-**Goal:** Pass the active trace context through async call chains so child spans are linked to their parent.
+**Goal:** Alongside each hop, show how long that hop took, at `/architecture`.
 
-**Inputs & outputs:**
-- Input: a parent span; async child operations that should appear nested under it
-- Output: each child span has a `parentSpanId` pointing to the parent; the complete tree is reconstructable
+**Shape:**
+- Input: the same forwarded request, plus how long each hop spent handling it
+- Output: `/architecture`: the same ordered hops, each with a duration
 
 **Key questions:**
-- How do you make the current span available inside async callbacks without passing it explicitly? (Hint: Node.js `AsyncLocalStorage`)
-- What is `parentSpanId` and how does it link spans into a tree?
-- How do you propagate context across an HTTP boundary? (W3C TraceContext: `traceparent` header)
+- Front door's own time and the backend's own time overlap for part of the request. Is a hop's duration "wall time end to end at that hop" or "time until the next hop was called," and does that choice change what the numbers mean?
+- What clock resolution does a duration need, given some hops in this cluster answer in a handful of milliseconds?
+- Stage 7's `/metrics` keeps a running average across many requests. `/architecture` shows one request's durations. Do these have to share any code, or are they answering different questions?
+
+**Watch out:** Reading the clock after work has already started, or before the response has actually left, makes every hop look faster than it was, and the slow hop this page exists to find stops being visible.
+
+**Samples:**
+
+##### Sample 2 - architecture shows a duration per hop
+
+```
+curl -s http://127.0.0.1:8080/ > /dev/null
+curl -s http://127.0.0.1:8080/architecture
+```
+
+```
+hop	duration_ms
+alpha	2
+bravo	36
+```
 
 **Done when:**
-- Three nested async operations produce three spans with correct `parentSpanId` linkages
-- Reconstructing the tree from flat span data produces the correct hierarchy
-
-**Watch out:** `AsyncLocalStorage` context does not automatically propagate into `EventEmitter` callbacks in all Node.js versions. Use `AsyncResource.bind()` for event listeners that need context.
+- architecture shows a duration per hop
 
 ---
 
-#### Step 3 - Export spans in OTLP/JSON format
-
-**Goal:** Batch completed spans and export them to a trace collector in a standard format.
-
-**Inputs & outputs:**
-- Input: completed spans collected in memory
-- Output: HTTP POST to a collector endpoint with OTLP-JSON payload; spans visible in Jaeger UI (or logged to stdout as valid OTLP JSON)
-
-**Key questions:**
-- What is the OTLP JSON schema for a `ResourceSpans` envelope?
-- How do you batch spans - by count, by time interval, or both?
-- What should happen to spans collected while the export is in-flight?
-
-**Done when:**
-- Spans exported to Jaeger (via its OTLP HTTP endpoint) are visible in the Jaeger UI with correct parent-child relationships
-- If Jaeger is unavailable, spans are dropped gracefully (no crash, no retry storm)
-
-**Watch out:** OTLP timestamps are in nanoseconds since Unix epoch as `fixed64` (or string in JSON mode). Sending milliseconds produces traces that appear to have occurred in 1970 in the Jaeger UI.
+**Next:** the platform can see its own request path, but a node killed mid-write still loses data. [Stage 9 · Write-ahead log](../5-data-storage/13-write-ahead-log.md).
