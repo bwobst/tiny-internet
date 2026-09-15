@@ -17,6 +17,13 @@ const pages = [
     file: 'CURRICULUM.md',
   },
   {
+    id: 'network',
+    title: 'Network',
+    subtitle: 'Stage 0',
+    layer: 0,
+    file: '0-network/0-network.md',
+  },
+  {
     id: 'dns-resolver',
     title: 'Naming',
     subtitle: 'Stage 1',
@@ -125,11 +132,11 @@ const pages = [
 
 const layerLabels = {
   0: 'Start',
-  1: 'Layer 1 — Networking',
-  2: 'Layer 2 — Traffic & Routing',
-  3: 'Layer 3 — Caching & Delivery',
-  4: 'Layer 4 — Reliability',
-  5: 'Layer 5 — Data & Storage',
+  1: 'Layer 1 · Networking fundamentals',
+  2: 'Layer 2 · Traffic',
+  3: 'Layer 3 · Caching and shared state',
+  4: 'Layer 4 · Observability',
+  5: 'Layer 5 · Data and storage',
 }
 
 function escapeHtml(text) {
@@ -274,9 +281,7 @@ function markdownToHtml(markdown, pageId, fromFile = '') {
         i++
       }
       if (i < lines.length) i++
-      html.push(
-        `<pre><code>${escapeHtml(body.join('\n'))}\n</code></pre>`,
-      )
+      html.push(`<pre><code>${escapeHtml(body.join('\n'))}\n</code></pre>`)
       continue
     }
 
