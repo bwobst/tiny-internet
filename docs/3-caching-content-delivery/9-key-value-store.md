@@ -1,75 +1,124 @@
-### Stage 9 · Key-value store
+### Stage 6 · Key-value store
 
-> Build the storage engine the cache and the app both need.
+> Give BRAVO and CHARLIE a value they both agree on.
 
-**In the platform:** Per-node memory stops being enough once BRAVO and CHARLIE need to agree on something - a visitor count, a session, a cached object. This is the platform's first shared state.
+**Enables:** BRAVO and CHARLIE agree on one value after a write from either.
 
-**Scope:** a store your own services can depend on. Not Redis. Do not use Redis to build it.
+**Scope:** Two Nodes sharing one key space, agreeing after a write to either one. No cluster larger than two, no persistence across restarts, no partition handling beyond deciding which write wins when both Nodes have one.
 
 *Formerly: Key-Value Store.*
 
-**Recommended stack:** Node.js
+#### Step 1 - Store and retrieve a value on one Node
 
-#### Step 1 - Core get/set/delete operations
+**Goal:** Implement an in-memory store on one Node so a value written to a key is readable back from that same Node.
 
-**Goal:** Implement a simple in-memory key-value store with string keys and arbitrary value types.
-
-**Inputs & outputs:**
-- Input: `set(key, value)`, `get(key)`, `delete(key)` calls
-- Output: stored/retrieved values; `null` for missing keys; `true`/`false` for delete
+**Shape:**
+- Input:
+  - write: key: string, value: string
+  - read: key: string
+- Output:
+  - write: acknowledgement
+  - read: the value last written for that key, or a marker that the key has never been written
 
 **Key questions:**
-- What data structure backs the store? Plain object, `Map`, or something else?
-- What value types will you support - strings only, or arbitrary serializable values?
-- What is the return value of `get` on a missing key vs. a key explicitly set to `null`?
+- What backs the store so a `write` to a key that already has a value replaces it, rather than keeping both?
+- What does a `read` return for a key nobody has written yet, and how is that distinguished from a key written with an empty value?
+- The store lives in memory for this stage. What would you have to add for it to survive a restart - and is that this stage's job?
+
+**Watch out:** A plain object used as a map has surprising key behavior - inherited properties can shadow a lookup, and non-string keys get silently coerced to strings. Pick a backing structure where a key you never wrote cannot appear to have a value.
+
+**Samples:**
+
+##### Sample 1 - write color to bravo
+
+```
+docker compose exec alpha curl -s -i -X PUT http://bravo:7070/kv/color -d red
+```
+
+```
+HTTP/1.1 204 No Content
+Connection: close
+
+```
+
+##### Sample 2 - read color from bravo
+
+```
+docker compose exec alpha curl -s -i http://bravo:7070/kv/color
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 3
+Connection: close
+
+red
+```
 
 **Done when:**
-- 10,000 sequential set/get/delete operations complete without errors
-- `get` on a deleted key returns `null`, not the previous value
-- Keys with identical content but different types (e.g. `1` vs `"1"`) are handled predictably
-
-**Watch out:** JavaScript object keys are always strings. If you use a plain object as your backing store, the integer key `1` and the string key `"1"` collide. Use `Map` to avoid this.
+- write color to bravo
+- read color from bravo
 
 ---
 
-#### Step 2 - TTL expiry
+#### Step 2 - Agree on a value across both Nodes
 
-**Goal:** Allow keys to be set with an expiry time; return `null` for expired keys and clean them up.
+**Goal:** After a write lands on either BRAVO or CHARLIE, both Nodes answer a `read` for that key with the same value.
 
-**Inputs & outputs:**
-- Input: `set(key, value, ttlSeconds)`
-- Output: `get` returns the value until TTL expires; returns `null` afterward
+**Shape:**
+- Input: a write on one Node, followed by a read on the other Node
+- Output: the read returns the value from the write, not a stale or missing value
 
 **Key questions:**
-- Do you use `setTimeout` per key, a periodic sweep, or lazy expiry on `get`?
-- What are the memory trade-offs of each approach?
-- What happens to a key's TTL if you `set` it again without a TTL argument?
+- How does a write on BRAVO reach CHARLIE - does BRAVO push it immediately, does CHARLIE pull on an interval, or does CHARLIE ask BRAVO when it doesn't recognize a key?
+- If BRAVO and CHARLIE each get a different write to the same key before either has heard from the other, which value survives once they both know about both writes?
+- Does the write's acknowledgement to the client come back before or after the peer Node has the update? What does that decision do to a read on the peer that happens right after?
+
+**Watch out:** If a write acknowledges success before the peer actually has it, "write on one Node, read on the other" can flake for a reason that has nothing to do with whether agreement itself works. Decide whether the write blocks until the peer confirms, or whether a read shortly after a write is allowed to retry, and make that decision visible in how the Sample is run.
+
+**Samples:**
+
+##### Sample 3 - write on bravo, read on charlie
+
+```
+docker compose exec alpha curl -s -i -X PUT http://bravo:7070/kv/color -d blue && docker compose exec alpha curl -s -i http://charlie:7070/kv/color
+```
+
+```
+HTTP/1.1 204 No Content
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 4
+Connection: close
+
+blue
+```
+
+##### Sample 4 - write on charlie, read on bravo
+
+```
+docker compose exec alpha curl -s -i -X PUT http://charlie:7070/kv/color -d green && docker compose exec alpha curl -s -i http://bravo:7070/kv/color
+```
+
+```
+HTTP/1.1 204 No Content
+Connection: close
+
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Content-Length: 5
+Connection: close
+
+green
+```
 
 **Done when:**
-- `set("x", 1, 1)` followed by a 1.1-second wait causes `get("x")` to return `null`
-- `set("x", 2)` after expiry correctly stores the new value without TTL
-- 10,000 expired keys are eventually cleaned from memory (verify with `process.memoryUsage()`)
-
-**Watch out:** One `setTimeout` per key sounds simple but creates memory pressure under high write volume. A lazy expiry check on `get` + periodic sweep is typically more efficient. Know the trade-off.
+- write on bravo, read on charlie
+- write on charlie, read on bravo
 
 ---
 
-#### Step 3 - LRU eviction
-
-**Goal:** Enforce a maximum capacity; when full, evict the least recently used key.
-
-**Inputs & outputs:**
-- Input: `new KVStore({ maxSize: N })`; `set` calls beyond capacity
-- Output: the LRU key is evicted automatically; recently accessed keys survive eviction
-
-**Key questions:**
-- What data structure gives O(1) get/set/evict? (Hint: doubly linked list + hash map)
-- Does a `get` access count as "recently used"?
-- What happens when you `set` an existing key - does it move to the front?
-
-**Done when:**
-- With `maxSize: 3`, setting a 4th key evicts the least-recently-used (not the least-recently-set) key
-- A `get` access promotes a key so it is not the next to be evicted
-- All operations remain O(1) - verified by timing 100,000 operations against 1000 operations and confirming linear (not quadratic) scaling
-
-**Watch out:** JavaScript's `Map` preserves insertion order, which you can exploit to fake an LRU - but only if you delete and re-insert on every access. That's a valid approach, but understand its cost vs. a true doubly linked list implementation.
+**Next:** BRAVO and CHARLIE agree on a value, but nothing tells you how often either one is asked for it. [Stage 7 · Metrics](../4-reliability-observability/11-metrics-collector.md).
