@@ -8,13 +8,8 @@ You implement the infrastructure yourself, one layer at a time.
 At first the system can barely communicate.
 By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.
 
-Each layer exists because the system needs it.
-
-**Start here:** [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md), implemented in Node.js under [`packages/dns/`](../packages/dns/).
-
-Stage files for 3-11 still use old names on disk.
-A later session rewrites them to this contract.
-Do not treat those files as the locked step lists.
+**Start here:** [Stage 0 · Network](./0-network/0-network.md).
+Then [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md), implemented in Node.js under [`packages/dns/`](../packages/dns/).
 
 ---
 
@@ -39,9 +34,6 @@ They have to be separate machines on a real network, where pulling a power cable
 The platform serves `pi.world`, a site about the platform itself.
 
 The site grows with the infrastructure.
-Do not build the site up front.
-Product pages prove an Enables line.
-They do not order the path.
 
 | Page | Needs |
 |---|---|
@@ -51,65 +43,27 @@ They do not order the path.
 | `/metrics` | Metrics |
 | `/events` | Message queue |
 | `/architecture` | Tracing |
-| `/lab` | The cluster under stress |
+| `/lab` | Controls to break a node or delay a hop, then watch the rest of the site |
 
 ---
 
-## Methodology - Guided Spec
+## How the specs work
 
-For each stage you receive a **guided spec**, not implementation code: enough to know what to build, why, and how to know it is done.
-Design and implementation stay yours.
+Each stage is a **guided spec**.
+It tells you what to build, which questions to answer first, and how you know you are done.
 
-[Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md) is the exemplar.
-Copy its headings.
-Do not invent a new format.
+[Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md) shows the shape.
 
-### Stage headings
+A stage file has:
 
-1. `### Stage N · Name`
-2. Blockquote: one-sentence stage Goal
-3. `**Enables:**` one skip-testable platform fact, present tense, observable on the real machines
-4. `**Scope:**` one or two sentences of bound
-5. `*Formerly: …*` only when the name changed
-6. Steps
-7. `**Next:**` one sentence plus a link
+- **Goal** - one fact you can check on the real machines. The stage is done when that fact is true. If it is already true, skip the stage.
+- **Scope** - the bound. Stop when the Goal is true.
+- **Steps** - sitting-sized work. A step is done when its Samples reproduce on Compose.
+- **Key questions** - answer these before you write code.
+- **Samples** - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe.
 
-Do not add prereqs, time estimates, or stretch sections.
-
-### Step headings
-
-1. `#### Step N - Title`
-2. `**Goal:**`
-3. `**Shape:**` field list with types only. No example values.
-4. `**Key questions:**` may name an RFC. Must not implement it for you.
-5. `**Watch out:**`
-6. `**Samples:**`
-7. `**Done when:**` the Check list. Keep this string so the reader does not move.
-
-Sitting-sized work is a Step.
-Use `##### Substep - <name>` only when one Step must stay one Check list but is too big to read as a single block.
-A Substep gets a Goal only.
-
-### Samples and Checks
-
-Each Sample is `##### Sample <n> - <short name>`.
-One Check per Sample.
-The Check bullet uses the Sample's short name.
-
-Behavior Sample: one command fenced, then one exact transcript fenced.
-Wire or object Sample: one relative link to a fixture (`.bin` or `.ts`) plus one sentence that names that file as the oracle.
-A step may mix kinds.
-Never both for the same Check.
-
-A Sample may contain expected bytes, a decoded object, one command, or one transcript.
-A Sample must not contain algorithms, control flow, code, a walkthrough of how to produce the transcript, or an RFC section used as a recipe.
-
-### Done and Skip
-
-A **Step** is done when its Samples reproduce on Compose.
-A **Stage** is done when its Enables line is true on the real machines.
-
-**Skip:** if a stage's Enables line is already true on the real machines, skip that stage.
+Compose is for step Checks.
+The Goal is for ALPHA, BRAVO, and CHARLIE.
 
 ---
 
@@ -127,8 +81,7 @@ You are understanding one deeply enough to build a small working version and wat
 
 **Let failure be real.** Physical failure is part of the project, not something to mock away.
 
-**Pedagogy that does not Enable `pi.world` is off the path.**
-Do not add these as Steps unless a new Enables fact appears: least-connections, presigned URLs, OTLP export, multipart upload, virtual hosts, TLS termination.
+**Stay on the current Goal.** If a feature does not make that Goal true on the machines, leave it out.
 
 ---
 
@@ -136,7 +89,8 @@ Do not add these as Steps unless a new Enables fact appears: least-connections, 
 
 Three machines that can reach each other, with fixed addresses, SSH access, and a way to run a process on each one.
 
-**Enables:** From ALPHA you can `ssh bravo`, and a process on ALPHA can open a socket to a process on CHARLIE.
+**Goal:** From ALPHA, `ssh bravo hostname` prints `bravo`.
+From ALPHA, `nc charlie 9000` delivers `hello from alpha` to a listener on CHARLIE.
 
 ---
 
@@ -146,15 +100,16 @@ Turn three addressable machines into something that can serve a page.
 
 ### [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md)
 
-**Enables:** `dig pi.world` against ALPHA returns the cluster addresses. Later stages do not hardcode IPs.
+**Goal:** `dig pi.world` against ALPHA returns the cluster addresses.
+Later stages look up names instead of hardcoding IPs.
 
 ### [Stage 2 · Transport](./1-networking-fundamentals/2-tcp-server.md)
 
-**Enables:** ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.
+**Goal:** ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.
 
 ### [Stage 3 · HTTP](./1-networking-fundamentals/3-http-server.md)
 
-**Enables:** `pi.world/` serves a static page from BRAVO.
+**Goal:** `pi.world/` serves a static page from BRAVO.
 
 ---
 
@@ -164,9 +119,9 @@ Make the website a property of the cluster instead of a property of one machine.
 
 ### [Stage 4 · Front door](./2-traffic-routing/4-front-door.md)
 
-**Enables:** `pi.world` has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.
-
-Old reverse-proxy and load-balancer docs stay on disk until a later rewrite deletes or recuts them. They are no longer the stage.
+**Goal:** `pi.world` has one public entry on ALPHA.
+You shut BRAVO down.
+The page says Served by CHARLIE.
 
 ---
 
@@ -176,11 +131,18 @@ Make the system fast, and give it shared state.
 
 ### [Stage 5 · HTTP cache](./3-caching-content-delivery/8-http-cache-layer.md)
 
-**Enables:** The site reports a MISS from origin, then a HIT with age and a shorter time.
+**Goal:** The first GET of `/` reports a MISS from origin.
+The second reports a HIT with an Age header and a shorter time.
+
+Without a cache, every request pays origin work on BRAVO or CHARLIE.
+Repeat views should be cheap at the front door.
 
 ### [Stage 6 · Key-value store](./3-caching-content-delivery/9-key-value-store.md)
 
-**Enables:** BRAVO and CHARLIE agree on one value after a write from either.
+**Goal:** You SET a key on BRAVO and GET the same value from CHARLIE.
+
+Each backend otherwise keeps its own memory.
+A write on one node has to show up on the other, or sessions and counters depend on which machine you hit.
 
 ---
 
@@ -190,11 +152,11 @@ Find out what the cluster is doing.
 
 ### [Stage 7 · Metrics](./4-reliability-observability/11-metrics-collector.md)
 
-**Enables:** `/metrics` and `/status` show request counts and timings.
+**Goal:** `/metrics` and `/status` show request counts and timings.
 
 ### [Stage 8 · Tracing](./4-reliability-observability/12-distributed-tracing.md)
 
-**Enables:** `/architecture` shows a live request path with a duration on each hop.
+**Goal:** `/architecture` shows a live request path with a duration on each hop.
 
 ---
 
@@ -204,35 +166,19 @@ Give the system memory.
 
 ### [Stage 9 · Write-ahead log](./5-data-storage/13-write-ahead-log.md)
 
-**Enables:** You kill a node during a write, restart it, and the data is intact.
+**Goal:** You kill a node during a write, restart it, and the data is intact.
 
 ### [Stage 10 · Message queue](./5-data-storage/14-message-queue.md)
 
-**Enables:** `/events` updates without the page waiting for the consumer.
+**Goal:** A request that records an event returns before the worker finishes.
+`/events` then shows the processed event.
+
+The HTTP process should not wait on slow work.
+The queue is the handoff so the page can update later.
 
 ### [Stage 11 · Object storage](./5-data-storage/15-object-storage.md)
 
-**Enables:** A blob is still served after the node that first stored it reboots.
+**Goal:** You PUT a blob, reboot the node that stored it, and GET still returns the bytes.
 
----
-
-## Not on this path
-
-These are not stages on the locked path.
-Their files stay until a later rewrite deletes or recuts them.
-
-- API gateway: no product page that needs policy yet
-- Content delivery: three nodes in one room do not Enable a CDN
-- Circuit breaker: dead-BRAVO failover is the Front door Enables line
-
----
-
-## Do not design the whole thing first
-
-The stage list above is a direction, not an architecture.
-
-Build the smallest thing that works, then let the next problem force the next piece of infrastructure.
-Discovering why a system is built the way it is - by hitting the problem it solves - is the point.
-
-If you reach a stage and its Enables line is already true, skip it.
-If the system needs something not on this list, that is a new Enables fact, not a silent extra Step.
+Bytes in RAM or in a tmp directory die with the process.
+Object storage is how uploads survive a reboot.

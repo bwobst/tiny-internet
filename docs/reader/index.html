@@ -561,18 +561,15 @@
         <h1>Overview</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#curriculum/curriculum-stage-headings">Stage headings</a></li><li class="depth-3"><a href="#curriculum/curriculum-step-headings">Step headings</a></li><li class="depth-3"><a href="#curriculum/curriculum-samples-and-checks">Samples and Checks</a></li><li class="depth-3"><a href="#curriculum/curriculum-done-and-skip">Done and Skip</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-4-front-door">Stage 4 · Front door</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-5-http-cache">Stage 5 · HTTP cache</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-6-key-value-store">Stage 6 · Key-value store</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-7-metrics">Stage 7 · Metrics</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-8-tracing">Stage 8 · Tracing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-9-write-ahead-log">Stage 9 · Write-ahead log</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-10-message-queue">Stage 10 · Message queue</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-11-object-storage">Stage 11 · Object storage</a></li></ul></nav>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#curriculum/curriculum-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-4-front-door">Stage 4 · Front door</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-5-http-cache">Stage 5 · HTTP cache</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-6-key-value-store">Stage 6 · Key-value store</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-7-metrics">Stage 7 · Metrics</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-8-tracing">Stage 8 · Tracing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-9-write-ahead-log">Stage 9 · Write-ahead log</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-10-message-queue">Stage 10 · Message queue</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-11-object-storage">Stage 11 · Object storage</a></li></ul></nav>
         <div class="page-content prose"><h1 id="curriculum-tiny-internet---build-path">Tiny Internet - Build Path</h1>
 <p>You are going to build a tiny web platform from scratch and run it across three physical computers.</p>
 <p>There is no framework, no cloud platform, no managed database, no CDN, and no observability service hiding underneath it.</p>
 <p>You implement the infrastructure yourself, one layer at a time.</p>
 <p>At first the system can barely communicate.</p>
 <p>By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.</p>
-<p>Each layer exists because the system needs it.</p>
-<p><strong>Start here:</strong> <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/dns/"><code>packages/dns/</code></a>.</p>
-<p>Stage files for 3-11 still use old names on disk.</p>
-<p>A later session rewrites them to this contract.</p>
-<p>Do not treat those files as the locked step lists.</p>
+<p><strong>Start here:</strong> <a href="#network">Stage 0 · Network</a>.</p>
+<p>Then <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/dns/"><code>packages/dns/</code></a>.</p>
 <hr />
 <h2 id="curriculum-the-machines">The machines</h2>
 <div class="table-wrap"><table>
@@ -601,9 +598,6 @@
 <h2 id="curriculum-the-product">The product</h2>
 <p>The platform serves <code>pi.world</code>, a site about the platform itself.</p>
 <p>The site grows with the infrastructure.</p>
-<p>Do not build the site up front.</p>
-<p>Product pages prove an Enables line.</p>
-<p>They do not order the path.</p>
 <div class="table-wrap"><table>
 <thead><tr>
 <th>Page</th>
@@ -635,50 +629,30 @@
 </tr>
 <tr>
 <td><code>/lab</code></td>
-<td>The cluster under stress</td>
+<td>Controls to break a node or delay a hop, then watch the rest of the site</td>
 </tr>
 </tbody></table></div>
 <hr />
-<h2 id="curriculum-methodology---guided-spec">Methodology - Guided Spec</h2>
-<p>For each stage you receive a <strong>guided spec</strong>, not implementation code: enough to know what to build, why, and how to know it is done.</p>
-<p>Design and implementation stay yours.</p>
-<p><a href="#dns-resolver">Stage 1 · Naming</a> is the exemplar.</p>
-<p>Copy its headings.</p>
-<p>Do not invent a new format.</p>
-<h3 id="curriculum-stage-headings">Stage headings</h3>
-<p>1. <code>### Stage N · Name</code></p>
-<p>2. Blockquote: one-sentence stage Goal</p>
-<p>3. <code><strong>Enables:</strong></code> one skip-testable platform fact, present tense, observable on the real machines</p>
-<p>4. <code><strong>Scope:</strong></code> one or two sentences of bound</p>
-<p>5. <code>*Formerly: …*</code> only when the name changed</p>
-<p>6. Steps</p>
-<p>7. <code><strong>Next:</strong></code> one sentence plus a link</p>
-<p>Do not add prereqs, time estimates, or stretch sections.</p>
-<h3 id="curriculum-step-headings">Step headings</h3>
-<p>1. <code>#### Step N - Title</code></p>
-<p>2. <code><strong>Goal:</strong></code></p>
-<p>3. <code><strong>Shape:</strong></code> field list with types only. No example values.</p>
-<p>4. <code><strong>Key questions:</strong></code> may name an RFC. Must not implement it for you.</p>
-<p>5. <code><strong>Watch out:</strong></code></p>
-<p>6. <code><strong>Samples:</strong></code></p>
-<p>7. <code><strong>Done when:</strong></code> the Check list. Keep this string so the reader does not move.</p>
-<p>Sitting-sized work is a Step.</p>
-<p>Use <code>##### Substep - &lt;name&gt;</code> only when one Step must stay one Check list but is too big to read as a single block.</p>
-<p>A Substep gets a Goal only.</p>
-<h3 id="curriculum-samples-and-checks">Samples and Checks</h3>
-<p>Each Sample is <code>##### Sample &lt;n&gt; - &lt;short name&gt;</code>.</p>
-<p>One Check per Sample.</p>
-<p>The Check bullet uses the Sample's short name.</p>
-<p>Behavior Sample: one command fenced, then one exact transcript fenced.</p>
-<p>Wire or object Sample: one relative link to a fixture (<code>.bin</code> or <code>.ts</code>) plus one sentence that names that file as the oracle.</p>
-<p>A step may mix kinds.</p>
-<p>Never both for the same Check.</p>
-<p>A Sample may contain expected bytes, a decoded object, one command, or one transcript.</p>
-<p>A Sample must not contain algorithms, control flow, code, a walkthrough of how to produce the transcript, or an RFC section used as a recipe.</p>
-<h3 id="curriculum-done-and-skip">Done and Skip</h3>
-<p>A <strong>Step</strong> is done when its Samples reproduce on Compose.</p>
-<p>A <strong>Stage</strong> is done when its Enables line is true on the real machines.</p>
-<p><strong>Skip:</strong> if a stage's Enables line is already true on the real machines, skip that stage.</p>
+<h2 id="curriculum-how-the-specs-work">How the specs work</h2>
+<p>Each stage is a <strong>guided spec</strong>.</p>
+<p>It tells you what to build, which questions to answer first, and how you know you are done.</p>
+<p>Design and code stay yours.</p>
+<p><a href="#dns-resolver">Stage 1 · Naming</a> shows the shape.</p>
+<p>A stage file has:</p>
+<ul>
+<li><strong>Goal</strong> - one fact you can check on the real machines. The stage is done when that fact is true. If it is already true, skip the stage.
+</li>
+<li><strong>Scope</strong> - the bound. Stop when the Goal is true.
+</li>
+<li><strong>Steps</strong> - sitting-sized work. A step is done when its Samples reproduce on Compose.
+</li>
+<li><strong>Key questions</strong> - answer these before you write code.
+</li>
+<li><strong>Samples</strong> - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe.
+</li>
+</ul>
+<p>Compose is for step Checks.</p>
+<p>The Goal is for ALPHA, BRAVO, and CHARLIE.</p>
 <hr />
 <h2 id="curriculum-rules">Rules</h2>
 <p><strong>Write the code by hand.</strong> That is the point of the project.</p>
@@ -689,69 +663,62 @@
 <p><strong>Keep scope bounded.</strong> You are not recreating production systems.</p>
 <p>You are understanding one deeply enough to build a small working version and watch it behave in a real environment.</p>
 <p><strong>Let failure be real.</strong> Physical failure is part of the project, not something to mock away.</p>
-<p><strong>Pedagogy that does not Enable <code>pi.world</code> is off the path.</strong></p>
-<p>Do not add these as Steps unless a new Enables fact appears: least-connections, presigned URLs, OTLP export, multipart upload, virtual hosts, TLS termination.</p>
+<p><strong>Stay on the current Goal.</strong> If a feature does not make that Goal true on the machines, leave it out.</p>
 <hr />
 <h2 id="curriculum-stage-0-network"><a href="#network">Stage 0 · Network</a></h2>
 <p>Three machines that can reach each other, with fixed addresses, SSH access, and a way to run a process on each one.</p>
-<p><strong>Enables:</strong> From ALPHA you can <code>ssh bravo</code>, and a process on ALPHA can open a socket to a process on CHARLIE.</p>
+<p><strong>Goal:</strong> From ALPHA, <code>ssh bravo hostname</code> prints <code>bravo</code>.</p>
+<p>From ALPHA, <code>nc charlie 9000</code> delivers <code>hello from alpha</code> to a listener on CHARLIE.</p>
 <hr />
 <h2 id="curriculum-layer-1-networking-fundamentals">Layer 1 · Networking fundamentals</h2>
 <p>Turn three addressable machines into something that can serve a page.</p>
 <h3 id="curriculum-stage-1-naming"><a href="#dns-resolver">Stage 1 · Naming</a></h3>
-<p><strong>Enables:</strong> <code>dig pi.world</code> against ALPHA returns the cluster addresses. Later stages do not hardcode IPs.</p>
+<p><strong>Goal:</strong> <code>dig pi.world</code> against ALPHA returns the cluster addresses.</p>
+<p>Later stages look up names instead of hardcoding IPs.</p>
 <h3 id="curriculum-stage-2-transport"><a href="#tcp-server">Stage 2 · Transport</a></h3>
-<p><strong>Enables:</strong> ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.</p>
+<p><strong>Goal:</strong> ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.</p>
 <h3 id="curriculum-stage-3-http"><a href="#http-server">Stage 3 · HTTP</a></h3>
-<p><strong>Enables:</strong> <code>pi.world/</code> serves a static page from BRAVO.</p>
+<p><strong>Goal:</strong> <code>pi.world/</code> serves a static page from BRAVO.</p>
 <hr />
 <h2 id="curriculum-layer-2-traffic">Layer 2 · Traffic</h2>
 <p>Make the website a property of the cluster instead of a property of one machine.</p>
 <h3 id="curriculum-stage-4-front-door"><a href="#front-door">Stage 4 · Front door</a></h3>
-<p><strong>Enables:</strong> <code>pi.world</code> has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.</p>
-<p>Old reverse-proxy and load-balancer docs stay on disk until a later rewrite deletes or recuts them. They are no longer the stage.</p>
+<p><strong>Goal:</strong> <code>pi.world</code> has one public entry on ALPHA.</p>
+<p>You shut BRAVO down.</p>
+<p>The page says Served by CHARLIE.</p>
 <hr />
 <h2 id="curriculum-layer-3-caching-and-shared-state">Layer 3 · Caching and shared state</h2>
 <p>Make the system fast, and give it shared state.</p>
 <h3 id="curriculum-stage-5-http-cache"><a href="#http-cache-layer">Stage 5 · HTTP cache</a></h3>
-<p><strong>Enables:</strong> The site reports a MISS from origin, then a HIT with age and a shorter time.</p>
+<p><strong>Goal:</strong> The first GET of <code>/</code> reports a MISS from origin.</p>
+<p>The second reports a HIT with an Age header and a shorter time.</p>
+<p>Without a cache, every request pays origin work on BRAVO or CHARLIE.</p>
+<p>Repeat views should be cheap at the front door.</p>
 <h3 id="curriculum-stage-6-key-value-store"><a href="#key-value-store">Stage 6 · Key-value store</a></h3>
-<p><strong>Enables:</strong> BRAVO and CHARLIE agree on one value after a write from either.</p>
+<p><strong>Goal:</strong> You SET a key on BRAVO and GET the same value from CHARLIE.</p>
+<p>Each backend otherwise keeps its own memory.</p>
+<p>A write on one node has to show up on the other, or sessions and counters depend on which machine you hit.</p>
 <hr />
 <h2 id="curriculum-layer-4-observability">Layer 4 · Observability</h2>
 <p>Find out what the cluster is doing.</p>
 <h3 id="curriculum-stage-7-metrics"><a href="#metrics-collector">Stage 7 · Metrics</a></h3>
-<p><strong>Enables:</strong> <code>/metrics</code> and <code>/status</code> show request counts and timings.</p>
+<p><strong>Goal:</strong> <code>/metrics</code> and <code>/status</code> show request counts and timings.</p>
 <h3 id="curriculum-stage-8-tracing"><a href="#distributed-tracing">Stage 8 · Tracing</a></h3>
-<p><strong>Enables:</strong> <code>/architecture</code> shows a live request path with a duration on each hop.</p>
+<p><strong>Goal:</strong> <code>/architecture</code> shows a live request path with a duration on each hop.</p>
 <hr />
 <h2 id="curriculum-layer-5-data-and-storage">Layer 5 · Data and storage</h2>
 <p>Give the system memory.</p>
 <h3 id="curriculum-stage-9-write-ahead-log"><a href="#write-ahead-log">Stage 9 · Write-ahead log</a></h3>
-<p><strong>Enables:</strong> You kill a node during a write, restart it, and the data is intact.</p>
+<p><strong>Goal:</strong> You kill a node during a write, restart it, and the data is intact.</p>
 <h3 id="curriculum-stage-10-message-queue"><a href="#message-queue">Stage 10 · Message queue</a></h3>
-<p><strong>Enables:</strong> <code>/events</code> updates without the page waiting for the consumer.</p>
+<p><strong>Goal:</strong> A request that records an event returns before the worker finishes.</p>
+<p><code>/events</code> then shows the processed event.</p>
+<p>The HTTP process should not wait on slow work.</p>
+<p>The queue is the handoff so the page can update later.</p>
 <h3 id="curriculum-stage-11-object-storage"><a href="#object-storage">Stage 11 · Object storage</a></h3>
-<p><strong>Enables:</strong> A blob is still served after the node that first stored it reboots.</p>
-<hr />
-<h2 id="curriculum-not-on-this-path">Not on this path</h2>
-<p>These are not stages on the locked path.</p>
-<p>Their files stay until a later rewrite deletes or recuts them.</p>
-<ul>
-<li>API gateway: no product page that needs policy yet
-</li>
-<li>Content delivery: three nodes in one room do not Enable a CDN
-</li>
-<li>Circuit breaker: dead-BRAVO failover is the Front door Enables line
-</li>
-</ul>
-<hr />
-<h2 id="curriculum-do-not-design-the-whole-thing-first">Do not design the whole thing first</h2>
-<p>The stage list above is a direction, not an architecture.</p>
-<p>Build the smallest thing that works, then let the next problem force the next piece of infrastructure.</p>
-<p>Discovering why a system is built the way it is - by hitting the problem it solves - is the point.</p>
-<p>If you reach a stage and its Enables line is already true, skip it.</p>
-<p>If the system needs something not on this list, that is a new Enables fact, not a silent extra Step.</p></div>
+<p><strong>Goal:</strong> You PUT a blob, reboot the node that stored it, and GET still returns the bytes.</p>
+<p>Bytes in RAM or in a tmp directory die with the process.</p>
+<p>Object storage is how uploads survive a reboot.</p></div>
       </div>
     </article>
 <article class="page" id="page-network" data-page="network" hidden>
