@@ -26,14 +26,14 @@
 - Stage 3's backends answer once per connection and close it. Does the front door open a fresh connection to the backend for every request it forwards, or try to reuse one?
 - Where does "which backend is next" live so it survives across separate incoming connections, not just inside the function handling one of them?
 
-**Watch out:** Compose publishes ALPHA's port 80 to the host as 8080. A curl from the laptop uses `127.0.0.1:8080`; a request from inside BRAVO's or CHARLIE's container uses `alpha` on port 80 directly, the same as Stage 3's backends.
+**Watch out:** Compose publishes ALPHA's port 80 to the host as 8090. A curl from the laptop uses `127.0.0.1:8090`; a request from inside BRAVO's or CHARLIE's container uses `alpha` on port 80 directly, the same as Stage 3's backends.
 
 **Samples:**
 
 ##### Sample 1 - first request goes to bravo
 
 ```
-curl -s -i http://127.0.0.1:8080/
+curl -s -i http://127.0.0.1:8090/
 ```
 
 ```
@@ -51,7 +51,7 @@ Connection: close
 ##### Sample 2 - second request goes to charlie
 
 ```
-curl -s -i http://127.0.0.1:8080/
+curl -s -i http://127.0.0.1:8090/
 ```
 
 ```
@@ -94,7 +94,7 @@ Connection: close
 ##### Sample 3 - curl pi.world with both backends up
 
 ```
-curl -s -i http://127.0.0.1:8080/
+curl -s -i http://127.0.0.1:8090/
 ```
 
 ```
@@ -114,7 +114,7 @@ Connection: close
 After `docker compose stop bravo`:
 
 ```
-curl -s -i http://127.0.0.1:8080/
+curl -s -i http://127.0.0.1:8090/
 ```
 
 ```

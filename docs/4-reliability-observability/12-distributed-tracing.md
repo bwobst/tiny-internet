@@ -28,8 +28,8 @@
 ##### Sample 1 - architecture after one request to /
 
 ```
-curl -s http://127.0.0.1:8080/ > /dev/null
-curl -s http://127.0.0.1:8080/architecture
+curl -s http://127.0.0.1:8090/ > /dev/null
+curl -s http://127.0.0.1:8090/architecture
 ```
 
 ```
@@ -63,8 +63,8 @@ bravo
 ##### Sample 2 - architecture shows a duration per hop
 
 ```
-curl -s http://127.0.0.1:8080/ > /dev/null
-curl -s http://127.0.0.1:8080/architecture
+curl -s http://127.0.0.1:8090/ > /dev/null
+curl -s http://127.0.0.1:8090/architecture
 ```
 
 ```

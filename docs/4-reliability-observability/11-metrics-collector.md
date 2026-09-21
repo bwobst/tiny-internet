@@ -30,10 +30,10 @@
 ##### Sample 1 - status after three requests to /
 
 ```
-curl -s http://127.0.0.1:8080/ > /dev/null
-curl -s http://127.0.0.1:8080/ > /dev/null
-curl -s http://127.0.0.1:8080/ > /dev/null
-curl -s http://127.0.0.1:8080/status
+curl -s http://127.0.0.1:8090/ > /dev/null
+curl -s http://127.0.0.1:8090/ > /dev/null
+curl -s http://127.0.0.1:8090/ > /dev/null
+curl -s http://127.0.0.1:8090/status
 ```
 
 ```
@@ -68,8 +68,8 @@ path	count
 ##### Sample 2 - status shows counts and average duration
 
 ```
-curl -s http://127.0.0.1:8080/ > /dev/null
-curl -s http://127.0.0.1:8080/status
+curl -s http://127.0.0.1:8090/ > /dev/null
+curl -s http://127.0.0.1:8090/status
 ```
 
 ```
@@ -80,7 +80,7 @@ path	count	avg_ms
 ##### Sample 3 - metrics shows the same numbers
 
 ```
-curl -s http://127.0.0.1:8080/metrics
+curl -s http://127.0.0.1:8090/metrics
 ```
 
 ```

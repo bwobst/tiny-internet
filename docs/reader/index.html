@@ -636,7 +636,6 @@
 <h2 id="curriculum-how-the-specs-work">How the specs work</h2>
 <p>Each stage is a <strong>guided spec</strong>.</p>
 <p>It tells you what to build, which questions to answer first, and how you know you are done.</p>
-<p>Design and code stay yours.</p>
 <p><a href="#dns-resolver">Stage 1 · Naming</a> shows the shape.</p>
 <p>A stage file has:</p>
 <ul>
@@ -961,11 +960,15 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 <p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process.</p>
 <p>Refused means the Node answered and nothing was listening.</p>
 <p>A listener in the foreground blocks until something connects, so the Samples below send its output to a log and read that log afterwards.</p>
+<p><code>&amp;</code> inside an attached <code>docker compose exec</code> still belongs to that session.</p>
+<p>When exec returns, hangup kills the listener.</p>
+<p>Detach it (<code>-d</code>) so it outlives the command that started it.</p>
 <p>Run the Samples in order: the listener has to be up before ALPHA connects.</p>
 <p>The source port in the listener log changes every run - match the Node name and the bytes.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---listener-on-charlie">Sample 1 - listener on charlie</h5>
-<pre><code>docker compose exec charlie sh -c 'nc -lv -p 9000 &gt; /tmp/listener.log 2&gt;&amp;1 &amp; sleep 0.5; ss -ltn sport = :9000'
+<pre><code>docker compose exec -d charlie sh -c 'nc -lv -p 9000 &gt; /tmp/listener.log 2&gt;&amp;1'
+docker compose exec charlie ss -ltn sport = :9000
 </code></pre>
 <pre><code>State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
 LISTEN 0      1            0.0.0.0:9000      0.0.0.0:*          
@@ -1495,10 +1498,10 @@ Connection: close
 <li>Where does &quot;which backend is next&quot; live so it survives across separate incoming connections, not just inside the function handling one of them?
 </li>
 </ul>
-<p><strong>Watch out:</strong> Compose publishes ALPHA's port 80 to the host as 8080. A curl from the laptop uses <code>127.0.0.1:8080</code>; a request from inside BRAVO's or CHARLIE's container uses <code>alpha</code> on port 80 directly, the same as Stage 3's backends.</p>
+<p><strong>Watch out:</strong> Compose publishes ALPHA's port 80 to the host as 8090. A curl from the laptop uses <code>127.0.0.1:8090</code>; a request from inside BRAVO's or CHARLIE's container uses <code>alpha</code> on port 80 directly, the same as Stage 3's backends.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="front-door-sample-1---first-request-goes-to-bravo">Sample 1 - first request goes to bravo</h5>
-<pre><code>curl -s -i http://127.0.0.1:8080/
+<pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
 Content-Type: text/html
@@ -1511,7 +1514,7 @@ Connection: close
 &lt;/html&gt;
 </code></pre>
 <h5 id="front-door-sample-2---second-request-goes-to-charlie">Sample 2 - second request goes to charlie</h5>
-<pre><code>curl -s -i http://127.0.0.1:8080/
+<pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
 Content-Type: text/html
@@ -1558,7 +1561,7 @@ Connection: close
 <p><strong>Watch out:</strong> <code>docker compose stop bravo</code> does not always hand you a clean &quot;connection refused&quot; on the very next request - a listener shutting down can also hand you a connection reset partway through. Treat both as dead, not only the refusal case.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="front-door-sample-3---curl-piworld-with-both-backends-up">Sample 3 - curl pi.world with both backends up</h5>
-<pre><code>curl -s -i http://127.0.0.1:8080/
+<pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
 Content-Type: text/html
@@ -1572,7 +1575,7 @@ Connection: close
 </code></pre>
 <h5 id="front-door-sample-4---curl-piworld-after-bravo-dies">Sample 4 - curl pi.world after bravo dies</h5>
 <p>After <code>docker compose stop bravo</code>:</p>
-<pre><code>curl -s -i http://127.0.0.1:8080/
+<pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
 Content-Type: text/html
@@ -1636,7 +1639,7 @@ Connection: close
 <p><strong>Watch out:</strong> A MISS still has to look like a normal response to the client. If the added header is the only difference, a client that doesn't know to look for it should see nothing broken.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="http-cache-layer-sample-1---first-request-is-a-miss">Sample 1 - first request is a MISS</h5>
-<pre><code>curl -s -i http://127.0.0.1:8080/
+<pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
 Content-Type: text/html
@@ -1683,7 +1686,7 @@ Connection: close
 <p><strong>Watch out:</strong> A HIT that is faster only because the test happened to run fast isn't proof of anything. The Sample has to show the same path answered without a new origin round trip, and the origin's own latency has to still be visible in the MISS Sample for the comparison to mean something.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="http-cache-layer-sample-2---second-request-is-a-hit-with-age">Sample 2 - second request is a HIT with age</h5>
-<pre><code>curl -s -i http://127.0.0.1:8080/
+<pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
 Content-Type: text/html
@@ -1699,7 +1702,7 @@ Connection: close
 &lt;/html&gt;
 </code></pre>
 <h5 id="http-cache-layer-sample-3---request-after-expiry-is-a-miss-again">Sample 3 - request after expiry is a MISS again</h5>
-<pre><code>curl -s -i http://127.0.0.1:8080/
+<pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
 Content-Type: text/html
@@ -1889,10 +1892,10 @@ green
 <p><strong>Watch out:</strong> Stage 4's dead-backend handling means a request can fail before any backend answers it. If the counter only increments once a response comes back, that request disappears from <code>/status</code> instead of showing up as a failure. Decide what &quot;a request happened&quot; means before you start incrementing.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="metrics-collector-sample-1---status-after-three-requests-to">Sample 1 - status after three requests to /</h5>
-<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
-curl -s http://127.0.0.1:8080/ &gt; /dev/null
-curl -s http://127.0.0.1:8080/ &gt; /dev/null
-curl -s http://127.0.0.1:8080/status
+<pre><code>curl -s http://127.0.0.1:8090/ &gt; /dev/null
+curl -s http://127.0.0.1:8090/ &gt; /dev/null
+curl -s http://127.0.0.1:8090/ &gt; /dev/null
+curl -s http://127.0.0.1:8090/status
 </code></pre>
 <pre><code>path	count
 /	3
@@ -1930,14 +1933,14 @@ curl -s http://127.0.0.1:8080/status
 <p><strong>Watch out:</strong> <code>/status</code> and <code>/metrics</code> are requests too. If they get counted like any other path, checking <code>/status</code> changes the number <code>/status</code> reports next time you check it. Decide up front whether the metrics endpoints exempt themselves, and make sure both pages agree.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="metrics-collector-sample-2---status-shows-counts-and-average-duration">Sample 2 - status shows counts and average duration</h5>
-<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
-curl -s http://127.0.0.1:8080/status
+<pre><code>curl -s http://127.0.0.1:8090/ &gt; /dev/null
+curl -s http://127.0.0.1:8090/status
 </code></pre>
 <pre><code>path	count	avg_ms
 /	4	38
 </code></pre>
 <h5 id="metrics-collector-sample-3---metrics-shows-the-same-numbers">Sample 3 - metrics shows the same numbers</h5>
-<pre><code>curl -s http://127.0.0.1:8080/metrics
+<pre><code>curl -s http://127.0.0.1:8090/metrics
 </code></pre>
 <pre><code>/ count=4 avg_ms=38
 </code></pre>
@@ -1985,8 +1988,8 @@ curl -s http://127.0.0.1:8080/status
 <p><strong>Watch out:</strong> If each hop invents its own identifier for the request instead of carrying forward one it received, two hops of the same request look like two separate, unrelated requests, and <code>/architecture</code> cannot reassemble a path at all.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="distributed-tracing-sample-1---architecture-after-one-request-to">Sample 1 - architecture after one request to /</h5>
-<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
-curl -s http://127.0.0.1:8080/architecture
+<pre><code>curl -s http://127.0.0.1:8090/ &gt; /dev/null
+curl -s http://127.0.0.1:8090/architecture
 </code></pre>
 <pre><code>hop
 alpha
@@ -2019,8 +2022,8 @@ bravo
 <p><strong>Watch out:</strong> Reading the clock after work has already started, or before the response has actually left, makes every hop look faster than it was, and the slow hop this page exists to find stops being visible.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="distributed-tracing-sample-2---architecture-shows-a-duration-per-hop">Sample 2 - architecture shows a duration per hop</h5>
-<pre><code>curl -s http://127.0.0.1:8080/ &gt; /dev/null
-curl -s http://127.0.0.1:8080/architecture
+<pre><code>curl -s http://127.0.0.1:8090/ &gt; /dev/null
+curl -s http://127.0.0.1:8090/architecture
 </code></pre>
 <pre><code>hop	duration_ms
 alpha	2

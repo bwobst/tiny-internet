@@ -24,7 +24,7 @@
 - What is the `Via` header and what format does it use?
 
 **Done when:**
-- `curl -H "Host: myapp.local" http://localhost:8080/` is forwarded to the correct upstream
+- `curl -H "Host: myapp.local" http://localhost:8090/` is forwarded to the correct upstream
 - The upstream's access log shows the correct client IP in `X-Forwarded-For`
 - Large file downloads stream through without memory usage growing
 
@@ -71,4 +71,4 @@
 - Requests with `Host: api.local` consistently reach the API upstream, and `Host: app.local` consistently reach the app upstream
 - An unknown host returns `502` with a meaningful error body (not a silent connection close)
 
-**Watch out:** `Host` headers include the port when it's non-standard (e.g. `api.local:8080`). Split on `:` and match on the hostname portion only.
+**Watch out:** `Host` headers include the port when it's non-standard (e.g. `api.local:8090`). Split on `:` and match on the hostname portion only.

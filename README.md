@@ -70,8 +70,8 @@ docker compose down               # stop them
 
 | Node | Address | Role | From the laptop |
 | --- | --- | --- | --- |
-| ALPHA | `10.53.0.10` | Names and front door | `127.0.0.1:5354` DNS, `127.0.0.1:8080` HTTP |
-| BRAVO | `10.53.0.11` | Web backend | `127.0.0.1:8081` HTTP, `127.0.0.1:3001` TCP |
+| ALPHA | `10.53.0.10` | Names and front door | `127.0.0.1:5354` DNS, `127.0.0.1:8090` HTTP |
+| BRAVO | `10.53.0.11` | Web backend | `127.0.0.1:8091` HTTP, `127.0.0.1:3001` TCP |
 | CHARLIE | `10.53.0.12` | Web backend | `127.0.0.1:8082` HTTP, `127.0.0.1:3002` TCP |
 
 Addresses are fixed, so zone data has actual A records.

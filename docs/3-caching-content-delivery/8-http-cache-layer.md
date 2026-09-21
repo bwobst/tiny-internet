@@ -31,7 +31,7 @@
 ##### Sample 1 - first request is a MISS
 
 ```
-curl -s -i http://127.0.0.1:8080/
+curl -s -i http://127.0.0.1:8090/
 ```
 
 ```
@@ -75,7 +75,7 @@ Connection: close
 ##### Sample 2 - second request is a HIT with age
 
 ```
-curl -s -i http://127.0.0.1:8080/
+curl -s -i http://127.0.0.1:8090/
 ```
 
 ```
@@ -96,7 +96,7 @@ Connection: close
 ##### Sample 3 - request after expiry is a MISS again
 
 ```
-curl -s -i http://127.0.0.1:8080/
+curl -s -i http://127.0.0.1:8090/
 ```
 
 ```

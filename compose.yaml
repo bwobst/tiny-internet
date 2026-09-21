@@ -65,7 +65,7 @@ services:
       - "127.0.0.1:5354:53/udp"
       - "127.0.0.1:5354:53/tcp"
       # The public entry point, once the proxy exists.
-      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8090:80"
 
   # Web backend: HTTP server, then cache.
   bravo:
@@ -76,7 +76,7 @@ services:
       tiny-internet:
         ipv4_address: 10.53.0.11
     ports:
-      - "127.0.0.1:8081:80"
+      - "127.0.0.1:8091:80"
       # The TCP server from Stage 2, reachable from the laptop.
       - "127.0.0.1:3001:3000"
 

@@ -219,6 +219,9 @@ bravo
 **Watch out:** A connection that hangs instead of being refused is a filter, not a dead process.
 Refused means the Node answered and nothing was listening.
 A listener in the foreground blocks until something connects, so the Samples below send its output to a log and read that log afterwards.
+`&` inside an attached `docker compose exec` still belongs to that session.
+When exec returns, hangup kills the listener.
+Detach it (`-d`) so it outlives the command that started it.
 Run the Samples in order: the listener has to be up before ALPHA connects.
 The source port in the listener log changes every run - match the Node name and the bytes.
 
@@ -227,7 +230,8 @@ The source port in the listener log changes every run - match the Node name and 
 ##### Sample 1 - listener on charlie
 
 ```
-docker compose exec charlie sh -c 'nc -lv -p 9000 > /tmp/listener.log 2>&1 & sleep 0.5; ss -ltn sport = :9000'
+docker compose exec -d charlie sh -c 'nc -lv -p 9000 > /tmp/listener.log 2>&1'
+docker compose exec charlie ss -ltn sport = :9000
 ```
 
 ```
