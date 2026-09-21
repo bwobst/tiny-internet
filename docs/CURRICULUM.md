@@ -9,7 +9,7 @@ At first the system can barely communicate.
 By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.
 
 **Start here:** [Stage 0 · Network](./0-network/0-network.md).
-Then [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md), implemented in Node.js under [`packages/dns/`](../packages/dns/).
+Then [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md), implemented in Node.js under [`packages/naming/`](../packages/naming/).
 
 ---
 

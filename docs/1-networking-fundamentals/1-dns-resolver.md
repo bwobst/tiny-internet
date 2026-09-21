@@ -45,7 +45,7 @@
 
 ##### Sample 1 - pi.world A query
 
-The oracle is the bytes in [`01-query.bin`](../../packages/dns/src/fixtures/pi-world-a/01-query.bin) and the decoded object in [`01-query.ts`](../../packages/dns/src/fixtures/pi-world-a/01-query.ts).
+The oracle is the bytes in [`01-query.bin`](../../packages/naming/src/fixtures/pi-world-a/01-query.bin) and the decoded object in [`01-query.ts`](../../packages/naming/src/fixtures/pi-world-a/01-query.ts).
 
 **Done when:**
 - pi.world A query
@@ -80,7 +80,7 @@ The oracle is the bytes in [`01-query.bin`](../../packages/dns/src/fixtures/pi-w
 
 ##### Sample 1 - pi.world AA answer
 
-The oracle is the bytes in [`02-aa-answer.bin`](../../packages/dns/src/fixtures/pi-world-a/02-aa-answer.bin) and the decoded object in [`02-aa-answer.ts`](../../packages/dns/src/fixtures/pi-world-a/02-aa-answer.ts).
+The oracle is the bytes in [`02-aa-answer.bin`](../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.bin) and the decoded object in [`02-aa-answer.ts`](../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.ts).
 
 **Done when:**
 - pi.world AA answer

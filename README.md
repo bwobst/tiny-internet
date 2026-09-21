@@ -82,7 +82,6 @@ Interact with the nodes when run via Docker Compose:
 
 ```bash
 docker compose exec alpha bash           # shell as node@alpha
-docker compose exec alpha pnpm exec tsx packages/dns/src/query.ts
 docker compose exec bravo sh             # a shell on a node
 ssh bravo                                # from a shell on ALPHA
 ```
@@ -114,7 +113,8 @@ This repo is a pnpm workspace. Each package under `packages/*` is a TypeScript p
 
 | Package | Path            | Role in the system                         |
 | ------- | --------------- | ------------------------------------------ |
-| `@dns`  | `packages/dns/` | Naming. Wire format, capture scripts, resolver |
+| `@naming` | `packages/naming/` | Naming. Authoritative answers for `pi.world` |
+| `@http`   | `packages/http/`   | HTTP. Parse requests and write responses |
 
 ### Commands
 
@@ -129,10 +129,10 @@ pnpm test:coverage    # run tests with coverage report
 pnpm test:watch       # re-run tests on change
 ```
 
-### @dns scripts
+### @naming
 
 ```bash
-pnpm exec tsx packages/dns/src/query.ts
+pnpm --filter @naming test
 ```
 
 Requires **Node 26** (see `engines` in root `package.json`). Use [fnm](https://github.com/Schniz/fnm) or similar: `fnm use 26`.
