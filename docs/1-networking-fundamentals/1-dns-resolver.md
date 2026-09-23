@@ -48,7 +48,7 @@
 The oracle is the bytes in [`01-query.bin`](../../packages/naming/src/fixtures/pi-world-a/01-query.bin) and the decoded object in [`01-query.ts`](../../packages/naming/src/fixtures/pi-world-a/01-query.ts).
 
 **Done when:**
-- pi.world A query
+- Decode `wire` from `01-query.ts`. The result equals `expected`.
 
 ---
 
@@ -83,7 +83,7 @@ The oracle is the bytes in [`01-query.bin`](../../packages/naming/src/fixtures/p
 The oracle is the bytes in [`02-aa-answer.bin`](../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.bin) and the decoded object in [`02-aa-answer.ts`](../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.ts).
 
 **Done when:**
-- pi.world AA answer
+- Encode the message in `02-aa-answer.ts`. The bytes equal `wire`.
 
 ---
 

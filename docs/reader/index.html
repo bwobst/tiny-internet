@@ -569,7 +569,7 @@
 <p>At first the system can barely communicate.</p>
 <p>By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.</p>
 <p><strong>Start here:</strong> <a href="#network">Stage 0 · Network</a>.</p>
-<p>Then <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/dns/"><code>packages/dns/</code></a>.</p>
+<p>Then <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/naming/"><code>packages/naming/</code></a>.</p>
 <hr />
 <h2 id="curriculum-the-machines">The machines</h2>
 <div class="table-wrap"><table>
@@ -643,14 +643,14 @@
 </li>
 <li><strong>Scope</strong> - the bound. Stop when the Goal is true.
 </li>
-<li><strong>Steps</strong> - sitting-sized work. A step is done when its Samples reproduce on Compose.
+<li><strong>Steps</strong> - sitting-sized work. A step is done when its Samples reproduce. A command Sample reproduces on Compose. A fixture Sample reproduces when a test matches the fixture pair.
 </li>
 <li><strong>Key questions</strong> - answer these before you write code.
 </li>
-<li><strong>Samples</strong> - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe.
+<li><strong>Samples</strong> - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe. A fixture file exports <code>wire</code> (bytes) and <code>expected</code> (object). The <code>.bin</code> file is the same bytes as <code>wire</code>.
 </li>
 </ul>
-<p>Compose is for step Checks.</p>
+<p>Compose is for command Samples.</p>
 <p>The Goal is for ALPHA, BRAVO, and CHARLIE.</p>
 <hr />
 <h2 id="curriculum-rules">Rules</h2>
@@ -1082,10 +1082,10 @@ hello from alpha
 <p><strong>Watch out:</strong> Names on the wire are length-prefixed labels, not dots. A linear read that treats <code>.</code> as a separator will not match the oracle.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="dns-resolver-sample-1---piworld-a-query">Sample 1 - pi.world A query</h5>
-<p>The oracle is the bytes in <a href="../../packages/dns/src/fixtures/pi-world-a/01-query.bin"><code>01-query.bin</code></a> and the decoded object in <a href="../../packages/dns/src/fixtures/pi-world-a/01-query.ts"><code>01-query.ts</code></a>.</p>
+<p>The oracle is the bytes in <a href="../../packages/naming/src/fixtures/pi-world-a/01-query.bin"><code>01-query.bin</code></a> and the decoded object in <a href="../../packages/naming/src/fixtures/pi-world-a/01-query.ts"><code>01-query.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>pi.world A query
+<li>Decode <code>wire</code> from <code>01-query.ts</code>. The result equals <code>expected</code>.
 </li>
 </ul>
 <hr />
@@ -1132,10 +1132,10 @@ hello from alpha
 <p><strong>Watch out:</strong> If you write the apex name out in full in every answer, your bytes will not match the oracle. Most answers point back at the question name.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="dns-resolver-sample-1---piworld-aa-answer">Sample 1 - pi.world AA answer</h5>
-<p>The oracle is the bytes in <a href="../../packages/dns/src/fixtures/pi-world-a/02-aa-answer.bin"><code>02-aa-answer.bin</code></a> and the decoded object in <a href="../../packages/dns/src/fixtures/pi-world-a/02-aa-answer.ts"><code>02-aa-answer.ts</code></a>.</p>
+<p>The oracle is the bytes in <a href="../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.bin"><code>02-aa-answer.bin</code></a> and the decoded object in <a href="../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.ts"><code>02-aa-answer.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>pi.world AA answer
+<li>Encode the message in <code>02-aa-answer.ts</code>. The bytes equal <code>wire</code>.
 </li>
 </ul>
 <hr />
