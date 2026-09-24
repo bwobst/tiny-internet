@@ -60,7 +60,7 @@ A stage file has:
 - **Scope** - the bound. Stop when the Goal is true.
 - **Steps** - sitting-sized work. A step is done when its Samples reproduce. A command Sample reproduces on Compose. A fixture Sample reproduces when a test matches the fixture pair.
 - **Key questions** - answer these before you write code.
-- **Samples** - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe. A fixture file exports `wire` (bytes) and `expected` (object). The `.bin` file is the same bytes as `wire`.
+- **Samples** - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe. A fixture file exports `wire` (bytes) and `decoded` (object). The `.bin` file is the same bytes as `wire`.
 
 Compose is for command Samples.
 The Goal is for ALPHA, BRAVO, and CHARLIE.

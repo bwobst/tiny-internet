@@ -4,7 +4,7 @@ import type { DnsQuery } from '@naming/interfaces.js'
  * Inbound A query for the zone apex.
  * Oracle for Stage 1 Step 1. Not a captured public-resolver packet.
  */
-export const expected: DnsQuery = {
+export const decoded: DnsQuery = {
   header: {
     transactionId: 0xaaaa,
     flags: {

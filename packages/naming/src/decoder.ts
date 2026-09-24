@@ -1,4 +1,15 @@
-import type { DnsHeader, DnsQuery, DnsQuestion } from '@naming/interfaces.js'
+import type {
+  DnsHeader,
+  DnsQuery,
+  DnsQuestion,
+  DnsResourceRecord,
+} from '@naming/interfaces.js'
+
+// word - flag
+// shift - number of bits that sit to the right of the word
+// width - number of bits that represent the word
+const bits = (word: number, shift: number, width: number) =>
+  (word >> shift) & ((1 << width) - 1)
 
 const decodeFlags = (
   flagUdpPayload: Buffer<ArrayBuffer>,
@@ -6,17 +17,19 @@ const decodeFlags = (
   const flags = flagUdpPayload.readUInt16BE()
 
   return {
-    qr: (flags >> 15) & 0b1, // query/response
-    opcode: (flags >> 11) & 0b1111, // opcode
-    aa: (flags >> 10) & 0b1, // authoritative answer
-    tc: (flags >> 9) & 0b1, // truncated
-    rd: (flags >> 8) & 0b1, // recursion desired
-    ra: (flags >> 7) & 0b1, // recursion available
-    rcode: (flags >> 3) & 0b1111, // reply code
+    qr: bits(flags, 15, 1), // query/response
+    opcode: bits(flags, 11, 4), // opcode
+    aa: bits(flags, 10, 1), // authoritative answer
+    tc: bits(flags, 9, 1), // truncated
+    rd: bits(flags, 8, 1), // recursion desired
+    ra: bits(flags, 7, 1), // recursion available
+    rcode: bits(flags, 3, 4), // reply code
   }
 }
 
-const decodeHeader = (headerUdpPayload: Buffer<ArrayBuffer>): DnsHeader => {
+export const decodeHeader = (
+  headerUdpPayload: Buffer<ArrayBuffer>,
+): DnsHeader => {
   return {
     transactionId: headerUdpPayload.readUInt16BE(0),
     flags: decodeFlags(headerUdpPayload.subarray(2, 4)),
@@ -27,17 +40,14 @@ const decodeHeader = (headerUdpPayload: Buffer<ArrayBuffer>): DnsHeader => {
   }
 }
 
-const convertBuffToInt = (buffer: Buffer<ArrayBuffer>): number => {
-  return parseInt(buffer.toString('hex'), 10)
-}
-
 // TODO: Only supports decoding one question
-const decodeQuestions = (
+export const decodeQuestions = (
   questionsUdpPayload: Buffer<ArrayBuffer>,
 ): DnsQuestion[] => {
-  const TYPE_LENGTH = 2
-  const CLSS_LENGTH = 2
+  // Overall result
   const results = []
+
+  // Per-iteration variables. Doesn't currently get cleared out per iteration.
   const labels = []
   let index = 0
   let type: number
@@ -45,18 +55,9 @@ const decodeQuestions = (
 
   do {
     // Found null byte for label
-    if (
-      convertBuffToInt(questionsUdpPayload.subarray(index, index + 1)) === 0x00
-    ) {
-      type = convertBuffToInt(
-        questionsUdpPayload.subarray(index + 1, index + 1 + TYPE_LENGTH),
-      )
-      clss = convertBuffToInt(
-        questionsUdpPayload.subarray(
-          index + 3,
-          index + 1 + TYPE_LENGTH + CLSS_LENGTH,
-        ),
-      )
+    if (questionsUdpPayload.readUInt16BE(index) === 0x00) {
+      type = questionsUdpPayload.readUInt16BE(index + 1)
+      clss = questionsUdpPayload.readUInt16BE(index + 3)
 
       results.push({
         name: labels.join('.'),
@@ -67,13 +68,13 @@ const decodeQuestions = (
       break
     }
 
-    const length = convertBuffToInt(
-      questionsUdpPayload.subarray(index, index + 1),
-    )
+    const length = questionsUdpPayload.readUIntBE(index, 1)
 
-    const value = questionsUdpPayload
-      .subarray(index + 1, index + length + 1)
-      .toString('utf8')
+    const value = questionsUdpPayload.toString(
+      'utf8',
+      index + 1,
+      index + length + 1,
+    )
 
     labels.push(value)
 

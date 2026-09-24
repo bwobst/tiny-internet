@@ -5,7 +5,7 @@ import type { DnsResponse } from '@naming/interfaces.js'
  * Three A records: ALPHA, BRAVO, CHARLIE Compose addresses.
  * Oracle for Stage 1 Step 2.
  */
-export const expected: DnsResponse = {
+export const decoded: DnsResponse = {
   header: {
     transactionId: 0xaaaa,
     flags: {

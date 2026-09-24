@@ -16,7 +16,7 @@ Stage 1 · Naming uses `pi-world-a` only.
 
 | Suffix | Role |
 | --- | --- |
-| `.ts` | Source of truth for tests. Exports `expected` (decoded object) and `wire` (bytes). |
+| `.ts` | Source of truth for tests. Exports `decoded` (object) and `wire` (bytes). |
 | `.bin` | Raw UDP payload. Same bytes as `wire`. |
 | `.pcap` | Same DNS bytes as the `.bin`, inside one dummy Ethernet, IPv4, and UDP frame. For Wireshark. |
 

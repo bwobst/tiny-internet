@@ -647,7 +647,7 @@
 </li>
 <li><strong>Key questions</strong> - answer these before you write code.
 </li>
-<li><strong>Samples</strong> - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe. A fixture file exports <code>wire</code> (bytes) and <code>expected</code> (object). The <code>.bin</code> file is the same bytes as <code>wire</code>.
+<li><strong>Samples</strong> - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe. A fixture file exports <code>wire</code> (bytes) and <code>decoded</code> (object). The <code>.bin</code> file is the same bytes as <code>wire</code>.
 </li>
 </ul>
 <p>Compose is for command Samples.</p>
@@ -1085,7 +1085,7 @@ hello from alpha
 <p>The oracle is the bytes in <a href="../../packages/naming/src/fixtures/pi-world-a/01-query.bin"><code>01-query.bin</code></a> and the decoded object in <a href="../../packages/naming/src/fixtures/pi-world-a/01-query.ts"><code>01-query.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
-<li>Decode <code>wire</code> from <code>01-query.ts</code>. The result equals <code>expected</code>.
+<li>Decode <code>wire</code> from <code>01-query.ts</code>. The result equals <code>decoded</code>.
 </li>
 </ul>
 <hr />
