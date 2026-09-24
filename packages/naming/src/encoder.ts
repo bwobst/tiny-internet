@@ -34,7 +34,7 @@ const encodeFlags = (
   result |= responseFlags.tc << 9
   result |= responseFlags.rd << 8
   result |= responseFlags.ra << 7
-  result |= responseFlags.rcode << 3
+  result |= responseFlags.rcode
 
   // Allocate two bytes and write the manually constructed 16-bit flag value into it
   const buffer = Buffer.alloc(2)
@@ -141,7 +141,7 @@ const encoder = (response: DnsResponse): Buffer<ArrayBuffer> => {
     encodeAnswers(response.answers),
   ])
 
-  prettyPrintResult(result)
+  // prettyPrintResult(result)
 
   return result
 }

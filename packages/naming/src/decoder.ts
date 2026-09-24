@@ -1,9 +1,4 @@
-import type {
-  DnsHeader,
-  DnsQuery,
-  DnsQuestion,
-  DnsResourceRecord,
-} from '@naming/interfaces.js'
+import type { DnsHeader, DnsQuery, DnsQuestion } from '@naming/interfaces.js'
 
 // word - flag
 // shift - number of bits that sit to the right of the word
@@ -23,7 +18,7 @@ const decodeFlags = (
     tc: bits(flags, 9, 1), // truncated
     rd: bits(flags, 8, 1), // recursion desired
     ra: bits(flags, 7, 1), // recursion available
-    rcode: bits(flags, 3, 4), // reply code
+    rcode: bits(flags, 0, 4), // reply code
   }
 }
 
