@@ -1,12 +1,12 @@
-import type { DnsMessageRequest } from '@dns/interfaces.js'
+import type { DnsQuery } from '@dns-resolver/interfaces.js'
 
 /**
  * Inbound A query for the zone apex.
  * Oracle for Stage 1 Step 1. Not a captured public-resolver packet.
  */
-export const expected: DnsMessageRequest = {
+export const decoded: DnsQuery = {
   header: {
-    transactionId: '0xaaaa',
+    transactionId: 0xaaaa,
     flags: {
       qr: 0,
       opcode: 0,
@@ -21,12 +21,13 @@ export const expected: DnsMessageRequest = {
     nscount: 0,
     arcount: 0,
   },
-  questions: {
-    name: 'pi.world',
-    class: 1,
-    type: 1,
-    totalLength: 14,
-  },
+  questions: [
+    {
+      name: 'pi.world',
+      type: 1,
+      class: 1,
+    },
+  ],
 }
 
 /** Header + question (26 bytes). RD=1, same as a default `dig` query. */

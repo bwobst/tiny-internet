@@ -6,7 +6,6 @@
 
 **Scope:** placement, origin fallback, and invalidation across three nodes in one house. Not a global edge network.
 
-*Formerly: CDN (Content Delivery Simulation).*
 
 **Recommended stack:** Node.js
 

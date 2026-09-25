@@ -1,16 +1,14 @@
-### Stage 7 · Metrics
+### Stage 7 · Metrics collector
 
 > Stop guessing how busy the cluster is and how long it takes to answer.
 
 **Enables:** `/metrics` and `/status` show request counts and timings.
 
-**Scope:** cluster-wide request counts and per-path average duration, observed at the front door on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.
-
-*Formerly: Metrics Collector.*
+**Scope:** cluster-wide request counts and per-path average duration, observed at the load balancer on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.
 
 #### Step 1 - Count every request, show it at /status
 
-**Goal:** On ALPHA, count every request the front door forwards, broken down by path, and serve the running counts at `/status`.
+**Goal:** On ALPHA, count every request the load balancer forwards, broken down by path, and serve the running counts at `/status`.
 
 **Shape:**
 - Input: each request ALPHA forwards to a backend
@@ -93,4 +91,4 @@ curl -s http://127.0.0.1:8090/metrics
 
 ---
 
-**Next:** you can see how busy the cluster is, but not which hop of a request took the time. [Stage 8 · Tracing](./12-distributed-tracing.md).
+**Next:** you can see how busy the cluster is, but not which hop of a request took the time. [Stage 8 · Distributed tracing](./12-distributed-tracing.md).

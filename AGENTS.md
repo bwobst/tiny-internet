@@ -43,13 +43,13 @@ Stage 0 · Network sits outside the layers.
 
 | Layer | Role in the platform |
 |---|---|
-| 1 - Networking fundamentals | Naming names the machines, Transport carries the bytes, HTTP serves the first page |
-| 2 - Traffic | Front door makes the site one public entry and survives a dead backend |
+| 1 - Networking fundamentals | DNS resolver names the machines, TCP server carries the bytes, HTTP server serves the first page |
+| 2 - Traffic | Load balancer makes the site one public entry and survives a dead backend |
 | 3 - Caching and shared state | HTTP cache and the key-value store make it fast and give it shared state |
-| 4 - Observability | Metrics and tracing make it legible |
+| 4 - Observability | Metrics collector and distributed tracing make it legible |
 | 5 - Data and storage | WAL, queue, and object storage give it memory |
 
-Three nodes: ALPHA (names and Front door), BRAVO and CHARLIE (backends). Any node must be allowed to die.
+Three nodes: ALPHA (DNS and Load balancer), BRAVO and CHARLIE (backends). Any node must be allowed to die.
 
 When the developer asks where something fits, the right frame is **what does this enable in the platform?** - not "which project number is this?"
 
@@ -65,7 +65,7 @@ Two constraints you must hold them to, and never violate yourself:
 
 ## How Guided Specs Work
 
-[Stage 1 · Naming](./docs/1-networking-fundamentals/1-dns-resolver.md) is the exemplar.
+[Stage 1 · DNS resolver](./docs/1-networking-fundamentals/1-dns-resolver.md) is the exemplar.
 Copy its headings.
 Do not invent a new format.
 The locked heading lists live in [docs/CURRICULUM.md](./docs/CURRICULUM.md).

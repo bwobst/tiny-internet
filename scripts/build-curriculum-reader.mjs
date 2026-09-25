@@ -25,31 +25,31 @@ const pages = [
   },
   {
     id: 'dns-resolver',
-    title: 'Naming',
+    title: 'DNS resolver',
     subtitle: 'Stage 1',
     layer: 1,
     file: '1-networking-fundamentals/1-dns-resolver.md',
   },
   {
     id: 'tcp-server',
-    title: 'Transport',
+    title: 'TCP server',
     subtitle: 'Stage 2',
     layer: 1,
     file: '1-networking-fundamentals/2-tcp-server.md',
   },
   {
     id: 'http-server',
-    title: 'HTTP',
+    title: 'HTTP server',
     subtitle: 'Stage 3',
     layer: 1,
     file: '1-networking-fundamentals/3-http-server.md',
   },
   {
-    id: 'front-door',
-    title: 'Front door',
+    id: 'load-balancer',
+    title: 'Load balancer',
     subtitle: 'Stage 4',
     layer: 2,
-    file: '2-traffic-routing/4-front-door.md',
+    file: '2-traffic-routing/4-load-balancer.md',
   },
   {
     id: 'http-cache-layer',
@@ -67,14 +67,14 @@ const pages = [
   },
   {
     id: 'metrics-collector',
-    title: 'Metrics',
+    title: 'Metrics collector',
     subtitle: 'Stage 7',
     layer: 4,
     file: '4-reliability-observability/11-metrics-collector.md',
   },
   {
     id: 'distributed-tracing',
-    title: 'Tracing',
+    title: 'Distributed tracing',
     subtitle: 'Stage 8',
     layer: 4,
     file: '4-reliability-observability/12-distributed-tracing.md',
@@ -261,7 +261,7 @@ function markdownToHtml(markdown, pageId, fromFile = '') {
     if (/^#{1,6} /.test(line)) {
       const level = line.match(/^#+/)[0].length
       const text = line.replace(/^#+\s*/, '')
-      // A heading may be a link (e.g. "### [Stage 1 · Naming](./spec.md)"). The
+      // A heading may be a link (e.g. "### [Stage 1 · DNS resolver](./spec.md)"). The
       // TOC entry and anchor id want the label, not the markdown link syntax.
       const plainText = text.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
       const localId = slugify(plainText)

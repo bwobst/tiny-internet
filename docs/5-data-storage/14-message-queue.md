@@ -6,8 +6,6 @@
 
 **Scope:** a broker your own producer and consumer use. Not Kafka, and do not build it on a real broker.
 
-*Formerly: Message Queue.*
-
 #### Step 1 - Publish without waiting for the consumer
 
 **Goal:** `POST /events` enqueues the event and responds before the consumer has processed it.

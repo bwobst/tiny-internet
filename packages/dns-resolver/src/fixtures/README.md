@@ -1,6 +1,6 @@
-# Naming fixtures
+# DNS resolver fixtures
 
-Authored bytes and decoded objects for `@naming` encoder/decoder tests.
+Authored bytes and decoded objects for `@dns-resolver` encoder/decoder tests.
 
 ## Layout
 
@@ -10,7 +10,7 @@ pi-world-a/
   02-aa-answer.*    # AA response: three cluster A records
 ```
 
-Stage 1 · Naming uses `pi-world-a` only.
+Stage 1 · DNS resolver uses `pi-world-a` only.
 
 ## File roles
 

@@ -11,7 +11,7 @@ The three nodes are ALPHA, BRAVO, and CHARLIE.
 _Avoid_: server, host, box, instance
 
 **ALPHA**:
-The node that starts as names and Front door.
+The node that starts as DNS resolver and Load balancer.
 _Avoid_: dns-node, gateway node
 
 **BRAVO**:
@@ -35,15 +35,15 @@ The five layers are Networking fundamentals, Traffic, Caching and shared state, 
 Stage 0 · Network sits outside the layers.
 _Avoid_: module, unit, chapter
 
-**Naming**:
+**DNS resolver**:
 The stage that makes cluster names work.
 ALPHA answers authoritatively for `pi.world`.
 It does not recurse or forward until a later Enables fact needs that.
-_Avoid_: DNS resolver (when you mean this stage), recursive resolver
+_Avoid_: Naming (when you mean this stage), recursive resolver
 
-**Front door**:
+**Load balancer**:
 The stage that makes `pi.world` one public entry on ALPHA and keeps serving it when a backend node dies.
-_Avoid_: reverse proxy, load balancer, API gateway (when you mean this stage)
+_Avoid_: Front door, reverse proxy, API gateway (when you mean this stage)
 
 **Skip**:
 Leave a stage unbuilt when its Enables line is already true on the real machines.

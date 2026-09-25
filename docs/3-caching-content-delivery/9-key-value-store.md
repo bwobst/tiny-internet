@@ -6,8 +6,6 @@
 
 **Scope:** Two Nodes sharing one key space, agreeing after a write to either one. No cluster larger than two, no persistence across restarts, no partition handling beyond deciding which write wins when both Nodes have one.
 
-*Formerly: Key-Value Store.*
-
 #### Step 1 - Store and retrieve a value on one Node
 
 **Goal:** Implement an in-memory store on one Node so a value written to a key is readable back from that same Node.
@@ -121,4 +119,4 @@ green
 
 ---
 
-**Next:** BRAVO and CHARLIE agree on a value, but nothing tells you how often either one is asked for it. [Stage 7 · Metrics](../4-reliability-observability/11-metrics-collector.md).
+**Next:** BRAVO and CHARLIE agree on a value, but nothing tells you how often either one is asked for it. [Stage 7 · Metrics collector](../4-reliability-observability/11-metrics-collector.md).

@@ -1,4 +1,4 @@
-import type { DnsHeader, DnsQuery, DnsQuestion } from '@naming/interfaces.js'
+import type { DnsHeader, DnsQuery, DnsQuestion } from '@dns-resolver/interfaces.js'
 
 // word - flag
 // shift - number of bits that sit to the right of the word

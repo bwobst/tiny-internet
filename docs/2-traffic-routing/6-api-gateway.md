@@ -6,7 +6,6 @@
 
 **Scope:** the routing and policy rules your own site needs. Build it when the site has API routes worth protecting.
 
-*Formerly: API Gateway.*
 
 **Recommended stack:** Node.js
 

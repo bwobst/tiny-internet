@@ -1,12 +1,10 @@
-### Stage 3 · HTTP
+### Stage 3 · HTTP server
 
 > Build the first thing a person can actually see.
 
 **Enables:** `pi.world/` serves a static page from BRAVO.
 
 **Scope:** Enough HTTP/1.1 to parse a request, write a valid response, and answer `GET /` on BRAVO. No keep-alive, no chunked encoding, no framework - you build this on your Stage 2 transport.
-
-*Formerly: HTTP/1.1 Server.*
 
 #### Step 1 - Parse a request
 
@@ -113,4 +111,4 @@ Connection: close
 
 ---
 
-**Next:** BRAVO answers, but only over a connection you opened straight to it. [Stage 4 · Front door](../2-traffic-routing/4-front-door.md).
+**Next:** BRAVO answers, but only over a connection you opened straight to it. [Stage 4 · Load balancer](../2-traffic-routing/4-load-balancer.md).

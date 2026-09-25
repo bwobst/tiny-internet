@@ -6,7 +6,6 @@
 
 **Scope:** protecting your own calls between your own nodes.
 
-*Formerly: Circuit Breaker.*
 
 **Recommended stack:** Node.js
 

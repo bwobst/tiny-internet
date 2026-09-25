@@ -226,9 +226,9 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.5.1)(@vitest/coverage-v8@5.0.0)(vite@8.0.14(@types/node@26.5.1)(esbuild@0.28.0)(tsx@4.23.13))
 
-  packages/http: {}
+  packages/dns-resolver: {}
 
-  packages/naming: {}
+  packages/http: {}
 
 packages:
 

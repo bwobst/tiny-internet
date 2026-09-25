@@ -1,73 +1,136 @@
-### Stage 5 · Load balancing
+### Stage 4 · Load balancer
 
-> Spread traffic across BRAVO and CHARLIE, and notice when one stops answering.
+> Give `pi.world` one public entry on ALPHA, and let it survive a dead backend.
 
-**In the platform:** This is the defining moment of the project. The page says `Served by BRAVO`. You `ssh bravo; sudo shutdown now`. The page says `Served by CHARLIE`. Health checking exists here because a real machine really went away.
+**Enables:** `pi.world` has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.
 
-**Scope:** balancing across two real backends with real health checks. Failure is physical, not simulated.
+**Scope:** One process on ALPHA forwarding real HTTP/1.1 traffic to BRAVO and CHARLIE, spreading requests across both while they answer, and routing around one that stops answering. No TLS, no virtual hosts, no least-connections, no rate limiting or auth.
 
-*Formerly: Load Balancer.*
+#### Step 1 - Forward across a pool of backends
 
-**Recommended stack:** Node.js (`http` or `net`)
+**Goal:** Accept an inbound request on ALPHA, forward it to one backend chosen from a pool of two, return that backend's response to the client unchanged, and send the next request to a different backend.
 
-#### Step 1 - Round-robin request forwarding
-
-**Goal:** Accept incoming HTTP requests and forward them to a rotating pool of backend servers.
-
-**Inputs & outputs:**
-- Input: HTTP request from a client
-- Output: the request proxied to one backend; the backend's response returned to the client
+**Shape:**
+- Input:
+  - request: an HTTP request arriving on ALPHA's port 80
+  - pool: list of backend addresses (BRAVO, CHARLIE)
+- Output:
+  - the request, forwarded to one backend from `pool`, with `X-Forwarded-For` added
+  - the chosen backend's response, returned to the client with no other change to status, headers, or body
+  - the following request forwarded to a different backend than this one
 
 **Key questions:**
-- How do you forward a request - do you open a new connection to the backend per request, or reuse connections?
-- Which request headers must you pass through unchanged, and which should you add (e.g. `X-Forwarded-For`)?
-- How do you pass the response status, headers, and body back to the original client?
+- Which headers are hop-by-hop (RFC 7230 §6.1) and must be regenerated on the new connection to the backend, rather than copied straight off the client's connection?
+- Stage 3's backends answer once per connection and close it. Does the load balancer open a fresh connection to the backend for every request it forwards, or try to reuse one?
+- Where does "which backend is next" live so it survives across separate incoming connections, not just inside the function handling one of them?
+
+**Watch out:** Compose publishes ALPHA's port 80 to the host as 8090. A curl from the laptop uses `127.0.0.1:8090`; a request from inside BRAVO's or CHARLIE's container uses `alpha` on port 80 directly, the same as Stage 3's backends.
+
+**Samples:**
+
+##### Sample 1 - first request goes to bravo
+
+```
+curl -s -i http://127.0.0.1:8090/
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+Connection: close
+
+<!doctype html>
+<html>
+<body>Served by BRAVO</body>
+</html>
+```
+
+##### Sample 2 - second request goes to charlie
+
+```
+curl -s -i http://127.0.0.1:8090/
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 62
+Connection: close
+
+<!doctype html>
+<html>
+<body>Served by CHARLIE</body>
+</html>
+```
 
 **Done when:**
-- Three backend servers started on ports 3001–3003 each respond with their own port number
-- 300 sequential requests distribute ~100 each to all three (verify with access logs)
-
-**Watch out:** HTTP/1.1 `Host` header on the forwarded request must match what the backend expects. Forgetting to rewrite it breaks backends that do virtual hosting.
+- first request goes to bravo
+- second request goes to charlie
 
 ---
 
-#### Step 2 - Least-connections load balancing
+#### Step 2 - Route around a dead backend
 
-**Goal:** Route each new request to the backend with the fewest in-flight requests.
+**Goal:** Stop sending new requests to a backend that has stopped answering, so a client hitting ALPHA never sees a failed request once another backend is reachable.
 
-**Inputs & outputs:**
-- Input: incoming request + current in-flight count per backend
-- Output: the chosen backend; count incremented on dispatch, decremented on response end
+**Shape:**
+- Input: a connection attempt or response wait against a backend from the Step 1 pool that errors or times out
+- Output:
+  - that backend excluded from the rotation Step 1 uses, until it is judged healthy again
+  - the request that hit the dead backend still answered, from a different backend, without the client seeing an error
 
 **Key questions:**
-- Where do you track the in-flight count - in a module-level map, or on a backend object?
-- When exactly do you decrement? On response `end`? On socket `close`? What about errors?
-- What happens when all backends are tied? (Any tiebreak is valid - pick one and stick with it.)
+- What counts as "dead" here - connection refused, connection reset, a timeout, or all three? What timeout is defensible for a backend Docker just stopped, versus one that is merely slow?
+- Does the request that hit the dead backend get retried against a different backend inside the load balancer, or does the client have to issue it again itself? Reread the Enables line before answering.
+- This stage does not ask for automatic recovery. Is a backend, once marked dead, allowed to stay excluded for the rest of the run?
+
+**Watch out:** `docker compose stop bravo` does not always hand you a clean "connection refused" on the very next request - a listener shutting down can also hand you a connection reset partway through. Treat both as dead, not only the refusal case.
+
+**Samples:**
+
+##### Sample 3 - curl pi.world with both backends up
+
+```
+curl -s -i http://127.0.0.1:8090/
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 60
+Connection: close
+
+<!doctype html>
+<html>
+<body>Served by BRAVO</body>
+</html>
+```
+
+##### Sample 4 - curl pi.world after bravo dies
+
+After `docker compose stop bravo`:
+
+```
+curl -s -i http://127.0.0.1:8090/
+```
+
+```
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 62
+Connection: close
+
+<!doctype html>
+<html>
+<body>Served by CHARLIE</body>
+</html>
+```
 
 **Done when:**
-- With one slow backend (simulated with `setTimeout`), new requests avoid it and pile onto the faster backends
-- After all in-flight requests complete, counts return to 0 for all backends
-
-**Watch out:** Decrement the counter in a `finally`-equivalent handler that fires on *both* success and error. Missing the error path leaks the counter upward until that backend is never chosen again.
+- curl pi.world with both backends up
+- curl pi.world after bravo dies
 
 ---
 
-#### Step 3 - Active health checks
-
-**Goal:** Periodically probe each backend and remove unhealthy ones from rotation until they recover.
-
-**Inputs & outputs:**
-- Input: a configurable probe interval and endpoint (e.g. `GET /health`)
-- Output: backends marked healthy/unhealthy; unhealthy backends skipped during routing; re-added after N consecutive successes
-
-**Key questions:**
-- What constitutes "unhealthy"? HTTP 5xx? Connection refused? Timeout?
-- How many consecutive failures before marking unhealthy, and how many successes to recover?
-- What should happen to in-flight requests on a backend that just became unhealthy?
-
-**Done when:**
-- Killing a backend process causes it to drop from rotation within one probe interval
-- Restarting the backend causes it to rejoin after N successful probes
-- A client making continuous requests never sees an error response due to a downed backend (after the first probe cycle)
-
-**Watch out:** Don't remove a backend from the pool mid-request. Mark it unhealthy so *new* requests skip it, but let in-flight requests complete (or fail naturally).
+**Next:** ALPHA survives a dead backend, but every request still recomputes the same response from scratch. [Stage 5 · HTTP cache](../3-caching-content-delivery/8-http-cache-layer.md).

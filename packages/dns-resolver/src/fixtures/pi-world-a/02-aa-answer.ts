@@ -1,4 +1,4 @@
-import type { DnsResponse } from '@naming/interfaces.js'
+import type { DnsResponse } from '@dns-resolver/interfaces.js'
 
 /**
  * Authoritative A answer for the zone apex.

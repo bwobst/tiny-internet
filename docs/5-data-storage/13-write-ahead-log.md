@@ -6,8 +6,6 @@
 
 **Scope:** Durability and recovery for the Stage 6 key-value store on one Node. Understand what `fsync` actually guarantees on your hardware. No compaction, no changes to how BRAVO and CHARLIE agree with each other.
 
-*Formerly: Write-Ahead Log.*
-
 #### Step 1 - Log a write before acknowledging it
 
 **Goal:** Append each write to an on-disk log and `fsync` it before the store acknowledges the write, then rebuild in-memory state from that log on startup.

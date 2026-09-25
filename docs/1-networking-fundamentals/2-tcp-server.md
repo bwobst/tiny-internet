@@ -1,12 +1,10 @@
-### Stage 2 · Transport
+### Stage 2 · TCP server
 
 > Accept a TCP connection from another node and echo bytes back across it.
 
 **Enables:** ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.
 
 **Scope:** a socket server on BRAVO that accepts a connection and echoes whatever bytes arrive. No framing, no backpressure handling, no application protocol on top.
-
-*Formerly: TCP Server.*
 
 #### Step 1 - Accept and echo across Nodes
 
@@ -40,4 +38,4 @@ hello bravo
 
 ---
 
-**Next:** bytes cross the network, but nothing above them understands a request yet. [Stage 3 · HTTP](./3-http-server.md).
+**Next:** bytes cross the network, but nothing above them understands a request yet. [Stage 3 · HTTP server](./3-http-server.md).

@@ -1,24 +1,22 @@
-### Stage 8 · Tracing
+### Stage 8 · Distributed tracing
 
 > Follow one request across every hop it took through the cluster.
 
 **Enables:** `/architecture` shows a live request path with a duration on each hop.
 
-**Scope:** Trace context carried across your own front door and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.
-
-*Formerly: Distributed Tracing.*
+**Scope:** Trace context carried across your own load balancer and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.
 
 #### Step 1 - Show the path of one request
 
 **Goal:** Serve `/architecture` with the ordered list of hops the most recently completed request passed through.
 
 **Shape:**
-- Input: a request arriving at ALPHA's front door, forwarded to one backend
+- Input: a request arriving at ALPHA's load balancer, forwarded to one backend
 - Output: `/architecture`: a page listing hop names in the order the request visited them
 
 **Key questions:**
 - ALPHA and the backend are separate processes. How does the backend know it's continuing the same request ALPHA is already tracking, rather than starting a path of its own?
-- Front door forwards to one backend and returns. What is the shortest possible path, and what does `/architecture` show if a second request is still in flight when you check it?
+- Load balancer forwards to one backend and returns. What is the shortest possible path, and what does `/architecture` show if a second request is still in flight when you check it?
 - Does every request update what `/architecture` shows, or only requests to `/`?
 
 **Watch out:** If each hop invents its own identifier for the request instead of carrying forward one it received, two hops of the same request look like two separate, unrelated requests, and `/architecture` cannot reassemble a path at all.
@@ -52,7 +50,7 @@ bravo
 - Output: `/architecture`: the same ordered hops, each with a duration
 
 **Key questions:**
-- Front door's own time and the backend's own time overlap for part of the request. Is a hop's duration "wall time end to end at that hop" or "time until the next hop was called," and does that choice change what the numbers mean?
+- Load balancer's own time and the backend's own time overlap for part of the request. Is a hop's duration "wall time end to end at that hop" or "time until the next hop was called," and does that choice change what the numbers mean?
 - What clock resolution does a duration need, given some hops in this cluster answer in a handful of milliseconds?
 - Stage 7's `/metrics` keeps a running average across many requests. `/architecture` shows one request's durations. Do these have to share any code, or are they answering different questions?
 

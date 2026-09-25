@@ -4,11 +4,11 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   resolve: {
     alias: {
-      '@naming': path.resolve(import.meta.dirname, 'src'),
+      '@dns-resolver': path.resolve(import.meta.dirname, 'src'),
     },
   },
   test: {
-    name: '@naming',
+    name: '@dns-resolver',
     include: ['src/**/*.test.ts'],
     passWithNoTests: true,
     root: import.meta.dirname,

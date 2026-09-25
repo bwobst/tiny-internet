@@ -77,10 +77,10 @@ default via 10.53.0.1 dev eth0
 **Key questions:**
 - Where does the name `bravo` resolve on this Node, before you have written a DNS server?
 - Which failure tells you the name did not resolve, and which tells you the address did not answer?
-- Stage 1 removes this name source. What does the Enables line for Naming say ALPHA has to do instead?
+- Stage 1 removes this name source. What does the Enables line for DNS resolver say ALPHA has to do instead?
 
 **Watch out:** Names work here because something local already maps them.
-That mapping is a starting point, not the finished cluster: Naming replaces it, and a leftover `/etc/hosts` entry will hide a broken zone.
+That mapping is a starting point, not the finished cluster: DNS resolver replaces it, and a leftover `/etc/hosts` entry will hide a broken zone.
 Times and sequence numbers change every run - match the resolved address, the loss count, and the error text.
 
 **Samples:**
@@ -214,7 +214,7 @@ bravo
 **Key questions:**
 - Which side has to be running first, and what does the other side see if it is not?
 - The listener binds a port. Which addresses does it accept on, and does that matter on a Node with one interface?
-- Ports under 1024 need a capability or root. Which range are you using here, and why does Naming not get that choice?
+- Ports under 1024 need a capability or root. Which range are you using here, and why does DNS resolver not get that choice?
 
 **Watch out:** A connection that hangs instead of being refused is a filter, not a dead process.
 Refused means the Node answered and nothing was listening.
@@ -279,4 +279,4 @@ nc: connect to charlie (10.53.0.12) port 9001 (tcp) failed: Connection refused
 
 ---
 
-**Next:** the Nodes reach each other, but only because something local already knows their names. [Stage 1 · Naming](../1-networking-fundamentals/1-dns-resolver.md).
+**Next:** the Nodes reach each other, but only because something local already knows their names. [Stage 1 · DNS resolver](../1-networking-fundamentals/1-dns-resolver.md).

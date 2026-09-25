@@ -521,15 +521,15 @@
 <section class="nav-section" data-layer="1">
       <h2 class="nav-heading">Layer 1 · Networking fundamentals</h2>
       <ul>
-        <li><a href="#dns-resolver" data-page="dns-resolver"><span class="nav-subtitle">Stage 1</span><span class="nav-title">Naming</span></a></li>
-<li><a href="#tcp-server" data-page="tcp-server"><span class="nav-subtitle">Stage 2</span><span class="nav-title">Transport</span></a></li>
-<li><a href="#http-server" data-page="http-server"><span class="nav-subtitle">Stage 3</span><span class="nav-title">HTTP</span></a></li>
+        <li><a href="#dns-resolver" data-page="dns-resolver"><span class="nav-subtitle">Stage 1</span><span class="nav-title">DNS resolver</span></a></li>
+<li><a href="#tcp-server" data-page="tcp-server"><span class="nav-subtitle">Stage 2</span><span class="nav-title">TCP server</span></a></li>
+<li><a href="#http-server" data-page="http-server"><span class="nav-subtitle">Stage 3</span><span class="nav-title">HTTP server</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="2">
       <h2 class="nav-heading">Layer 2 · Traffic</h2>
       <ul>
-        <li><a href="#front-door" data-page="front-door"><span class="nav-subtitle">Stage 4</span><span class="nav-title">Front door</span></a></li>
+        <li><a href="#load-balancer" data-page="load-balancer"><span class="nav-subtitle">Stage 4</span><span class="nav-title">Load balancer</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="3">
@@ -542,8 +542,8 @@
 <section class="nav-section" data-layer="4">
       <h2 class="nav-heading">Layer 4 · Observability</h2>
       <ul>
-        <li><a href="#metrics-collector" data-page="metrics-collector"><span class="nav-subtitle">Stage 7</span><span class="nav-title">Metrics</span></a></li>
-<li><a href="#distributed-tracing" data-page="distributed-tracing"><span class="nav-subtitle">Stage 8</span><span class="nav-title">Tracing</span></a></li>
+        <li><a href="#metrics-collector" data-page="metrics-collector"><span class="nav-subtitle">Stage 7</span><span class="nav-title">Metrics collector</span></a></li>
+<li><a href="#distributed-tracing" data-page="distributed-tracing"><span class="nav-subtitle">Stage 8</span><span class="nav-title">Distributed tracing</span></a></li>
       </ul>
     </section>
 <section class="nav-section" data-layer="5">
@@ -561,7 +561,7 @@
         <h1>Overview</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#curriculum/curriculum-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-4-front-door">Stage 4 · Front door</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-5-http-cache">Stage 5 · HTTP cache</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-6-key-value-store">Stage 6 · Key-value store</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-7-metrics">Stage 7 · Metrics</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-8-tracing">Stage 8 · Tracing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-9-write-ahead-log">Stage 9 · Write-ahead log</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-10-message-queue">Stage 10 · Message queue</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-11-object-storage">Stage 11 · Object storage</a></li></ul></nav>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#curriculum/curriculum-stage-1-dns-resolver">Stage 1 · DNS resolver</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-2-tcp-server">Stage 2 · TCP server</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-3-http-server">Stage 3 · HTTP server</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-4-load-balancer">Stage 4 · Load balancer</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-5-http-cache">Stage 5 · HTTP cache</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-6-key-value-store">Stage 6 · Key-value store</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-7-metrics-collector">Stage 7 · Metrics collector</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-8-distributed-tracing">Stage 8 · Distributed tracing</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-9-write-ahead-log">Stage 9 · Write-ahead log</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-10-message-queue">Stage 10 · Message queue</a></li><li class="depth-3"><a href="#curriculum/curriculum-stage-11-object-storage">Stage 11 · Object storage</a></li></ul></nav>
         <div class="page-content prose"><h1 id="curriculum-tiny-internet---build-path">Tiny Internet - Build Path</h1>
 <p>You are going to build a tiny web platform from scratch and run it across three physical computers.</p>
 <p>There is no framework, no cloud platform, no managed database, no CDN, and no observability service hiding underneath it.</p>
@@ -569,7 +569,7 @@
 <p>At first the system can barely communicate.</p>
 <p>By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.</p>
 <p><strong>Start here:</strong> <a href="#network">Stage 0 · Network</a>.</p>
-<p>Then <a href="#dns-resolver">Stage 1 · Naming</a>, implemented in Node.js under <a href="../../packages/naming/"><code>packages/naming/</code></a>.</p>
+<p>Then <a href="#dns-resolver">Stage 1 · DNS resolver</a>, implemented in Node.js under <a href="../../packages/dns-resolver/"><code>packages/dns-resolver/</code></a>.</p>
 <hr />
 <h2 id="curriculum-the-machines">The machines</h2>
 <div class="table-wrap"><table>
@@ -579,7 +579,7 @@
 </tr></thead><tbody>
 <tr>
 <td>ALPHA</td>
-<td>Names and Front door</td>
+<td>DNS and Load balancer</td>
 </tr>
 <tr>
 <td>BRAVO</td>
@@ -605,19 +605,19 @@
 </tr></thead><tbody>
 <tr>
 <td><code>/</code></td>
-<td>HTTP</td>
+<td>HTTP server</td>
 </tr>
 <tr>
 <td><code>/status</code></td>
-<td>Metrics</td>
+<td>Metrics collector</td>
 </tr>
 <tr>
 <td><code>/requests</code></td>
-<td>Front door</td>
+<td>Load balancer</td>
 </tr>
 <tr>
 <td><code>/metrics</code></td>
-<td>Metrics</td>
+<td>Metrics collector</td>
 </tr>
 <tr>
 <td><code>/events</code></td>
@@ -625,7 +625,7 @@
 </tr>
 <tr>
 <td><code>/architecture</code></td>
-<td>Tracing</td>
+<td>Distributed tracing</td>
 </tr>
 <tr>
 <td><code>/lab</code></td>
@@ -636,7 +636,7 @@
 <h2 id="curriculum-how-the-specs-work">How the specs work</h2>
 <p>Each stage is a <strong>guided spec</strong>.</p>
 <p>It tells you what to build, which questions to answer first, and how you know you are done.</p>
-<p><a href="#dns-resolver">Stage 1 · Naming</a> shows the shape.</p>
+<p><a href="#dns-resolver">Stage 1 · DNS resolver</a> shows the shape.</p>
 <p>A stage file has:</p>
 <ul>
 <li><strong>Goal</strong> - one fact you can check on the real machines. The stage is done when that fact is true. If it is already true, skip the stage.
@@ -671,17 +671,17 @@
 <hr />
 <h2 id="curriculum-layer-1-networking-fundamentals">Layer 1 · Networking fundamentals</h2>
 <p>Turn three addressable machines into something that can serve a page.</p>
-<h3 id="curriculum-stage-1-naming"><a href="#dns-resolver">Stage 1 · Naming</a></h3>
+<h3 id="curriculum-stage-1-dns-resolver"><a href="#dns-resolver">Stage 1 · DNS resolver</a></h3>
 <p><strong>Goal:</strong> <code>dig pi.world</code> against ALPHA returns the cluster addresses.</p>
 <p>Later stages look up names instead of hardcoding IPs.</p>
-<h3 id="curriculum-stage-2-transport"><a href="#tcp-server">Stage 2 · Transport</a></h3>
+<h3 id="curriculum-stage-2-tcp-server"><a href="#tcp-server">Stage 2 · TCP server</a></h3>
 <p><strong>Goal:</strong> ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.</p>
-<h3 id="curriculum-stage-3-http"><a href="#http-server">Stage 3 · HTTP</a></h3>
+<h3 id="curriculum-stage-3-http-server"><a href="#http-server">Stage 3 · HTTP server</a></h3>
 <p><strong>Goal:</strong> <code>pi.world/</code> serves a static page from BRAVO.</p>
 <hr />
 <h2 id="curriculum-layer-2-traffic">Layer 2 · Traffic</h2>
 <p>Make the website a property of the cluster instead of a property of one machine.</p>
-<h3 id="curriculum-stage-4-front-door"><a href="#front-door">Stage 4 · Front door</a></h3>
+<h3 id="curriculum-stage-4-load-balancer"><a href="#load-balancer">Stage 4 · Load balancer</a></h3>
 <p><strong>Goal:</strong> <code>pi.world</code> has one public entry on ALPHA.</p>
 <p>You shut BRAVO down.</p>
 <p>The page says Served by CHARLIE.</p>
@@ -692,7 +692,7 @@
 <p><strong>Goal:</strong> The first GET of <code>/</code> reports a MISS from origin.</p>
 <p>The second reports a HIT with an Age header and a shorter time.</p>
 <p>Without a cache, every request pays origin work on BRAVO or CHARLIE.</p>
-<p>Repeat views should be cheap at the front door.</p>
+<p>Repeat views should be cheap at the load balancer.</p>
 <h3 id="curriculum-stage-6-key-value-store"><a href="#key-value-store">Stage 6 · Key-value store</a></h3>
 <p><strong>Goal:</strong> You SET a key on BRAVO and GET the same value from CHARLIE.</p>
 <p>Each backend otherwise keeps its own memory.</p>
@@ -700,9 +700,9 @@
 <hr />
 <h2 id="curriculum-layer-4-observability">Layer 4 · Observability</h2>
 <p>Find out what the cluster is doing.</p>
-<h3 id="curriculum-stage-7-metrics"><a href="#metrics-collector">Stage 7 · Metrics</a></h3>
+<h3 id="curriculum-stage-7-metrics-collector"><a href="#metrics-collector">Stage 7 · Metrics collector</a></h3>
 <p><strong>Goal:</strong> <code>/metrics</code> and <code>/status</code> show request counts and timings.</p>
-<h3 id="curriculum-stage-8-tracing"><a href="#distributed-tracing">Stage 8 · Tracing</a></h3>
+<h3 id="curriculum-stage-8-distributed-tracing"><a href="#distributed-tracing">Stage 8 · Distributed tracing</a></h3>
 <p><strong>Goal:</strong> <code>/architecture</code> shows a live request path with a duration on each hop.</p>
 <hr />
 <h2 id="curriculum-layer-5-data-and-storage">Layer 5 · Data and storage</h2>
@@ -817,11 +817,11 @@
 </li>
 <li>Which failure tells you the name did not resolve, and which tells you the address did not answer?
 </li>
-<li>Stage 1 removes this name source. What does the Enables line for Naming say ALPHA has to do instead?
+<li>Stage 1 removes this name source. What does the Enables line for DNS resolver say ALPHA has to do instead?
 </li>
 </ul>
 <p><strong>Watch out:</strong> Names work here because something local already maps them.</p>
-<p>That mapping is a starting point, not the finished cluster: Naming replaces it, and a leftover <code>/etc/hosts</code> entry will hide a broken zone.</p>
+<p>That mapping is a starting point, not the finished cluster: DNS resolver replaces it, and a leftover <code>/etc/hosts</code> entry will hide a broken zone.</p>
 <p>Times and sequence numbers change every run - match the resolved address, the loss count, and the error text.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="network-sample-1---ping-bravo-by-name">Sample 1 - ping bravo by name</h5>
@@ -954,7 +954,7 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 </li>
 <li>The listener binds a port. Which addresses does it accept on, and does that matter on a Node with one interface?
 </li>
-<li>Ports under 1024 need a capability or root. Which range are you using here, and why does Naming not get that choice?
+<li>Ports under 1024 need a capability or root. Which range are you using here, and why does DNS resolver not get that choice?
 </li>
 </ul>
 <p><strong>Watch out:</strong> A connection that hangs instead of being refused is a filter, not a dead process.</p>
@@ -1002,21 +1002,20 @@ hello from alpha
 </li>
 </ul>
 <hr />
-<p><strong>Next:</strong> the Nodes reach each other, but only because something local already knows their names. <a href="#dns-resolver">Stage 1 · Naming</a>.</p></div>
+<p><strong>Next:</strong> the Nodes reach each other, but only because something local already knows their names. <a href="#dns-resolver">Stage 1 · DNS resolver</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-dns-resolver" data-page="dns-resolver" hidden>
       <header class="page-header">
         <p class="page-eyebrow">Stage 1</p>
-        <h1>Naming</h1>
+        <h1>DNS resolver</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#dns-resolver/dns-resolver-stage-1-naming">Stage 1 · Naming</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-1---decode-a-query">Step 1 - Decode a query</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-2---encode-an-aa-response">Step 2 - Encode an AA response</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-3---answer-on-the-wire">Step 3 - Answer on the wire</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="dns-resolver-stage-1-naming">Stage 1 · Naming</h3>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#dns-resolver/dns-resolver-stage-1-dns-resolver">Stage 1 · DNS resolver</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-1---decode-a-query">Step 1 - Decode a query</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-2---encode-an-aa-response">Step 2 - Encode an AA response</a></li><li class="depth-4"><a href="#dns-resolver/dns-resolver-step-3---answer-on-the-wire">Step 3 - Answer on the wire</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="dns-resolver-stage-1-dns-resolver">Stage 1 · DNS resolver</h3>
 <blockquote><p>Build an authoritative nameserver for <code>pi.world</code>.</p></blockquote>
 <p><strong>Enables:</strong> <code>dig pi.world</code> against ALPHA returns the cluster addresses. Later stages do not hardcode IPs.</p>
 <p><strong>Scope:</strong> Authoritative answers for <code>pi.world</code> and the node names under it. No walk, no cache, no forwarder.</p>
-<p>*Formerly: DNS Resolver.*</p>
 <h4 id="dns-resolver-step-1---decode-a-query">Step 1 - Decode a query</h4>
 <p><strong>Goal:</strong> Decode an inbound A query for <code>pi.world</code> into a message object.</p>
 <p><strong>Shape:</strong></p>
@@ -1082,7 +1081,7 @@ hello from alpha
 <p><strong>Watch out:</strong> Names on the wire are length-prefixed labels, not dots. A linear read that treats <code>.</code> as a separator will not match the oracle.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="dns-resolver-sample-1---piworld-a-query">Sample 1 - pi.world A query</h5>
-<p>The oracle is the bytes in <a href="../../packages/naming/src/fixtures/pi-world-a/01-query.bin"><code>01-query.bin</code></a> and the decoded object in <a href="../../packages/naming/src/fixtures/pi-world-a/01-query.ts"><code>01-query.ts</code></a>.</p>
+<p>The oracle is the bytes in <a href="../../packages/dns-resolver/src/fixtures/pi-world-a/01-query.bin"><code>01-query.bin</code></a> and the decoded object in <a href="../../packages/dns-resolver/src/fixtures/pi-world-a/01-query.ts"><code>01-query.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
 <li>Decode <code>wire</code> from <code>01-query.ts</code>. The result equals <code>decoded</code>.
@@ -1132,7 +1131,7 @@ hello from alpha
 <p><strong>Watch out:</strong> If you write the apex name out in full in every answer, your bytes will not match the oracle. Most answers point back at the question name.</p>
 <p><strong>Samples:</strong></p>
 <h5 id="dns-resolver-sample-1---piworld-aa-answer">Sample 1 - pi.world AA answer</h5>
-<p>The oracle is the bytes in <a href="../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.bin"><code>02-aa-answer.bin</code></a> and the decoded object in <a href="../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.ts"><code>02-aa-answer.ts</code></a>.</p>
+<p>The oracle is the bytes in <a href="../../packages/dns-resolver/src/fixtures/pi-world-a/02-aa-answer.bin"><code>02-aa-answer.bin</code></a> and the decoded object in <a href="../../packages/dns-resolver/src/fixtures/pi-world-a/02-aa-answer.ts"><code>02-aa-answer.ts</code></a>.</p>
 <p><strong>Done when:</strong></p>
 <ul>
 <li>Encode the message in <code>02-aa-answer.ts</code>. The bytes equal <code>wire</code>.
@@ -1261,21 +1260,20 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 </li>
 </ul>
 <hr />
-<p><strong>Next:</strong> the names resolve, but nothing answers on the other end yet. <a href="#tcp-server">Stage 2 · Transport</a>.</p></div>
+<p><strong>Next:</strong> the names resolve, but nothing answers on the other end yet. <a href="#tcp-server">Stage 2 · TCP server</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-tcp-server" data-page="tcp-server" hidden>
       <header class="page-header">
         <p class="page-eyebrow">Stage 2</p>
-        <h1>Transport</h1>
+        <h1>TCP server</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#tcp-server/tcp-server-stage-2-transport">Stage 2 · Transport</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-1---accept-and-echo-across-nodes">Step 1 - Accept and echo across Nodes</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="tcp-server-stage-2-transport">Stage 2 · Transport</h3>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#tcp-server/tcp-server-stage-2-tcp-server">Stage 2 · TCP server</a></li><li class="depth-4"><a href="#tcp-server/tcp-server-step-1---accept-and-echo-across-nodes">Step 1 - Accept and echo across Nodes</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="tcp-server-stage-2-tcp-server">Stage 2 · TCP server</h3>
 <blockquote><p>Accept a TCP connection from another node and echo bytes back across it.</p></blockquote>
 <p><strong>Enables:</strong> ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.</p>
 <p><strong>Scope:</strong> a socket server on BRAVO that accepts a connection and echoes whatever bytes arrive. No framing, no backpressure handling, no application protocol on top.</p>
-<p>*Formerly: TCP Server.*</p>
 <h4 id="tcp-server-step-1---accept-and-echo-across-nodes">Step 1 - Accept and echo across Nodes</h4>
 <p><strong>Goal:</strong> Listen on BRAVO, accept a connection from ALPHA, and echo back whatever bytes arrive.</p>
 <p><strong>Shape:</strong></p>
@@ -1307,21 +1305,20 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 </li>
 </ul>
 <hr />
-<p><strong>Next:</strong> bytes cross the network, but nothing above them understands a request yet. <a href="#http-server">Stage 3 · HTTP</a>.</p></div>
+<p><strong>Next:</strong> bytes cross the network, but nothing above them understands a request yet. <a href="#http-server">Stage 3 · HTTP server</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-http-server" data-page="http-server" hidden>
       <header class="page-header">
         <p class="page-eyebrow">Stage 3</p>
-        <h1>HTTP</h1>
+        <h1>HTTP server</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-server/http-server-stage-3-http">Stage 3 · HTTP</a></li><li class="depth-4"><a href="#http-server/http-server-step-1---parse-a-request">Step 1 - Parse a request</a></li><li class="depth-4"><a href="#http-server/http-server-step-2---encode-a-response">Step 2 - Encode a response</a></li><li class="depth-4"><a href="#http-server/http-server-step-3---serve-piworld-on-bravo">Step 3 - Serve pi.world/ on BRAVO</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="http-server-stage-3-http">Stage 3 · HTTP</h3>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#http-server/http-server-stage-3-http-server">Stage 3 · HTTP server</a></li><li class="depth-4"><a href="#http-server/http-server-step-1---parse-a-request">Step 1 - Parse a request</a></li><li class="depth-4"><a href="#http-server/http-server-step-2---encode-a-response">Step 2 - Encode a response</a></li><li class="depth-4"><a href="#http-server/http-server-step-3---serve-piworld-on-bravo">Step 3 - Serve pi.world/ on BRAVO</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="http-server-stage-3-http-server">Stage 3 · HTTP server</h3>
 <blockquote><p>Build the first thing a person can actually see.</p></blockquote>
 <p><strong>Enables:</strong> <code>pi.world/</code> serves a static page from BRAVO.</p>
 <p><strong>Scope:</strong> Enough HTTP/1.1 to parse a request, write a valid response, and answer <code>GET /</code> on BRAVO. No keep-alive, no chunked encoding, no framework - you build this on your Stage 2 transport.</p>
-<p>*Formerly: HTTP/1.1 Server.*</p>
 <h4 id="http-server-step-1---parse-a-request">Step 1 - Parse a request</h4>
 <p><strong>Goal:</strong> Decode an inbound HTTP/1.1 request into a request object.</p>
 <p><strong>Shape:</strong></p>
@@ -1451,22 +1448,21 @@ Connection: close
 </li>
 </ul>
 <hr />
-<p><strong>Next:</strong> BRAVO answers, but only over a connection you opened straight to it. <a href="#front-door">Stage 4 · Front door</a>.</p></div>
+<p><strong>Next:</strong> BRAVO answers, but only over a connection you opened straight to it. <a href="#load-balancer">Stage 4 · Load balancer</a>.</p></div>
       </div>
     </article>
-<article class="page" id="page-front-door" data-page="front-door" hidden>
+<article class="page" id="page-load-balancer" data-page="load-balancer" hidden>
       <header class="page-header">
         <p class="page-eyebrow">Stage 4</p>
-        <h1>Front door</h1>
+        <h1>Load balancer</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#front-door/front-door-stage-4-front-door">Stage 4 · Front door</a></li><li class="depth-4"><a href="#front-door/front-door-step-1---forward-across-a-pool-of-backends">Step 1 - Forward across a pool of backends</a></li><li class="depth-4"><a href="#front-door/front-door-step-2---route-around-a-dead-backend">Step 2 - Route around a dead backend</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="front-door-stage-4-front-door">Stage 4 · Front door</h3>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#load-balancer/load-balancer-stage-4-load-balancer">Stage 4 · Load balancer</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-1---forward-across-a-pool-of-backends">Step 1 - Forward across a pool of backends</a></li><li class="depth-4"><a href="#load-balancer/load-balancer-step-2---route-around-a-dead-backend">Step 2 - Route around a dead backend</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="load-balancer-stage-4-load-balancer">Stage 4 · Load balancer</h3>
 <blockquote><p>Give <code>pi.world</code> one public entry on ALPHA, and let it survive a dead backend.</p></blockquote>
 <p><strong>Enables:</strong> <code>pi.world</code> has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.</p>
 <p><strong>Scope:</strong> One process on ALPHA forwarding real HTTP/1.1 traffic to BRAVO and CHARLIE, spreading requests across both while they answer, and routing around one that stops answering. No TLS, no virtual hosts, no least-connections, no rate limiting or auth.</p>
-<p>*Formerly: Reverse Proxy and Load Balancer.*</p>
-<h4 id="front-door-step-1---forward-across-a-pool-of-backends">Step 1 - Forward across a pool of backends</h4>
+<h4 id="load-balancer-step-1---forward-across-a-pool-of-backends">Step 1 - Forward across a pool of backends</h4>
 <p><strong>Goal:</strong> Accept an inbound request on ALPHA, forward it to one backend chosen from a pool of two, return that backend's response to the client unchanged, and send the next request to a different backend.</p>
 <p><strong>Shape:</strong></p>
 <ul>
@@ -1493,14 +1489,14 @@ Connection: close
 <ul>
 <li>Which headers are hop-by-hop (RFC 7230 §6.1) and must be regenerated on the new connection to the backend, rather than copied straight off the client's connection?
 </li>
-<li>Stage 3's backends answer once per connection and close it. Does the front door open a fresh connection to the backend for every request it forwards, or try to reuse one?
+<li>Stage 3's backends answer once per connection and close it. Does the load balancer open a fresh connection to the backend for every request it forwards, or try to reuse one?
 </li>
 <li>Where does &quot;which backend is next&quot; live so it survives across separate incoming connections, not just inside the function handling one of them?
 </li>
 </ul>
 <p><strong>Watch out:</strong> Compose publishes ALPHA's port 80 to the host as 8090. A curl from the laptop uses <code>127.0.0.1:8090</code>; a request from inside BRAVO's or CHARLIE's container uses <code>alpha</code> on port 80 directly, the same as Stage 3's backends.</p>
 <p><strong>Samples:</strong></p>
-<h5 id="front-door-sample-1---first-request-goes-to-bravo">Sample 1 - first request goes to bravo</h5>
+<h5 id="load-balancer-sample-1---first-request-goes-to-bravo">Sample 1 - first request goes to bravo</h5>
 <pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
@@ -1513,7 +1509,7 @@ Connection: close
 &lt;body&gt;Served by BRAVO&lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
-<h5 id="front-door-sample-2---second-request-goes-to-charlie">Sample 2 - second request goes to charlie</h5>
+<h5 id="load-balancer-sample-2---second-request-goes-to-charlie">Sample 2 - second request goes to charlie</h5>
 <pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
@@ -1534,7 +1530,7 @@ Connection: close
 </li>
 </ul>
 <hr />
-<h4 id="front-door-step-2---route-around-a-dead-backend">Step 2 - Route around a dead backend</h4>
+<h4 id="load-balancer-step-2---route-around-a-dead-backend">Step 2 - Route around a dead backend</h4>
 <p><strong>Goal:</strong> Stop sending new requests to a backend that has stopped answering, so a client hitting ALPHA never sees a failed request once another backend is reachable.</p>
 <p><strong>Shape:</strong></p>
 <ul>
@@ -1553,14 +1549,14 @@ Connection: close
 <ul>
 <li>What counts as &quot;dead&quot; here - connection refused, connection reset, a timeout, or all three? What timeout is defensible for a backend Docker just stopped, versus one that is merely slow?
 </li>
-<li>Does the request that hit the dead backend get retried against a different backend inside the front door, or does the client have to issue it again itself? Reread the Enables line before answering.
+<li>Does the request that hit the dead backend get retried against a different backend inside the load balancer, or does the client have to issue it again itself? Reread the Enables line before answering.
 </li>
 <li>This stage does not ask for automatic recovery. Is a backend, once marked dead, allowed to stay excluded for the rest of the run?
 </li>
 </ul>
 <p><strong>Watch out:</strong> <code>docker compose stop bravo</code> does not always hand you a clean &quot;connection refused&quot; on the very next request - a listener shutting down can also hand you a connection reset partway through. Treat both as dead, not only the refusal case.</p>
 <p><strong>Samples:</strong></p>
-<h5 id="front-door-sample-3---curl-piworld-with-both-backends-up">Sample 3 - curl pi.world with both backends up</h5>
+<h5 id="load-balancer-sample-3---curl-piworld-with-both-backends-up">Sample 3 - curl pi.world with both backends up</h5>
 <pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
 <pre><code>HTTP/1.1 200 OK
@@ -1573,7 +1569,7 @@ Connection: close
 &lt;body&gt;Served by BRAVO&lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
-<h5 id="front-door-sample-4---curl-piworld-after-bravo-dies">Sample 4 - curl pi.world after bravo dies</h5>
+<h5 id="load-balancer-sample-4---curl-piworld-after-bravo-dies">Sample 4 - curl pi.world after bravo dies</h5>
 <p>After <code>docker compose stop bravo</code>:</p>
 <pre><code>curl -s -i http://127.0.0.1:8090/
 </code></pre>
@@ -1609,7 +1605,6 @@ Connection: close
 <blockquote><p>Stop recomputing the same response for every request.</p></blockquote>
 <p><strong>Enables:</strong> the site reports a MISS from origin, then a HIT with age and a shorter time.</p>
 <p><strong>Scope:</strong> a cache in front of one origin response, correct about freshness and honest about its own state. No CDN, no edge nodes, no per-client variants.</p>
-<p>*Formerly: HTTP Cache Layer.*</p>
 <h4 id="http-cache-layer-step-1---serve-a-miss-and-store-it">Step 1 - Serve a MISS and store it</h4>
 <p><strong>Goal:</strong> On the first request for a path, fetch the response from origin, mark it as a MISS, and store it for reuse.</p>
 <p><strong>Shape:</strong></p>
@@ -1738,7 +1733,6 @@ Connection: close
 <blockquote><p>Give BRAVO and CHARLIE a value they both agree on.</p></blockquote>
 <p><strong>Enables:</strong> BRAVO and CHARLIE agree on one value after a write from either.</p>
 <p><strong>Scope:</strong> Two Nodes sharing one key space, agreeing after a write to either one. No cluster larger than two, no persistence across restarts, no partition handling beyond deciding which write wins when both Nodes have one.</p>
-<p>*Formerly: Key-Value Store.*</p>
 <h4 id="key-value-store-step-1---store-and-retrieve-a-value-on-one-node">Step 1 - Store and retrieve a value on one Node</h4>
 <p><strong>Goal:</strong> Implement an in-memory store on one Node so a value written to a key is readable back from that same Node.</p>
 <p><strong>Shape:</strong></p>
@@ -1850,23 +1844,22 @@ green
 </li>
 </ul>
 <hr />
-<p><strong>Next:</strong> BRAVO and CHARLIE agree on a value, but nothing tells you how often either one is asked for it. <a href="#metrics-collector">Stage 7 · Metrics</a>.</p></div>
+<p><strong>Next:</strong> BRAVO and CHARLIE agree on a value, but nothing tells you how often either one is asked for it. <a href="#metrics-collector">Stage 7 · Metrics collector</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-metrics-collector" data-page="metrics-collector" hidden>
       <header class="page-header">
         <p class="page-eyebrow">Stage 7</p>
-        <h1>Metrics</h1>
+        <h1>Metrics collector</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#metrics-collector/metrics-collector-stage-7-metrics">Stage 7 · Metrics</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-1---count-every-request-show-it-at-status">Step 1 - Count every request, show it at /status</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-2---time-every-request-show-it-at-status-and-metrics">Step 2 - Time every request, show it at /status and /metrics</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="metrics-collector-stage-7-metrics">Stage 7 · Metrics</h3>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#metrics-collector/metrics-collector-stage-7-metrics-collector">Stage 7 · Metrics collector</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-1---count-every-request-show-it-at-status">Step 1 - Count every request, show it at /status</a></li><li class="depth-4"><a href="#metrics-collector/metrics-collector-step-2---time-every-request-show-it-at-status-and-metrics">Step 2 - Time every request, show it at /status and /metrics</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="metrics-collector-stage-7-metrics-collector">Stage 7 · Metrics collector</h3>
 <blockquote><p>Stop guessing how busy the cluster is and how long it takes to answer.</p></blockquote>
 <p><strong>Enables:</strong> <code>/metrics</code> and <code>/status</code> show request counts and timings.</p>
-<p><strong>Scope:</strong> cluster-wide request counts and per-path average duration, observed at the front door on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.</p>
-<p>*Formerly: Metrics Collector.*</p>
+<p><strong>Scope:</strong> cluster-wide request counts and per-path average duration, observed at the load balancer on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.</p>
 <h4 id="metrics-collector-step-1---count-every-request-show-it-at-status">Step 1 - Count every request, show it at /status</h4>
-<p><strong>Goal:</strong> On ALPHA, count every request the front door forwards, broken down by path, and serve the running counts at <code>/status</code>.</p>
+<p><strong>Goal:</strong> On ALPHA, count every request the load balancer forwards, broken down by path, and serve the running counts at <code>/status</code>.</p>
 <p><strong>Shape:</strong></p>
 <ul>
 <li>Input: each request ALPHA forwards to a backend
@@ -1952,26 +1945,25 @@ curl -s http://127.0.0.1:8090/status
 </li>
 </ul>
 <hr />
-<p><strong>Next:</strong> you can see how busy the cluster is, but not which hop of a request took the time. <a href="#distributed-tracing">Stage 8 · Tracing</a>.</p></div>
+<p><strong>Next:</strong> you can see how busy the cluster is, but not which hop of a request took the time. <a href="#distributed-tracing">Stage 8 · Distributed tracing</a>.</p></div>
       </div>
     </article>
 <article class="page" id="page-distributed-tracing" data-page="distributed-tracing" hidden>
       <header class="page-header">
         <p class="page-eyebrow">Stage 8</p>
-        <h1>Tracing</h1>
+        <h1>Distributed tracing</h1>
       </header>
       <div class="page-layout">
-        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#distributed-tracing/distributed-tracing-stage-8-tracing">Stage 8 · Tracing</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-1---show-the-path-of-one-request">Step 1 - Show the path of one request</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-2---add-a-duration-to-each-hop">Step 2 - Add a duration to each hop</a></li></ul></nav>
-        <div class="page-content prose"><h3 id="distributed-tracing-stage-8-tracing">Stage 8 · Tracing</h3>
+        <nav class="page-toc" aria-label="On this page"><p class="page-toc-label">On this page</p><ul><li class="depth-3"><a href="#distributed-tracing/distributed-tracing-stage-8-distributed-tracing">Stage 8 · Distributed tracing</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-1---show-the-path-of-one-request">Step 1 - Show the path of one request</a></li><li class="depth-4"><a href="#distributed-tracing/distributed-tracing-step-2---add-a-duration-to-each-hop">Step 2 - Add a duration to each hop</a></li></ul></nav>
+        <div class="page-content prose"><h3 id="distributed-tracing-stage-8-distributed-tracing">Stage 8 · Distributed tracing</h3>
 <blockquote><p>Follow one request across every hop it took through the cluster.</p></blockquote>
 <p><strong>Enables:</strong> <code>/architecture</code> shows a live request path with a duration on each hop.</p>
-<p><strong>Scope:</strong> Trace context carried across your own front door and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.</p>
-<p>*Formerly: Distributed Tracing.*</p>
+<p><strong>Scope:</strong> Trace context carried across your own load balancer and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.</p>
 <h4 id="distributed-tracing-step-1---show-the-path-of-one-request">Step 1 - Show the path of one request</h4>
 <p><strong>Goal:</strong> Serve <code>/architecture</code> with the ordered list of hops the most recently completed request passed through.</p>
 <p><strong>Shape:</strong></p>
 <ul>
-<li>Input: a request arriving at ALPHA's front door, forwarded to one backend
+<li>Input: a request arriving at ALPHA's load balancer, forwarded to one backend
 </li>
 <li>Output: <code>/architecture</code>: a page listing hop names in the order the request visited them
 </li>
@@ -1980,7 +1972,7 @@ curl -s http://127.0.0.1:8090/status
 <ul>
 <li>ALPHA and the backend are separate processes. How does the backend know it's continuing the same request ALPHA is already tracking, rather than starting a path of its own?
 </li>
-<li>Front door forwards to one backend and returns. What is the shortest possible path, and what does <code>/architecture</code> show if a second request is still in flight when you check it?
+<li>Load balancer forwards to one backend and returns. What is the shortest possible path, and what does <code>/architecture</code> show if a second request is still in flight when you check it?
 </li>
 <li>Does every request update what <code>/architecture</code> shows, or only requests to <code>/</code>?
 </li>
@@ -2012,7 +2004,7 @@ bravo
 </ul>
 <p><strong>Key questions:</strong></p>
 <ul>
-<li>Front door's own time and the backend's own time overlap for part of the request. Is a hop's duration &quot;wall time end to end at that hop&quot; or &quot;time until the next hop was called,&quot; and does that choice change what the numbers mean?
+<li>Load balancer's own time and the backend's own time overlap for part of the request. Is a hop's duration &quot;wall time end to end at that hop&quot; or &quot;time until the next hop was called,&quot; and does that choice change what the numbers mean?
 </li>
 <li>What clock resolution does a duration need, given some hops in this cluster answer in a handful of milliseconds?
 </li>
@@ -2049,7 +2041,6 @@ bravo	36
 <blockquote><p>Make a write to the store survive a Node that dies right after acknowledging it.</p></blockquote>
 <p><strong>Enables:</strong> You kill a node during a write, restart it, and the data is intact.</p>
 <p><strong>Scope:</strong> Durability and recovery for the Stage 6 key-value store on one Node. Understand what <code>fsync</code> actually guarantees on your hardware. No compaction, no changes to how BRAVO and CHARLIE agree with each other.</p>
-<p>*Formerly: Write-Ahead Log.*</p>
 <h4 id="write-ahead-log-step-1---log-a-write-before-acknowledging-it">Step 1 - Log a write before acknowledging it</h4>
 <p><strong>Goal:</strong> Append each write to an on-disk log and <code>fsync</code> it before the store acknowledges the write, then rebuild in-memory state from that log on startup.</p>
 <p><strong>Shape:</strong></p>
@@ -2162,7 +2153,6 @@ green
 <blockquote><p>Decouple a request from the work it triggers.</p></blockquote>
 <p><strong>Enables:</strong> <code>/events</code> updates without the page waiting for the consumer.</p>
 <p><strong>Scope:</strong> a broker your own producer and consumer use. Not Kafka, and do not build it on a real broker.</p>
-<p>*Formerly: Message Queue.*</p>
 <h4 id="message-queue-step-1---publish-without-waiting-for-the-consumer">Step 1 - Publish without waiting for the consumer</h4>
 <p><strong>Goal:</strong> <code>POST /events</code> enqueues the event and responds before the consumer has processed it.</p>
 <p><strong>Shape:</strong></p>
@@ -2244,7 +2234,6 @@ click
 <blockquote><p>Store the blobs the site serves, on disk, so one outlives the process that first wrote it.</p></blockquote>
 <p><strong>Enables:</strong> A blob is still served after the Node that first stored it reboots.</p>
 <p><strong>Scope:</strong> storing and retrieving an object on one Node's filesystem, durably enough to survive that Node restarting. No replication across Nodes, no S3 compatibility, no multipart upload, no presigned URLs.</p>
-<p>*Formerly: Object Storage.*</p>
 <h4 id="object-storage-step-1---put-and-get-an-object">Step 1 - Put and Get an object</h4>
 <p><strong>Goal:</strong> Implement <code>PUT /{bucket}/{key}</code> and <code>GET /{bucket}/{key}</code>, storing the object's bytes on the local filesystem before the PUT is acknowledged.</p>
 <p><strong>Shape:</strong></p>
@@ -2336,7 +2325,7 @@ tiny internet
   </div>
   <button class="mobile-toggle" id="menu-toggle" type="button" aria-label="Open navigation">Menu</button>
   <script>
-    const pages = ["curriculum","network","dns-resolver","tcp-server","http-server","front-door","http-cache-layer","key-value-store","metrics-collector","distributed-tracing","write-ahead-log","message-queue","object-storage"];
+    const pages = ["curriculum","network","dns-resolver","tcp-server","http-server","load-balancer","http-cache-layer","key-value-store","metrics-collector","distributed-tracing","write-ahead-log","message-queue","object-storage"];
     const sidebar = document.getElementById("sidebar");
     const menuToggle = document.getElementById("menu-toggle");
     const themeToggle = document.getElementById("theme-toggle");

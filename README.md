@@ -70,7 +70,7 @@ docker compose down               # stop them
 
 | Node | Address | Role | From the laptop |
 | --- | --- | --- | --- |
-| ALPHA | `10.53.0.10` | Names and front door | `127.0.0.1:5354` DNS, `127.0.0.1:8090` HTTP |
+| ALPHA | `10.53.0.10` | DNS and Load balancer | `127.0.0.1:5354` DNS, `127.0.0.1:8090` HTTP |
 | BRAVO | `10.53.0.11` | Web backend | `127.0.0.1:8091` HTTP, `127.0.0.1:3001` TCP |
 | CHARLIE | `10.53.0.12` | Web backend | `127.0.0.1:8082` HTTP, `127.0.0.1:3002` TCP |
 
@@ -113,8 +113,8 @@ This repo is a pnpm workspace. Each package under `packages/*` is a TypeScript p
 
 | Package | Path            | Role in the system                         |
 | ------- | --------------- | ------------------------------------------ |
-| `@naming` | `packages/naming/` | Naming. Authoritative answers for `pi.world` |
-| `@http`   | `packages/http/`   | HTTP. Parse requests and write responses |
+| `@dns-resolver` | `packages/dns-resolver/` | DNS resolver. Authoritative answers for `pi.world` |
+| `@http`   | `packages/http/`   | HTTP server. Parse requests and write responses |
 
 ### Commands
 
@@ -129,10 +129,10 @@ pnpm test:coverage    # run tests with coverage report
 pnpm test:watch       # re-run tests on change
 ```
 
-### @naming
+### @dns-resolver
 
 ```bash
-pnpm --filter @naming test
+pnpm --filter @dns-resolver test
 ```
 
 Requires **Node 26** (see `engines` in root `package.json`). Use [fnm](https://github.com/Schniz/fnm) or similar: `fnm use 26`.

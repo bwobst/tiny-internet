@@ -6,8 +6,6 @@
 
 **Scope:** a cache in front of one origin response, correct about freshness and honest about its own state. No CDN, no edge nodes, no per-client variants.
 
-*Formerly: HTTP Cache Layer.*
-
 #### Step 1 - Serve a MISS and store it
 
 **Goal:** On the first request for a path, fetch the response from origin, mark it as a MISS, and store it for reuse.

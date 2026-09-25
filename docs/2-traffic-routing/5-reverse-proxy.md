@@ -6,7 +6,6 @@
 
 **Scope:** forwarding, header handling, and connection management for your own site.
 
-*Formerly: Reverse Proxy.*
 
 **Recommended stack:** Node.js (`http`, `https`, `tls`)
 

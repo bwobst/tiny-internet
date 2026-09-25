@@ -6,8 +6,6 @@
 
 **Scope:** storing and retrieving an object on one Node's filesystem, durably enough to survive that Node restarting. No replication across Nodes, no S3 compatibility, no multipart upload, no presigned URLs.
 
-*Formerly: Object Storage.*
-
 #### Step 1 - Put and Get an object
 
 **Goal:** Implement `PUT /{bucket}/{key}` and `GET /{bucket}/{key}`, storing the object's bytes on the local filesystem before the PUT is acknowledged.

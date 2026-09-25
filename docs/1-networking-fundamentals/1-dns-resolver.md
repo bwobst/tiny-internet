@@ -1,12 +1,10 @@
-### Stage 1 · Naming
+### Stage 1 · DNS resolver
 
 > Build an authoritative nameserver for `pi.world`.
 
 **Enables:** `dig pi.world` against ALPHA returns the cluster addresses. Later stages do not hardcode IPs.
 
 **Scope:** Authoritative answers for `pi.world` and the node names under it. No walk, no cache, no forwarder.
-
-*Formerly: DNS Resolver.*
 
 #### Step 1 - Decode a query
 
@@ -45,7 +43,7 @@
 
 ##### Sample 1 - pi.world A query
 
-The oracle is the bytes in [`01-query.bin`](../../packages/naming/src/fixtures/pi-world-a/01-query.bin) and the decoded object in [`01-query.ts`](../../packages/naming/src/fixtures/pi-world-a/01-query.ts).
+The oracle is the bytes in [`01-query.bin`](../../packages/dns-resolver/src/fixtures/pi-world-a/01-query.bin) and the decoded object in [`01-query.ts`](../../packages/dns-resolver/src/fixtures/pi-world-a/01-query.ts).
 
 **Done when:**
 - Decode `wire` from `01-query.ts`. The result equals `decoded`.
@@ -80,7 +78,7 @@ The oracle is the bytes in [`01-query.bin`](../../packages/naming/src/fixtures/p
 
 ##### Sample 1 - pi.world AA answer
 
-The oracle is the bytes in [`02-aa-answer.bin`](../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.bin) and the decoded object in [`02-aa-answer.ts`](../../packages/naming/src/fixtures/pi-world-a/02-aa-answer.ts).
+The oracle is the bytes in [`02-aa-answer.bin`](../../packages/dns-resolver/src/fixtures/pi-world-a/02-aa-answer.bin) and the decoded object in [`02-aa-answer.ts`](../../packages/dns-resolver/src/fixtures/pi-world-a/02-aa-answer.ts).
 
 **Done when:**
 - Encode the message in `02-aa-answer.ts`. The bytes equal `wire`.
@@ -216,4 +214,4 @@ dig @127.0.0.1 -p 5354 google.com
 
 ---
 
-**Next:** the names resolve, but nothing answers on the other end yet. [Stage 2 · Transport](./2-tcp-server.md).
+**Next:** the names resolve, but nothing answers on the other end yet. [Stage 2 · TCP server](./2-tcp-server.md).

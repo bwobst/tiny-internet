@@ -9,7 +9,7 @@ At first the system can barely communicate.
 By the end it serves a website, distributes traffic across machines, survives a dead backend, caches content, collects metrics and traces, processes events through a queue, and persists data across restarts.
 
 **Start here:** [Stage 0 · Network](./0-network/0-network.md).
-Then [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md), implemented in Node.js under [`packages/naming/`](../packages/naming/).
+Then [Stage 1 · DNS resolver](./1-networking-fundamentals/1-dns-resolver.md), implemented in Node.js under [`packages/dns-resolver/`](../packages/dns-resolver/).
 
 ---
 
@@ -17,7 +17,7 @@ Then [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md), impleme
 
 | Node | Starting role |
 |---|---|
-| ALPHA | Names and Front door |
+| ALPHA | DNS and Load balancer |
 | BRAVO | Web backend |
 | CHARLIE | Web backend |
 
@@ -37,12 +37,12 @@ The site grows with the infrastructure.
 
 | Page | Needs |
 |---|---|
-| `/` | HTTP |
-| `/status` | Metrics |
-| `/requests` | Front door |
-| `/metrics` | Metrics |
+| `/` | HTTP server |
+| `/status` | Metrics collector |
+| `/requests` | Load balancer |
+| `/metrics` | Metrics collector |
 | `/events` | Message queue |
-| `/architecture` | Tracing |
+| `/architecture` | Distributed tracing |
 | `/lab` | Controls to break a node or delay a hop, then watch the rest of the site |
 
 ---
@@ -52,7 +52,7 @@ The site grows with the infrastructure.
 Each stage is a **guided spec**.
 It tells you what to build, which questions to answer first, and how you know you are done.
 
-[Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md) shows the shape.
+[Stage 1 · DNS resolver](./1-networking-fundamentals/1-dns-resolver.md) shows the shape.
 
 A stage file has:
 
@@ -98,16 +98,16 @@ From ALPHA, `nc charlie 9000` delivers `hello from alpha` to a listener on CHARL
 
 Turn three addressable machines into something that can serve a page.
 
-### [Stage 1 · Naming](./1-networking-fundamentals/1-dns-resolver.md)
+### [Stage 1 · DNS resolver](./1-networking-fundamentals/1-dns-resolver.md)
 
 **Goal:** `dig pi.world` against ALPHA returns the cluster addresses.
 Later stages look up names instead of hardcoding IPs.
 
-### [Stage 2 · Transport](./1-networking-fundamentals/2-tcp-server.md)
+### [Stage 2 · TCP server](./1-networking-fundamentals/2-tcp-server.md)
 
 **Goal:** ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.
 
-### [Stage 3 · HTTP](./1-networking-fundamentals/3-http-server.md)
+### [Stage 3 · HTTP server](./1-networking-fundamentals/3-http-server.md)
 
 **Goal:** `pi.world/` serves a static page from BRAVO.
 
@@ -117,7 +117,7 @@ Later stages look up names instead of hardcoding IPs.
 
 Make the website a property of the cluster instead of a property of one machine.
 
-### [Stage 4 · Front door](./2-traffic-routing/4-front-door.md)
+### [Stage 4 · Load balancer](./2-traffic-routing/4-load-balancer.md)
 
 **Goal:** `pi.world` has one public entry on ALPHA.
 You shut BRAVO down.
@@ -135,7 +135,7 @@ Make the system fast, and give it shared state.
 The second reports a HIT with an Age header and a shorter time.
 
 Without a cache, every request pays origin work on BRAVO or CHARLIE.
-Repeat views should be cheap at the front door.
+Repeat views should be cheap at the load balancer.
 
 ### [Stage 6 · Key-value store](./3-caching-content-delivery/9-key-value-store.md)
 
@@ -150,11 +150,11 @@ A write on one node has to show up on the other, or sessions and counters depend
 
 Find out what the cluster is doing.
 
-### [Stage 7 · Metrics](./4-reliability-observability/11-metrics-collector.md)
+### [Stage 7 · Metrics collector](./4-reliability-observability/11-metrics-collector.md)
 
 **Goal:** `/metrics` and `/status` show request counts and timings.
 
-### [Stage 8 · Tracing](./4-reliability-observability/12-distributed-tracing.md)
+### [Stage 8 · Distributed tracing](./4-reliability-observability/12-distributed-tracing.md)
 
 **Goal:** `/architecture` shows a live request path with a duration on each hop.
 
