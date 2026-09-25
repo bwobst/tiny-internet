@@ -6,6 +6,9 @@
 
 **Scope:** Authoritative answers for `pi.world` and the node names under it. No walk, no cache, no forwarder.
 
+**Read:** [Hello DNS: the core of DNS](https://powerdns.org/hello-dns/basic.md.html).
+A zone, a name, an authoritative answer, and a name that does not exist.
+
 #### Step 1 - Decode a query
 
 **Goal:** Decode an inbound A query for `pi.world` into a message object.
@@ -31,6 +34,9 @@
     - name: string
     - type: integer
     - class: integer
+
+**Read:** [DNS primer](https://courses.cs.duke.edu/fall16/compsci356/DNS/DNS-primer.pdf).
+The header, the question, and the worked A query for `www.northeastern.edu`.
 
 **Key questions:**
 - Where does the 12-byte header end and the question start?
@@ -67,6 +73,9 @@ The oracle is the bytes in [`01-query.bin`](../../packages/dns-resolver/src/fixt
     - rdata: bytes
 - Output: UDP payload bytes
 
+**Read:** [DNS primer](https://courses.cs.duke.edu/fall16/compsci356/DNS/DNS-primer.pdf).
+Answers, name compression, and the worked A response.
+
 **Key questions:**
 - Which flag bits change from the query to a response that claims authority?
 - What is in `rdata` for an A record, and how long is it?
@@ -96,6 +105,9 @@ The oracle is the bytes in [`02-aa-answer.bin`](../../packages/dns-resolver/src/
   - `bravo.pi.world` A: AA, NOERROR, BRAVO's A
   - a name under `pi.world` that is not in the zone: AA, NXDOMAIN
   - a name outside `pi.world`: REFUSED
+
+**Read:** [DNS primer](https://courses.cs.duke.edu/fall16/compsci356/DNS/DNS-primer.pdf).
+The flag bits and RCODE values, including name error and refused.
 
 **Key questions:**
 - From the laptop, which address and port reach ALPHA's port 53? From inside the Compose network, which?

@@ -6,6 +6,10 @@
 
 **Scope:** cluster-wide request counts and per-path average duration, observed at the load balancer on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.
 
+**Read:** [Monitoring distributed systems](https://sre.google/sre-book/monitoring-distributed-systems/).
+Traffic is how many requests arrived.
+Latency is how long they took.
+
 #### Step 1 - Count every request, show it at /status
 
 **Goal:** On ALPHA, count every request the load balancer forwards, broken down by path, and serve the running counts at `/status`.
@@ -15,6 +19,10 @@
 - Output:
   - a running count per path
   - `/status`: a page listing each path seen so far and its request count
+
+**Read:** [The RED method](https://grafana.com/blog/2018/08/02/the-red-method-how-to-instrument-your-services/).
+Rate is the count of requests.
+Keep that count per path.
 
 **Key questions:**
 - Does a count belong to the path the client requested, or the backend that answered it? If `/` is served by BRAVO once and CHARLIE once, is that one count or two?
@@ -53,6 +61,10 @@ path	count
 - Output:
   - `/status`: count and average duration per path, human-readable
   - `/metrics`: the same count and average duration per path, in one machine-parseable line per path
+
+**Read:** [Cumulative average](https://en.wikipedia.org/wiki/Moving_average#Cumulative_average).
+Keep the count and the current average.
+A new duration updates that average in place.
 
 **Key questions:**
 - Keeping every duration ever recorded to compute an average is the same unbounded-memory trap as Stage 5's cache. What running values do you keep per path instead so a new duration updates the average without storing the durations themselves?

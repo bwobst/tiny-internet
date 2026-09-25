@@ -6,6 +6,10 @@
 
 **Scope:** a socket server on BRAVO that accepts a connection and echoes whatever bytes arrive. No framing, no backpressure handling, no application protocol on top.
 
+**Read:** [Socket Programming HOWTO](https://docs.python.org/3/howto/sockets.html).
+A listening socket only accepts.
+A connection socket carries the bytes.
+
 #### Step 1 - Accept and echo across Nodes
 
 **Goal:** Listen on BRAVO, accept a connection from ALPHA, and echo back whatever bytes arrive.
@@ -13,6 +17,11 @@
 **Shape:**
 - Input: bytes written by a client into an accepted connection
 - Output: the same bytes, written back on that same connection
+
+**Read:** [Beej's Guide to Network Programming: partial `send`](https://beej.us/guide/bgnet/html/split/slightly-advanced-techniques.html).
+Section 7.4.
+One `send` is not one `recv`.
+TCP is a stream of bytes.
 
 **Key questions:**
 - What is the difference between a listening socket and a connection socket, and what has to exist on each side before bytes can flow?

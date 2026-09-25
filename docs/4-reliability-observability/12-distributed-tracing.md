@@ -6,6 +6,10 @@
 
 **Scope:** Trace context carried across your own load balancer and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.
 
+**Read:** [Dapper, a Large-Scale Distributed Systems Tracing Infrastructure](https://static.googleusercontent.com/media/research.google.com/en//archive/papers/dapper-2010-1.pdf).
+The figures show one request as a tree of spans.
+Each span is one hop, with a start and an end.
+
 #### Step 1 - Show the path of one request
 
 **Goal:** Serve `/architecture` with the ordered list of hops the most recently completed request passed through.
@@ -13,6 +17,10 @@
 **Shape:**
 - Input: a request arriving at ALPHA's load balancer, forwarded to one backend
 - Output: `/architecture`: a page listing hop names in the order the request visited them
+
+**Read:** [Context propagation](https://opentelemetry.io/docs/concepts/context-propagation/).
+The first hop puts a trace id on the call.
+The next hop continues that same trace.
 
 **Key questions:**
 - ALPHA and the backend are separate processes. How does the backend know it's continuing the same request ALPHA is already tracking, rather than starting a path of its own?
@@ -48,6 +56,11 @@ bravo
 **Shape:**
 - Input: the same forwarded request, plus how long each hop spent handling it
 - Output: `/architecture`: the same ordered hops, each with a duration
+
+**Read:** [Traces](https://opentelemetry.io/docs/concepts/signals/traces/).
+Open the Spans section.
+A span records when the hop started and when it ended.
+The duration is that interval.
 
 **Key questions:**
 - Load balancer's own time and the backend's own time overlap for part of the request. Is a hop's duration "wall time end to end at that hop" or "time until the next hop was called," and does that choice change what the numbers mean?

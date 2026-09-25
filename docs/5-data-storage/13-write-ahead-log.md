@@ -6,6 +6,10 @@
 
 **Scope:** Durability and recovery for the Stage 6 key-value store on one Node. Understand what `fsync` actually guarantees on your hardware. No compaction, no changes to how BRAVO and CHARLIE agree with each other.
 
+**Read:** [Write-ahead logging](https://www.postgresql.org/docs/current/wal-intro.html).
+Log the change first.
+Update memory only after that log is durable.
+
 #### Step 1 - Log a write before acknowledging it
 
 **Goal:** Append each write to an on-disk log and `fsync` it before the store acknowledges the write, then rebuild in-memory state from that log on startup.
@@ -13,6 +17,10 @@
 **Shape:**
 - Input: write: key: string, value: string, arriving at the Stage 6 key-value store on one Node
 - Output: an entry appended to a log file on disk, `fsync`'d, before the write's HTTP response is sent; on startup, in-memory state rebuilt by reading the log in order
+
+**Read:** [Files are hard](https://danluu.com/file-consistency/).
+`write` can return before the bytes are on disk.
+`fsync` is the call that waits for the device.
 
 **Key questions:**
 - `fs.write` (or `fs.appendFile`) returning does not mean the bytes are on disk. What call forces them there, and what does that guarantee compared to what `write` alone guaranteed?
@@ -55,6 +63,10 @@ red
 **Shape:**
 - Input: a Node killed with `kill -9` (or Compose's equivalent) while handling a write, followed by a restart of the same Node
 - Output: a read on the restarted Node returns the correct value for every write that was acknowledged before the kill, and the Node starts up without treating the log as corrupt
+
+**Read:** [Atomic commit in SQLite](https://sqlite.org/atomiccommit.html).
+A crash can stop in the middle of a write.
+Recovery has to tell a finished record from a torn one.
 
 **Key questions:**
 - `kill -9` gives the process no chance to run any shutdown code. What has to already be true on disk, by the time a write's HTTP response was sent, for that write to survive this?

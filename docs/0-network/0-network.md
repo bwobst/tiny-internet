@@ -7,6 +7,9 @@
 **Scope:** Fixed addresses, names that resolve on each Node, SSH between Nodes, and one TCP connection between two Nodes.
 No DNS server, no HTTP, no service you wrote.
 
+**Read:** [An introduction to networking terminology, interfaces, and protocols](https://www.digitalocean.com/community/tutorials/an-introduction-to-networking-terminology-interfaces-and-protocols).
+Addresses, interfaces, and the path a packet takes between two machines.
+
 #### Step 1 - Give each Node a fixed address
 
 **Goal:** Give ALPHA, BRAVO, and CHARLIE addresses that survive a reboot.
@@ -18,6 +21,9 @@ No DNS server, no HTTP, no service you wrote.
   - address: IPv4 address
   - prefix: integer (bits)
   - gateway: IPv4 address
+
+**Read:** [Understanding IP addresses, subnets, and CIDR notation](https://www.digitalocean.com/community/tutorials/understanding-ip-addresses-subnets-and-cidr-notation-for-networking).
+An address, a prefix length, and which addresses sit on one subnet.
 
 **Key questions:**
 - Which addresses in your subnet does the router hand out by DHCP, and which are yours to assign?
@@ -73,6 +79,9 @@ default via 10.53.0.1 dev eth0
   - received: integer
   - loss: percent
   - rtt: milliseconds
+
+**Read:** [hosts(5)](https://man7.org/linux/man-pages/man5/hosts.5.html).
+The local file that maps a name to an address before any DNS server exists.
 
 **Key questions:**
 - Where does the name `bravo` resolve on this Node, before you have written a DNS server?
@@ -148,6 +157,9 @@ ping: delta: Name or service not known
   - stdout: string
   - exitCode: integer
 
+**Read:** [Understanding the SSH encryption and connection process](https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process).
+Host keys, user keys, and what the first connection checks.
+
 **Key questions:**
 - Which key does ALPHA present, and which file on BRAVO decides to accept it?
 - A host key identifies the Node to you. What happens on the first connection, and what should happen if that key ever changes?
@@ -210,6 +222,10 @@ bravo
   - target: Node name
   - port: integer
   - sent: bytes
+
+**Read:** [Beej's Guide to Network Programming: system calls](https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html).
+`socket`, `bind`, `listen`, `accept`, and `connect`.
+What the other side sees when nobody is listening.
 
 **Key questions:**
 - Which side has to be running first, and what does the other side see if it is not?

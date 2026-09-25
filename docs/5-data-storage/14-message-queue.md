@@ -6,6 +6,10 @@
 
 **Scope:** a broker your own producer and consumer use. Not Kafka, and do not build it on a real broker.
 
+**Read:** [Message queue](https://en.wikipedia.org/wiki/Message_queue).
+The sender and the receiver do not have to run at the same time.
+A message stays on the queue until the receiver takes it.
+
 #### Step 1 - Publish without waiting for the consumer
 
 **Goal:** `POST /events` enqueues the event and responds before the consumer has processed it.
@@ -13,6 +17,10 @@
 **Shape:**
 - Input: HTTP POST to `/events` with an event body
 - Output: HTTP response sent back before the consumer's handler for that event has finished running; the event queued in the order it was received
+
+**Read:** [Message queue: synchronous vs. asynchronous](https://en.wikipedia.org/wiki/Message_queue#Synchronous_vs._asynchronous).
+HTTP waits until the work is done.
+A queue lets the handler answer first and do the work later.
 
 **Key questions:**
 - What does the handler for `POST /events` have to do, and in what order, so the response goes out before the consumer runs?
@@ -45,6 +53,10 @@ docker compose exec alpha sh -c "curl -s -o /dev/null -w '%{http_code} %{time_to
 **Shape:**
 - Input: several `POST /events` calls in sequence, followed by `GET /events` at two different times
 - Output: a `GET /events` immediately after publishing may omit an event still in flight; a `GET /events` after the consumer has had time to run lists every published event, in publish order
+
+**Read:** [Queue](https://en.wikipedia.org/wiki/Queue_(abstract_data_type)).
+First in, first out.
+The consumer handles events in the order they were published.
 
 **Key questions:**
 - What does the consumer write to, and does that write need to survive a restart? (Stage 9's log applies to whatever the consumer records into.)

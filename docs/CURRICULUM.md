@@ -58,6 +58,7 @@ A stage file has:
 
 - **Goal** - one fact you can check on the real machines. The stage is done when that fact is true. If it is already true, skip the stage.
 - **Scope** - the bound. Stop when the Goal is true.
+- **Read** - one primer for the stage, and one primer for each step. Open it when the Goal is clear and the mechanism is not. The page teaches the idea. It is not a solution of the step.
 - **Steps** - sitting-sized work. A step is done when its Samples reproduce. A command Sample reproduces on Compose. A fixture Sample reproduces when a test matches the fixture pair.
 - **Key questions** - answer these before you write code.
 - **Samples** - one command and its transcript, or a link to a fixture. That output is the oracle. It is not a recipe. A fixture file exports `wire` (bytes) and `decoded` (object). The `.bin` file is the same bytes as `wire`.

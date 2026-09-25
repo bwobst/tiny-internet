@@ -74,6 +74,7 @@ Each **Step** has this shape:
 
 - **Goal** - one sentence
 - **Shape** - types and fields, not a concrete instance
+- **Read** - one primer link. It teaches the idea. It is not a walkthrough, a recipe, or a filled-in solution.
 - **Key questions** - things to answer before writing anything
 - **Watch out** - the one trip-up
 - **Samples** - one concrete input and its expected observable output

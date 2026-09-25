@@ -6,6 +6,10 @@
 
 **Scope:** Enough HTTP/1.1 to parse a request, write a valid response, and answer `GET /` on BRAVO. No keep-alive, no chunked encoding, no framework - you build this on your Stage 2 transport.
 
+**Read:** [HTTP Made Really Easy](https://www.jmarshall.com/easy/http/).
+A client sends a request.
+The server sends a response, then it can close.
+
 #### Step 1 - Parse a request
 
 **Goal:** Decode an inbound HTTP/1.1 request into a request object.
@@ -20,6 +24,9 @@
     - name: string
     - value: string
   - body: bytes
+
+**Read:** [HTTP Made Really Easy: the request line](https://www.jmarshall.com/easy/http/#requestline).
+Request line, header lines, the blank line, then the body.
 
 **Key questions:**
 - Where does the request line end and the headers begin? (RFC 7230 §3)
@@ -53,6 +60,9 @@ The oracle is the bytes in [`01-request.bin`](../../packages/http/src/fixtures/g
   - body: bytes
 - Output: bytes
 
+**Read:** [HTTP Made Really Easy: the status line](https://www.jmarshall.com/easy/http/#responseline).
+Status line, header lines, the blank line, then the body.
+
 **Key questions:**
 - What is the required format of the status line? (RFC 7230 §3.1.2)
 - With no chunked encoding, which header tells the client where the body ends?
@@ -78,6 +88,9 @@ The oracle is the bytes in [`02-response.bin`](../../packages/http/src/fixtures/
 **Shape:**
 - Input: a `GET /` request arriving on BRAVO's HTTP port
 - Output: the Step 2 response for the page, written back on the same connection, then the connection closes
+
+**Read:** [HTTP Made Really Easy: `Connection: close`](https://www.jmarshall.com/easy/http/#http1.1c3).
+How the client knows the response is finished.
 
 **Key questions:**
 - Which address does BRAVO bind to so a request from ALPHA, not just from BRAVO itself, is answered?

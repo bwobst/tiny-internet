@@ -6,6 +6,9 @@
 
 **Scope:** a cache in front of one origin response, correct about freshness and honest about its own state. No CDN, no edge nodes, no per-client variants.
 
+**Read:** [HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching).
+A cache stores a response and serves it again while that response is fresh.
+
 #### Step 1 - Serve a MISS and store it
 
 **Goal:** On the first request for a path, fetch the response from origin, mark it as a MISS, and store it for reuse.
@@ -16,6 +19,9 @@
   - the origin's response, returned to the client unchanged except for one added cache-state header
   - that response, kept somewhere the next request for the same path can find it
   - a freshness lifetime attached to what was stored
+
+**Read:** [`Cache-Control`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control).
+`max-age` is how long a stored response stays fresh.
 
 **Key questions:**
 - What identifies a cache entry - the path alone, or something that also depends on request headers?
@@ -60,6 +66,9 @@ Connection: close
 - Output:
   - before expiry: the stored response, marked HIT, with its age since it was stored, returned faster than the Step 1 origin round trip
   - after expiry: origin fetched again, a fresh MISS, a new entry replacing the old one
+
+**Read:** [`Age`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Age).
+`Age` is seconds since the response was stored, not a timestamp.
 
 **Key questions:**
 - `Age` is a duration, not a timestamp. What do you measure it from, and at what point do you compute it - store time, or answer time?

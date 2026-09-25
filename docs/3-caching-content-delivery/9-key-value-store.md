@@ -6,6 +6,9 @@
 
 **Scope:** Two Nodes sharing one key space, agreeing after a write to either one. No cluster larger than two, no persistence across restarts, no partition handling beyond deciding which write wins when both Nodes have one.
 
+**Read:** [Key-value database](https://en.wikipedia.org/wiki/Key%E2%80%93value_database).
+A store that maps one key to one value.
+
 #### Step 1 - Store and retrieve a value on one Node
 
 **Goal:** Implement an in-memory store on one Node so a value written to a key is readable back from that same Node.
@@ -17,6 +20,10 @@
 - Output:
   - write: acknowledgement
   - read: the value last written for that key, or a marker that the key has never been written
+
+**Read:** [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map).
+A key you never set is absent.
+A plain object can still look like it has a value.
 
 **Key questions:**
 - What backs the store so a `write` to a key that already has a value replaces it, rather than keeping both?
@@ -67,6 +74,10 @@ red
 **Shape:**
 - Input: a write on one Node, followed by a read on the other Node
 - Output: the read returns the value from the write, not a stale or missing value
+
+**Read:** [Replication: disk storage replication](https://en.wikipedia.org/wiki/Replication_(computing)#Disk_storage_replication).
+A synchronous write finishes only after the other copy acknowledges it.
+An asynchronous write does not wait.
 
 **Key questions:**
 - How does a write on BRAVO reach CHARLIE - does BRAVO push it immediately, does CHARLIE pull on an interval, or does CHARLIE ask BRAVO when it doesn't recognize a key?

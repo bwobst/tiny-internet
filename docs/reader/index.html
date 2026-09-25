@@ -643,6 +643,8 @@
 </li>
 <li><strong>Scope</strong> - the bound. Stop when the Goal is true.
 </li>
+<li><strong>Read</strong> - one primer for the stage, and one primer for each step. Open it when the Goal is clear and the mechanism is not. The page teaches the idea. It is not a solution of the step.
+</li>
 <li><strong>Steps</strong> - sitting-sized work. A step is done when its Samples reproduce. A command Sample reproduces on Compose. A fixture Sample reproduces when a test matches the fixture pair.
 </li>
 <li><strong>Key questions</strong> - answer these before you write code.
@@ -732,6 +734,8 @@
 <p><strong>Enables:</strong> From ALPHA you can <code>ssh bravo</code>, and a process on ALPHA can open a socket to a process on CHARLIE.</p>
 <p><strong>Scope:</strong> Fixed addresses, names that resolve on each Node, SSH between Nodes, and one TCP connection between two Nodes.</p>
 <p>No DNS server, no HTTP, no service you wrote.</p>
+<p><strong>Read:</strong> <a href="https://www.digitalocean.com/community/tutorials/an-introduction-to-networking-terminology-interfaces-and-protocols">An introduction to networking terminology, interfaces, and protocols</a>.</p>
+<p>Addresses, interfaces, and the path a packet takes between two machines.</p>
 <h4 id="network-step-1---give-each-node-a-fixed-address">Step 1 - Give each Node a fixed address</h4>
 <p><strong>Goal:</strong> Give ALPHA, BRAVO, and CHARLIE addresses that survive a reboot.</p>
 <p><strong>Shape:</strong></p>
@@ -751,6 +755,8 @@
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://www.digitalocean.com/community/tutorials/understanding-ip-addresses-subnets-and-cidr-notation-for-networking">Understanding IP addresses, subnets, and CIDR notation</a>.</p>
+<p>An address, a prefix length, and which addresses sit on one subnet.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Which addresses in your subnet does the router hand out by DHCP, and which are yours to assign?
@@ -811,6 +817,8 @@
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://man7.org/linux/man-pages/man5/hosts.5.html">hosts(5)</a>.</p>
+<p>The local file that maps a name to an address before any DNS server exists.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Where does the name <code>bravo</code> resolve on this Node, before you have written a DNS server?
@@ -884,6 +892,8 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://www.digitalocean.com/community/tutorials/understanding-the-ssh-encryption-and-connection-process">Understanding the SSH encryption and connection process</a>.</p>
+<p>Host keys, user keys, and what the first connection checks.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Which key does ALPHA present, and which file on BRAVO decides to accept it?
@@ -948,6 +958,9 @@ rtt min/avg/max/mdev = 0.211/0.261/0.329/0.049 ms
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html">Beej's Guide to Network Programming: system calls</a>.</p>
+<p><code>socket</code>, <code>bind</code>, <code>listen</code>, <code>accept</code>, and <code>connect</code>.</p>
+<p>What the other side sees when nobody is listening.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Which side has to be running first, and what does the other side see if it is not?
@@ -1016,6 +1029,8 @@ hello from alpha
 <blockquote><p>Build an authoritative nameserver for <code>pi.world</code>.</p></blockquote>
 <p><strong>Enables:</strong> <code>dig pi.world</code> against ALPHA returns the cluster addresses. Later stages do not hardcode IPs.</p>
 <p><strong>Scope:</strong> Authoritative answers for <code>pi.world</code> and the node names under it. No walk, no cache, no forwarder.</p>
+<p><strong>Read:</strong> <a href="https://powerdns.org/hello-dns/basic.md.html">Hello DNS: the core of DNS</a>.</p>
+<p>A zone, a name, an authoritative answer, and a name that does not exist.</p>
 <h4 id="dns-resolver-step-1---decode-a-query">Step 1 - Decode a query</h4>
 <p><strong>Goal:</strong> Decode an inbound A query for <code>pi.world</code> into a message object.</p>
 <p><strong>Shape:</strong></p>
@@ -1069,6 +1084,8 @@ hello from alpha
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://courses.cs.duke.edu/fall16/compsci356/DNS/DNS-primer.pdf">DNS primer</a>.</p>
+<p>The header, the question, and the worked A query for <code>www.northeastern.edu</code>.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Where does the 12-byte header end and the question start?
@@ -1119,6 +1136,8 @@ hello from alpha
 <li>Output: UDP payload bytes
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://courses.cs.duke.edu/fall16/compsci356/DNS/DNS-primer.pdf">DNS primer</a>.</p>
+<p>Answers, name compression, and the worked A response.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Which flag bits change from the query to a response that claims authority?
@@ -1157,6 +1176,8 @@ hello from alpha
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://courses.cs.duke.edu/fall16/compsci356/DNS/DNS-primer.pdf">DNS primer</a>.</p>
+<p>The flag bits and RCODE values, including name error and refused.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>From the laptop, which address and port reach ALPHA's port 53? From inside the Compose network, which?
@@ -1274,6 +1295,9 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 <blockquote><p>Accept a TCP connection from another node and echo bytes back across it.</p></blockquote>
 <p><strong>Enables:</strong> ALPHA can send bytes to BRAVO on a connection you accept and get bytes back.</p>
 <p><strong>Scope:</strong> a socket server on BRAVO that accepts a connection and echoes whatever bytes arrive. No framing, no backpressure handling, no application protocol on top.</p>
+<p><strong>Read:</strong> <a href="https://docs.python.org/3/howto/sockets.html">Socket Programming HOWTO</a>.</p>
+<p>A listening socket only accepts.</p>
+<p>A connection socket carries the bytes.</p>
 <h4 id="tcp-server-step-1---accept-and-echo-across-nodes">Step 1 - Accept and echo across Nodes</h4>
 <p><strong>Goal:</strong> Listen on BRAVO, accept a connection from ALPHA, and echo back whatever bytes arrive.</p>
 <p><strong>Shape:</strong></p>
@@ -1283,6 +1307,10 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 <li>Output: the same bytes, written back on that same connection
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://beej.us/guide/bgnet/html/split/slightly-advanced-techniques.html">Beej's Guide to Network Programming: partial <code>send</code></a>.</p>
+<p>Section 7.4.</p>
+<p>One <code>send</code> is not one <code>recv</code>.</p>
+<p>TCP is a stream of bytes.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What is the difference between a listening socket and a connection socket, and what has to exist on each side before bytes can flow?
@@ -1319,6 +1347,9 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 <blockquote><p>Build the first thing a person can actually see.</p></blockquote>
 <p><strong>Enables:</strong> <code>pi.world/</code> serves a static page from BRAVO.</p>
 <p><strong>Scope:</strong> Enough HTTP/1.1 to parse a request, write a valid response, and answer <code>GET /</code> on BRAVO. No keep-alive, no chunked encoding, no framework - you build this on your Stage 2 transport.</p>
+<p><strong>Read:</strong> <a href="https://www.jmarshall.com/easy/http/">HTTP Made Really Easy</a>.</p>
+<p>A client sends a request.</p>
+<p>The server sends a response, then it can close.</p>
 <h4 id="http-server-step-1---parse-a-request">Step 1 - Parse a request</h4>
 <p><strong>Goal:</strong> Decode an inbound HTTP/1.1 request into a request object.</p>
 <p><strong>Shape:</strong></p>
@@ -1346,6 +1377,8 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://www.jmarshall.com/easy/http/#requestline">HTTP Made Really Easy: the request line</a>.</p>
+<p>Request line, header lines, the blank line, then the body.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Where does the request line end and the headers begin? (RFC 7230 §3)
@@ -1390,6 +1423,8 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 <li>Output: bytes
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://www.jmarshall.com/easy/http/#responseline">HTTP Made Really Easy: the status line</a>.</p>
+<p>Status line, header lines, the blank line, then the body.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What is the required format of the status line? (RFC 7230 §3.1.2)
@@ -1418,6 +1453,8 @@ bravo.pi.world.		300	IN	A	10.53.0.11
 <li>Output: the Step 2 response for the page, written back on the same connection, then the connection closes
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://www.jmarshall.com/easy/http/#http1.1c3">HTTP Made Really Easy: <code>Connection: close</code></a>.</p>
+<p>How the client knows the response is finished.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Which address does BRAVO bind to so a request from ALPHA, not just from BRAVO itself, is answered?
@@ -1462,6 +1499,9 @@ Connection: close
 <blockquote><p>Give <code>pi.world</code> one public entry on ALPHA, and let it survive a dead backend.</p></blockquote>
 <p><strong>Enables:</strong> <code>pi.world</code> has one public entry on ALPHA. You shut BRAVO down. The page says Served by CHARLIE.</p>
 <p><strong>Scope:</strong> One process on ALPHA forwarding real HTTP/1.1 traffic to BRAVO and CHARLIE, spreading requests across both while they answer, and routing around one that stops answering. No TLS, no virtual hosts, no least-connections, no rate limiting or auth.</p>
+<p><strong>Read:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling">Proxy servers and tunneling</a>.</p>
+<p>A reverse proxy accepts the client and forwards to one of several servers.</p>
+<p>The same page shows <code>X-Forwarded-For</code>.</p>
 <h4 id="load-balancer-step-1---forward-across-a-pool-of-backends">Step 1 - Forward across a pool of backends</h4>
 <p><strong>Goal:</strong> Accept an inbound request on ALPHA, forward it to one backend chosen from a pool of two, return that backend's response to the client unchanged, and send the next request to a different backend.</p>
 <p><strong>Shape:</strong></p>
@@ -1485,6 +1525,9 @@ Connection: close
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://samwho.dev/load-balancing/#visualising-the-problem">Load balancing</a>.</p>
+<p>Round robin sends each new request to the next server.</p>
+<p>This step uses that policy.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Which headers are hop-by-hop (RFC 7230 §6.1) and must be regenerated on the new connection to the backend, rather than copied straight off the client's connection?
@@ -1545,6 +1588,9 @@ Connection: close
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://man7.org/linux/man-pages/man2/connect.2.html">connect(2)</a>.</p>
+<p><code>ECONNREFUSED</code> means nothing is listening.</p>
+<p><code>ETIMEDOUT</code> means the peer never answered.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What counts as &quot;dead&quot; here - connection refused, connection reset, a timeout, or all three? What timeout is defensible for a backend Docker just stopped, versus one that is merely slow?
@@ -1605,6 +1651,8 @@ Connection: close
 <blockquote><p>Stop recomputing the same response for every request.</p></blockquote>
 <p><strong>Enables:</strong> the site reports a MISS from origin, then a HIT with age and a shorter time.</p>
 <p><strong>Scope:</strong> a cache in front of one origin response, correct about freshness and honest about its own state. No CDN, no edge nodes, no per-client variants.</p>
+<p><strong>Read:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching">HTTP caching</a>.</p>
+<p>A cache stores a response and serves it again while that response is fresh.</p>
 <h4 id="http-cache-layer-step-1---serve-a-miss-and-store-it">Step 1 - Serve a MISS and store it</h4>
 <p><strong>Goal:</strong> On the first request for a path, fetch the response from origin, mark it as a MISS, and store it for reuse.</p>
 <p><strong>Shape:</strong></p>
@@ -1622,6 +1670,8 @@ Connection: close
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control"><code>Cache-Control</code></a>.</p>
+<p><code>max-age</code> is how long a stored response stays fresh.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What identifies a cache entry - the path alone, or something that also depends on request headers?
@@ -1669,6 +1719,8 @@ Connection: close
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Age"><code>Age</code></a>.</p>
+<p><code>Age</code> is seconds since the response was stored, not a timestamp.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li><code>Age</code> is a duration, not a timestamp. What do you measure it from, and at what point do you compute it - store time, or answer time?
@@ -1733,6 +1785,8 @@ Connection: close
 <blockquote><p>Give BRAVO and CHARLIE a value they both agree on.</p></blockquote>
 <p><strong>Enables:</strong> BRAVO and CHARLIE agree on one value after a write from either.</p>
 <p><strong>Scope:</strong> Two Nodes sharing one key space, agreeing after a write to either one. No cluster larger than two, no persistence across restarts, no partition handling beyond deciding which write wins when both Nodes have one.</p>
+<p><strong>Read:</strong> <a href="https://en.wikipedia.org/wiki/Key%E2%80%93value_database">Key-value database</a>.</p>
+<p>A store that maps one key to one value.</p>
 <h4 id="key-value-store-step-1---store-and-retrieve-a-value-on-one-node">Step 1 - Store and retrieve a value on one Node</h4>
 <p><strong>Goal:</strong> Implement an in-memory store on one Node so a value written to a key is readable back from that same Node.</p>
 <p><strong>Shape:</strong></p>
@@ -1754,6 +1808,9 @@ Connection: close
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map"><code>Map</code></a>.</p>
+<p>A key you never set is absent.</p>
+<p>A plain object can still look like it has a value.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What backs the store so a <code>write</code> to a key that already has a value replaces it, rather than keeping both?
@@ -1799,6 +1856,9 @@ red
 <li>Output: the read returns the value from the write, not a stale or missing value
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://en.wikipedia.org/wiki/Replication_(computing">Replication: disk storage replication</a>#Disk_storage_replication).</p>
+<p>A synchronous write finishes only after the other copy acknowledges it.</p>
+<p>An asynchronous write does not wait.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>How does a write on BRAVO reach CHARLIE - does BRAVO push it immediately, does CHARLIE pull on an interval, or does CHARLIE ask BRAVO when it doesn't recognize a key?
@@ -1858,6 +1918,9 @@ green
 <blockquote><p>Stop guessing how busy the cluster is and how long it takes to answer.</p></blockquote>
 <p><strong>Enables:</strong> <code>/metrics</code> and <code>/status</code> show request counts and timings.</p>
 <p><strong>Scope:</strong> cluster-wide request counts and per-path average duration, observed at the load balancer on ALPHA. No Prometheus exposition format, no histograms or percentiles, no persistence across restarts.</p>
+<p><strong>Read:</strong> <a href="https://sre.google/sre-book/monitoring-distributed-systems/">Monitoring distributed systems</a>.</p>
+<p>Traffic is how many requests arrived.</p>
+<p>Latency is how long they took.</p>
 <h4 id="metrics-collector-step-1---count-every-request-show-it-at-status">Step 1 - Count every request, show it at /status</h4>
 <p><strong>Goal:</strong> On ALPHA, count every request the load balancer forwards, broken down by path, and serve the running counts at <code>/status</code>.</p>
 <p><strong>Shape:</strong></p>
@@ -1873,6 +1936,9 @@ green
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://grafana.com/blog/2018/08/02/the-red-method-how-to-instrument-your-services/">The RED method</a>.</p>
+<p>Rate is the count of requests.</p>
+<p>Keep that count per path.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Does a count belong to the path the client requested, or the backend that answered it? If <code>/</code> is served by BRAVO once and CHARLIE once, is that one count or two?
@@ -1914,6 +1980,9 @@ curl -s http://127.0.0.1:8090/status
 </ul>
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://en.wikipedia.org/wiki/Moving_average#Cumulative_average">Cumulative average</a>.</p>
+<p>Keep the count and the current average.</p>
+<p>A new duration updates that average in place.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Keeping every duration ever recorded to compute an average is the same unbounded-memory trap as Stage 5's cache. What running values do you keep per path instead so a new duration updates the average without storing the durations themselves?
@@ -1959,6 +2028,9 @@ curl -s http://127.0.0.1:8090/status
 <blockquote><p>Follow one request across every hop it took through the cluster.</p></blockquote>
 <p><strong>Enables:</strong> <code>/architecture</code> shows a live request path with a duration on each hop.</p>
 <p><strong>Scope:</strong> Trace context carried across your own load balancer and backend for one request at a time. One in-memory record of the most recently completed request's path. No OTLP export, no external collector, no historical trace storage.</p>
+<p><strong>Read:</strong> <a href="https://static.googleusercontent.com/media/research.google.com/en//archive/papers/dapper-2010-1.pdf">Dapper, a Large-Scale Distributed Systems Tracing Infrastructure</a>.</p>
+<p>The figures show one request as a tree of spans.</p>
+<p>Each span is one hop, with a start and an end.</p>
 <h4 id="distributed-tracing-step-1---show-the-path-of-one-request">Step 1 - Show the path of one request</h4>
 <p><strong>Goal:</strong> Serve <code>/architecture</code> with the ordered list of hops the most recently completed request passed through.</p>
 <p><strong>Shape:</strong></p>
@@ -1968,6 +2040,9 @@ curl -s http://127.0.0.1:8090/status
 <li>Output: <code>/architecture</code>: a page listing hop names in the order the request visited them
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://opentelemetry.io/docs/concepts/context-propagation/">Context propagation</a>.</p>
+<p>The first hop puts a trace id on the call.</p>
+<p>The next hop continues that same trace.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>ALPHA and the backend are separate processes. How does the backend know it's continuing the same request ALPHA is already tracking, rather than starting a path of its own?
@@ -2002,6 +2077,10 @@ bravo
 <li>Output: <code>/architecture</code>: the same ordered hops, each with a duration
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://opentelemetry.io/docs/concepts/signals/traces/">Traces</a>.</p>
+<p>Open the Spans section.</p>
+<p>A span records when the hop started and when it ended.</p>
+<p>The duration is that interval.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>Load balancer's own time and the backend's own time overlap for part of the request. Is a hop's duration &quot;wall time end to end at that hop&quot; or &quot;time until the next hop was called,&quot; and does that choice change what the numbers mean?
@@ -2041,6 +2120,9 @@ bravo	36
 <blockquote><p>Make a write to the store survive a Node that dies right after acknowledging it.</p></blockquote>
 <p><strong>Enables:</strong> You kill a node during a write, restart it, and the data is intact.</p>
 <p><strong>Scope:</strong> Durability and recovery for the Stage 6 key-value store on one Node. Understand what <code>fsync</code> actually guarantees on your hardware. No compaction, no changes to how BRAVO and CHARLIE agree with each other.</p>
+<p><strong>Read:</strong> <a href="https://www.postgresql.org/docs/current/wal-intro.html">Write-ahead logging</a>.</p>
+<p>Log the change first.</p>
+<p>Update memory only after that log is durable.</p>
 <h4 id="write-ahead-log-step-1---log-a-write-before-acknowledging-it">Step 1 - Log a write before acknowledging it</h4>
 <p><strong>Goal:</strong> Append each write to an on-disk log and <code>fsync</code> it before the store acknowledges the write, then rebuild in-memory state from that log on startup.</p>
 <p><strong>Shape:</strong></p>
@@ -2050,6 +2132,9 @@ bravo	36
 <li>Output: an entry appended to a log file on disk, <code>fsync</code>'d, before the write's HTTP response is sent; on startup, in-memory state rebuilt by reading the log in order
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://danluu.com/file-consistency/">Files are hard</a>.</p>
+<p><code>write</code> can return before the bytes are on disk.</p>
+<p><code>fsync</code> is the call that waits for the device.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li><code>fs.write</code> (or <code>fs.appendFile</code>) returning does not mean the bytes are on disk. What call forces them there, and what does that guarantee compared to what <code>write</code> alone guaranteed?
@@ -2091,6 +2176,9 @@ red
 <li>Output: a read on the restarted Node returns the correct value for every write that was acknowledged before the kill, and the Node starts up without treating the log as corrupt
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://sqlite.org/atomiccommit.html">Atomic commit in SQLite</a>.</p>
+<p>A crash can stop in the middle of a write.</p>
+<p>Recovery has to tell a finished record from a torn one.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li><code>kill -9</code> gives the process no chance to run any shutdown code. What has to already be true on disk, by the time a write's HTTP response was sent, for that write to survive this?
@@ -2153,6 +2241,9 @@ green
 <blockquote><p>Decouple a request from the work it triggers.</p></blockquote>
 <p><strong>Enables:</strong> <code>/events</code> updates without the page waiting for the consumer.</p>
 <p><strong>Scope:</strong> a broker your own producer and consumer use. Not Kafka, and do not build it on a real broker.</p>
+<p><strong>Read:</strong> <a href="https://en.wikipedia.org/wiki/Message_queue">Message queue</a>.</p>
+<p>The sender and the receiver do not have to run at the same time.</p>
+<p>A message stays on the queue until the receiver takes it.</p>
 <h4 id="message-queue-step-1---publish-without-waiting-for-the-consumer">Step 1 - Publish without waiting for the consumer</h4>
 <p><strong>Goal:</strong> <code>POST /events</code> enqueues the event and responds before the consumer has processed it.</p>
 <p><strong>Shape:</strong></p>
@@ -2162,6 +2253,9 @@ green
 <li>Output: HTTP response sent back before the consumer's handler for that event has finished running; the event queued in the order it was received
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://en.wikipedia.org/wiki/Message_queue#Synchronous_vs._asynchronous">Message queue: synchronous vs. asynchronous</a>.</p>
+<p>HTTP waits until the work is done.</p>
+<p>A queue lets the handler answer first and do the work later.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What does the handler for <code>POST /events</code> have to do, and in what order, so the response goes out before the consumer runs?
@@ -2193,6 +2287,9 @@ green
 <li>Output: a <code>GET /events</code> immediately after publishing may omit an event still in flight; a <code>GET /events</code> after the consumer has had time to run lists every published event, in publish order
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://en.wikipedia.org/wiki/Queue_(abstract_data_type">Queue</a>).</p>
+<p>First in, first out.</p>
+<p>The consumer handles events in the order they were published.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What does the consumer write to, and does that write need to survive a restart? (Stage 9's log applies to whatever the consumer records into.)
@@ -2234,6 +2331,8 @@ click
 <blockquote><p>Store the blobs the site serves, on disk, so one outlives the process that first wrote it.</p></blockquote>
 <p><strong>Enables:</strong> A blob is still served after the Node that first stored it reboots.</p>
 <p><strong>Scope:</strong> storing and retrieving an object on one Node's filesystem, durably enough to survive that Node restarting. No replication across Nodes, no S3 compatibility, no multipart upload, no presigned URLs.</p>
+<p><strong>Read:</strong> <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html">Amazon S3 objects overview</a>.</p>
+<p>An object is a key plus the bytes stored under that key, inside a bucket.</p>
 <h4 id="object-storage-step-1---put-and-get-an-object">Step 1 - Put and Get an object</h4>
 <p><strong>Goal:</strong> Implement <code>PUT /{bucket}/{key}</code> and <code>GET /{bucket}/{key}</code>, storing the object's bytes on the local filesystem before the PUT is acknowledged.</p>
 <p><strong>Shape:</strong></p>
@@ -2243,6 +2342,9 @@ click
 <li>Output: on PUT, the bytes durably on disk before the response is sent, and an ETag in the response; on GET, the exact bytes back with a matching ETag, or <code>404</code> if the key was never stored
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://lwn.net/Articles/457667/">Ensuring data reaches disk</a>.</p>
+<p>A reader can see a file while a write into it is still in progress.</p>
+<p>The article explains when a replace is one fact on disk.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>How do you turn <code>bucket</code> and <code>key</code> into a path on disk without letting a crafted <code>key</code> write outside the bucket's directory?
@@ -2286,6 +2388,9 @@ tiny internet
 <li>Output: a GET on the restarted Node returns the same bytes and the same ETag as before the restart
 </li>
 </ul>
+<p><strong>Read:</strong> <a href="https://man7.org/linux/man-pages/man2/fsync.2.html">fsync(2)</a>.</p>
+<p><code>fsync</code> returns only after the bytes are on the device.</p>
+<p>A later start of the process can read that same file.</p>
 <p><strong>Key questions:</strong></p>
 <ul>
 <li>What has to be true about where object bytes live for a Node restart to preserve them, versus a path that gets wiped along with the process?

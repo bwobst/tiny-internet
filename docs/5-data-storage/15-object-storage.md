@@ -6,6 +6,9 @@
 
 **Scope:** storing and retrieving an object on one Node's filesystem, durably enough to survive that Node restarting. No replication across Nodes, no S3 compatibility, no multipart upload, no presigned URLs.
 
+**Read:** [Amazon S3 objects overview](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html).
+An object is a key plus the bytes stored under that key, inside a bucket.
+
 #### Step 1 - Put and Get an object
 
 **Goal:** Implement `PUT /{bucket}/{key}` and `GET /{bucket}/{key}`, storing the object's bytes on the local filesystem before the PUT is acknowledged.
@@ -13,6 +16,10 @@
 **Shape:**
 - Input: HTTP PUT to `/{bucket}/{key}` with the object bytes as the body; HTTP GET to the same path
 - Output: on PUT, the bytes durably on disk before the response is sent, and an ETag in the response; on GET, the exact bytes back with a matching ETag, or `404` if the key was never stored
+
+**Read:** [Ensuring data reaches disk](https://lwn.net/Articles/457667/).
+A reader can see a file while a write into it is still in progress.
+The article explains when a replace is one fact on disk.
 
 **Key questions:**
 - How do you turn `bucket` and `key` into a path on disk without letting a crafted `key` write outside the bucket's directory?
@@ -57,6 +64,10 @@ tiny internet
 **Shape:**
 - Input: a Node restarted (or killed with `SIGKILL` and restarted) after a PUT has already been acknowledged
 - Output: a GET on the restarted Node returns the same bytes and the same ETag as before the restart
+
+**Read:** [fsync(2)](https://man7.org/linux/man-pages/man2/fsync.2.html).
+`fsync` returns only after the bytes are on the device.
+A later start of the process can read that same file.
 
 **Key questions:**
 - What has to be true about where object bytes live for a Node restart to preserve them, versus a path that gets wiped along with the process?

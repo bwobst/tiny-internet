@@ -6,6 +6,10 @@
 
 **Scope:** One process on ALPHA forwarding real HTTP/1.1 traffic to BRAVO and CHARLIE, spreading requests across both while they answer, and routing around one that stops answering. No TLS, no virtual hosts, no least-connections, no rate limiting or auth.
 
+**Read:** [Proxy servers and tunneling](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling).
+A reverse proxy accepts the client and forwards to one of several servers.
+The same page shows `X-Forwarded-For`.
+
 #### Step 1 - Forward across a pool of backends
 
 **Goal:** Accept an inbound request on ALPHA, forward it to one backend chosen from a pool of two, return that backend's response to the client unchanged, and send the next request to a different backend.
@@ -18,6 +22,10 @@
   - the request, forwarded to one backend from `pool`, with `X-Forwarded-For` added
   - the chosen backend's response, returned to the client with no other change to status, headers, or body
   - the following request forwarded to a different backend than this one
+
+**Read:** [Load balancing](https://samwho.dev/load-balancing/#visualising-the-problem).
+Round robin sends each new request to the next server.
+This step uses that policy.
 
 **Key questions:**
 - Which headers are hop-by-hop (RFC 7230 §6.1) and must be regenerated on the new connection to the backend, rather than copied straight off the client's connection?
@@ -79,6 +87,10 @@ Connection: close
 - Output:
   - that backend excluded from the rotation Step 1 uses, until it is judged healthy again
   - the request that hit the dead backend still answered, from a different backend, without the client seeing an error
+
+**Read:** [connect(2)](https://man7.org/linux/man-pages/man2/connect.2.html).
+`ECONNREFUSED` means nothing is listening.
+`ETIMEDOUT` means the peer never answered.
 
 **Key questions:**
 - What counts as "dead" here - connection refused, connection reset, a timeout, or all three? What timeout is defensible for a backend Docker just stopped, versus one that is merely slow?
